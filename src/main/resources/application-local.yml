@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/linkode?characterEncoding=UTF-8&serverTimezone=UTC
     username: root
-    password: ${DB_PROD_PASSWD}
+    password: ${DB_LOCAL_PASSWD}
 
   devtools:
     restart:
