@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/linkode?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: ${DB_PROD_PASSWD}
+
+  devtools:
+    restart:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.type: trace
+  org.springframework.web : DEBUG
+  org.springframework.web.socket : DEBUG
+  org.apache.kafka: DEBUG
+  org.springframework.kafka:
+  org.springframework.cache: DEBUG
+

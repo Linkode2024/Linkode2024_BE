@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PROFILE: ${{ secrets.PROFILE }}
+      DB_PROD_PASSWD: ${{ secrets.DB_PROD_PASSWD }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
