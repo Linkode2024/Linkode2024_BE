@@ -5,6 +5,7 @@ spring:
     username: root
     password: ${DB_LOCAL_PASSWD}
 
+
   devtools:
     restart:
       enabled: false
