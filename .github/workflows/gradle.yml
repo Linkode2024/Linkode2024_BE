@@ -54,7 +54,7 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
           docker images
-          docker push linkode/linkode:tagname
+          docker push linkode/linkode:latest
 
       - name: deploy
         uses: appleboy/ssh-action@master
