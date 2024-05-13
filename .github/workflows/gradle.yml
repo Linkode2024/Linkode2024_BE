@@ -60,7 +60,7 @@ jobs:
       - name: deploy
         uses: appleboy/ssh-action@master
         with:
-          username: ec2-user
+          username: ubuntu
           host: ${{ secrets.WAS_HOST }}
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
