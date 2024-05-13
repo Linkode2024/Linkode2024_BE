@@ -72,6 +72,6 @@ jobs:
             -e DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
             -e DB_PROD_PASSWD=${{ secrets.SOCIAL_CLIENT_ID }} \
             -e DB_PROD_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
-            -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}            
+            -p 9000:9000 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}            
             
             sudo docker image prune -f
