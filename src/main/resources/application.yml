@@ -15,3 +15,20 @@ spring:
   config:
     activate:
       on-profile: local
+
+---
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: "${{ secrets.GITHUB_CLIENT_ID }}"
+            client-secret: "${{ secrets.GITHUB_CLIENT_SECRET }}"
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
