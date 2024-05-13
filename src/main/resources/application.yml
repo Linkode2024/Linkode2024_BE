@@ -24,8 +24,8 @@ spring:
       client:
         registration:
           github:
-            client-id: "${{ secrets.GITHUB_CLIENT_ID }}"
-            client-secret: "${{ secrets.GITHUB_CLIENT_SECRET }}"
+            client-id: ${SOCIAL_CLIENT_ID}
+            client-secret: ${SOCIAL_CLIENT_SECRET}
 
 logging:
   level:

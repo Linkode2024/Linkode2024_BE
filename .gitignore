@@ -22,7 +22,7 @@ bin/
 *.iws
 *.iml
 *.ipr
-*.pem
+*pem
 .DS_Store
 out/
 !**/src/main/**/out/

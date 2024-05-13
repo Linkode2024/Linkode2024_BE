@@ -17,9 +17,9 @@ import java.util.Collections;
 @Slf4j
 @RequiredArgsConstructor
 public class LoginController {
-    @Value("${github.client-id}")
+    @Value("${social.client-id}")
     private String clientId;
-    @Value("${github.client-secret}")
+    @Value("${social.client-secret}")
     private String clientSecret;
 
     @GetMapping("/oauth2/redirect")
