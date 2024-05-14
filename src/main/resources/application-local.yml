@@ -5,12 +5,13 @@ spring:
     username: root
     password: ${DB_LOCAL_PASSWD}
 
+
   devtools:
     restart:
       enabled: false
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
