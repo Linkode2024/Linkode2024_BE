@@ -50,6 +50,7 @@ jobs:
       - name: Build with Gradle (without Test)
         run: ./gradlew clean build -x test --stacktrace
 
+
       - name: Docker Hub build & push
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
