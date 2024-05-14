@@ -2,9 +2,9 @@ name: Java CI/CD with Gradle
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "LIKODE-3-BE-깃허브소셜로그인" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "LIKODE-3-BE-깃허브소셜로그인" ]
     types: [ closed ]
 
 permissions:
