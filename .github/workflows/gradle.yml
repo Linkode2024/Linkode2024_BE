@@ -65,8 +65,7 @@ jobs:
           --build-arg DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
           --build-arg SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
           --build-arg SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
-          --build-arg SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }} \
-
+          --build-arg SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
           -t linkode/linkode:latest .
           docker images
           docker push linkode/linkode:latest
