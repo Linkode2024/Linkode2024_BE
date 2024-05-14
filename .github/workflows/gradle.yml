@@ -75,4 +75,6 @@ jobs:
             -e SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
             -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}            
             
+            sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
+
             sudo docker image prune -f
