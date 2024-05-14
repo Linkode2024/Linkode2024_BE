@@ -65,7 +65,8 @@ jobs:
           --build-arg SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
           -t linkode/linkode:latest .
           docker images
-          docker push linkode/linkode:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
+          docker logout
 
       - name: deploy
         uses: appleboy/ssh-action@master
