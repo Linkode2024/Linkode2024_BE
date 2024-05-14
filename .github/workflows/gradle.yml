@@ -75,7 +75,9 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
           script: |
+          
             sudo docker ps
+            sudo docker rm -f $(sudo docker ps -qa)            
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
             sudo docker run -d -e PROFILE=${{ secrets.PROFILE }} \
             -e DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
