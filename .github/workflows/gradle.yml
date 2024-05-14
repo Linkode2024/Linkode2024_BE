@@ -15,8 +15,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      PROFILE: ${{ secrets.PROFILE }}
-      DB_PROD_PASSWD: ${{ secrets.DB_PROD_PASSWD }}
+      PROFILE: prod
+      PROD_DB_HOST: ${{ secrets.PROD_DB_HOST }}
+      PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
+      PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
 
     steps:
       - name: Checkout repository
@@ -54,7 +56,13 @@ jobs:
       - name: Docker Hub build & push
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
-          docker build -t linkode/linkode:latest .
+          docker build --build-arg PROFILE=${{ secrets.PROFILE }} \
+          --build-arg DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
+          --build-arg DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
+          --build-arg DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
+          --build-arg SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
+          --build-arg SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
+          -t linkode/linkode:latest .
           docker images
           docker push linkode/linkode:latest
 
