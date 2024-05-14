@@ -19,7 +19,8 @@ jobs:
       PROD_DB_HOST: ${{ secrets.PROD_DB_HOST }}
       PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
       PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
-
+      SOCIAL_CLIENT_ID: ${{ secrets.SOCIAL_CLIENT_ID }}
+      SOCIAL_CLIENT_PASSWD: ${{ secrets.SOCIAL_CLIENT_PASSWD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
