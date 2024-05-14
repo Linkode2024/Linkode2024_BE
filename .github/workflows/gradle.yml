@@ -76,7 +76,8 @@ jobs:
           script: |
             sudo docker ps
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
-            sudo docker run -d -e DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
+            sudo docker run -d -e PROFILE=${{ secrets.PROFILE }} \
+            -e DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
             -e DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
             -e DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
             -e SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
