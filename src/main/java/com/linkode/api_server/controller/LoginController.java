@@ -22,7 +22,7 @@ public class LoginController {
     @Value("${SOCIAL_CLIENT_SECRET}")
     private String clientSecret;
 
-    @GetMapping("/login/oauth2/redirect")
+    @GetMapping("/oauth2/redirect")
     public ResponseEntity<String> githubLogin(@RequestParam String code) {
         String accessToken = getAccessToken(code);
         String userInfo = getUserInfo(accessToken);
