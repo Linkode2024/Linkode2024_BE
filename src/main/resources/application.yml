@@ -16,3 +16,20 @@ spring:
   config:
     activate:
       on-profile: local
+
+---
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${SOCIAL_CLIENT_ID}
+            client-secret: ${SOCIAL_CLIENT_SECRET}
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
