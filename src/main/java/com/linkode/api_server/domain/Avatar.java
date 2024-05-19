@@ -6,19 +6,18 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Character {
+public class Avatar {
 
 
     @Id
-    @GeneratedValue
-    @Column(name = "character_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "avatar_id")
     private Long id;
 
     private String name;
 
     private String description;
 
-    @OneToOne(mappedBy = "character")
+    @OneToOne(mappedBy = "avatar")
     private Member member;
 
 }

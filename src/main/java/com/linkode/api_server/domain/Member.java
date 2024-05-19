@@ -14,8 +14,7 @@ import java.util.List;
 public class Member {
 
     @Id
-    @GeneratedValue
-    @Column(name = "member_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "member_id")
     private Long id;
 
     private String githubId;
@@ -39,7 +38,7 @@ public class Member {
 
     /** 캐릭터와의 연관관계의 주인 */
     @OneToOne
-    @JoinColumn(name = "character_id")
-    private Character character;
+    @JoinColumn(name = "avatar_id")
+    private Avatar avatar;
 
 }

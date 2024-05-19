@@ -13,8 +13,7 @@ import static jakarta.persistence.FetchType.LAZY;
 public class MemberStudyroom {
 
     @Id
-    @GeneratedValue
-    @Column(name = "member_studyroom_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "member_studyroom_id")
     private Long id;
 
     private String status;

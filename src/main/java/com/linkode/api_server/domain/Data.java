@@ -16,8 +16,7 @@ import static jakarta.persistence.FetchType.LAZY;
 public class Data {
 
     @Id
-    @GeneratedValue
-    @Column(name = "data_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "data_id")
     private Long id;
 
     private String dataName;

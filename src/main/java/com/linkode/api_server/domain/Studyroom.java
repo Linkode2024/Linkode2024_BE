@@ -1,21 +1,21 @@
 package com.linkode.api_server.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Getter @Setter
 public class Studyroom {
 
 
     @Id
-    @GeneratedValue
-    @Column(name = "studyroom_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "studyroom_id")
     private Long id;
 
     private String studyRoomName;
