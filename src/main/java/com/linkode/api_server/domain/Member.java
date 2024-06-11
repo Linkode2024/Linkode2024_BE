@@ -1,31 +1,36 @@
 package com.linkode.api_server.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.linkode.api_server.domain.Avatar;
+import com.linkode.api_server.domain.Data;
+import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
+import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.base.BaseTime;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter
-public class Member {
+@Getter
+public class Member extends BaseTime {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "member_id")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
+    private Long memberId;
 
+    @Column(nullable = false)
     private String githubId;
 
-    private String nickName;
+    @Column(nullable = false)
+    private String nickname;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    private BaseStatus status;
 
-    private LocalDateTime createAt;
-
-    private LocalDateTime modifiedAt;
 
     @JsonIgnore
     @OneToMany(mappedBy = "member")

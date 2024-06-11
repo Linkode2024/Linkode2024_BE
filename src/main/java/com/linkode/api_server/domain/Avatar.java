@@ -1,21 +1,26 @@
 package com.linkode.api_server.domain;
 
+import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.base.BaseTime;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 @Entity
-@Getter @Setter
-public class Avatar {
+@Getter
+public class Avatar extends BaseTime {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)    @Column(name = "avatar_id")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "avatar_id", nullable = false)
+    private Long avatarId;
 
-    private String name;
+    @Column(nullable = false)
+    private String avatarImg;
 
-    private String description;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    private BaseStatus status;
 
     @OneToOne(mappedBy = "avatar")
     private Member member;

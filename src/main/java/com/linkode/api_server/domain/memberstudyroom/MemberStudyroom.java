@@ -1,8 +1,9 @@
-package com.linkode.api_server.domain;
+package com.linkode.api_server.domain.memberstudyroom;
 
-
+import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
+import com.linkode.api_server.domain.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -10,26 +11,20 @@ import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
-public class Data extends BaseTime {
+public class MemberStudyroom extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "data_id", nullable = false)
-    private Long dataId;
-
-    @Column(nullable = false)
-    private String dataName;
-
-    @Column(nullable = false)
-    private String dataType;
-
-    @Column(nullable = false)
-    private String dataUrl;
+    @Column(name = "member_studyroom_id", nullable = false)
+    private Long memberId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private BaseStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    private MemberRole role;
 
     /** 맴버와의 연관관계의 주인 */
     @ManyToOne(fetch = LAZY)
@@ -40,4 +35,5 @@ public class Data extends BaseTime {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "studyroom_id")
     private Studyroom studyroom;
+
 }
