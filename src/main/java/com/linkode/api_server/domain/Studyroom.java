@@ -44,4 +44,9 @@ public class Studyroom extends BaseTime {
     private List<Data> dataList= new ArrayList<>();
 
 
+    public Studyroom(String studyroomName, String studyroomProfile, BaseStatus status) {
+        this.studyroomName = studyroomName;
+        this.studyroomProfile = studyroomProfile;
+        this.status = status;
+    }
 }

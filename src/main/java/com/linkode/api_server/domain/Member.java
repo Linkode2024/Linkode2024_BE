@@ -51,4 +51,11 @@ public class Member extends BaseTime {
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
+    public Member(Long memberId, String githubId, String nickname, BaseStatus status, Avatar avatar) {
+        this.memberId = memberId;
+        this.githubId = githubId;
+        this.nickname = nickname;
+        this.status = status;
+        this.avatar = avatar;
+    }
 }
