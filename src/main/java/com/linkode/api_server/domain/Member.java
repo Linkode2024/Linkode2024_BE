@@ -7,6 +7,7 @@ import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Member extends BaseTime {
 
     @Id
