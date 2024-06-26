@@ -18,7 +18,7 @@ public class MemberStudyroom extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_studyroom_id", nullable = false)
-    private Long memberId;
+    private Long memberStudyroomId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
