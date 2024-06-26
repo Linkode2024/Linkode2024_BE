@@ -19,6 +19,7 @@ import java.util.List;
 public class Studyroom extends BaseTime {
 
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "studyroom_id", nullable = false)

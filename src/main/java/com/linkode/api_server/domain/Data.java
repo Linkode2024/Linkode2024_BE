@@ -16,6 +16,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 public class Data extends BaseTime {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "data_id", nullable = false)
