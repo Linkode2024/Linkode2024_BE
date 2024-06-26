@@ -6,12 +6,14 @@ import com.linkode.api_server.domain.base.BaseTime;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Studyroom extends BaseTime {
 
 
