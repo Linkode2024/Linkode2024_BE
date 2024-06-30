@@ -33,7 +33,7 @@ public class Member extends BaseTime {
     private String nickname;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
 

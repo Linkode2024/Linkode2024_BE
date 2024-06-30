@@ -32,7 +32,7 @@ public class Studyroom extends BaseTime {
     private String studyroomProfile;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
     @JsonIgnore

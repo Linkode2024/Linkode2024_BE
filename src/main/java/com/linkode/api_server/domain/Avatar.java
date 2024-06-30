@@ -22,7 +22,7 @@ public class Avatar extends BaseTime {
     private String avatarImg;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
     @OneToOne(mappedBy = "avatar")

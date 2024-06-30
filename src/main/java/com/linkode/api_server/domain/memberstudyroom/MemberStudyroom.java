@@ -23,11 +23,11 @@ public class MemberStudyroom extends BaseTime {
     private Long memberStudyroomId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private MemberRole role;
 
     /** 맴버와의 연관관계의 주인 */
