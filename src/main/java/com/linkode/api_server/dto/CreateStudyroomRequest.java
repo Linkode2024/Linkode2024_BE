@@ -14,5 +14,7 @@ public class CreateStudyroomRequest {
     private String studyroomName;
 
     private String studyroomProfile;
+    private long memberId;
+
 
 }
