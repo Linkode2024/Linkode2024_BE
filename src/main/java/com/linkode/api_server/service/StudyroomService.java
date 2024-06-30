@@ -1,0 +1,67 @@
+package com.linkode.api_server.service;
+
+import com.linkode.api_server.domain.Member;
+import com.linkode.api_server.domain.Studyroom;
+import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.memberstudyroom.MemberRole;
+import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
+import com.linkode.api_server.dto.CreateStudyroomRequest;
+import com.linkode.api_server.dto.CreateStudyroomResponse;
+import com.linkode.api_server.dto.JoinStudyroomRequest;
+import com.linkode.api_server.repository.MemberRepository;
+import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.StudyroomRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class StudyroomService {
+
+    @Autowired
+    private StudyroomRepository studyroomRepository;
+
+    @Autowired
+    private MemberstudyroomRepository memberstudyroomRepository;
+    @Autowired
+    MemberRepository memberRepository;
+    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request) {
+        Studyroom studyroom = new Studyroom(
+                request.getStudyroomName(),
+                request.getStudyroomProfile(),
+                BaseStatus.ACTIVE);
+
+        studyroomRepository.save(studyroom);
+
+        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroom.getStudyroomId()
+                ,request.getMemberId()
+                ,MemberRole.CAPTAIN);
+
+        joinStudyroomCaptain(joinStudyroomRequest);
+
+        return new CreateStudyroomResponse(
+                studyroom.getStudyroomId(),
+                studyroom.getStudyroomName(),
+                studyroom.getStudyroomProfile());
+    }
+
+    public void joinStudyroomCaptain(JoinStudyroomRequest request){
+        Member member = memberRepository.findById(request.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 맴버 ID"));
+        Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
+                .orElseThrow(() -> new IllegalArgumentException("유효하지않은 스터디룸 ID"));
+
+        MemberStudyroom memberStudyroom = new MemberStudyroom(
+                null,
+                BaseStatus.ACTIVE,
+                request.getMemberRole(),
+                member,
+                studyroom);
+
+        memberstudyroomRepository.save(memberStudyroom);
+
+    }
+
+
+
+
+}
