@@ -29,7 +29,7 @@ public class StudyroomService {
 
         if (memberStudyroom.getRole().equals(MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
-                log.info("Success delete studyRoom");
+                log.info("Success delete studyRoom in Service layer");
                 return BaseExceptionResponseStatus.SUCCESS;
             }else {
                 log.info("Failure delete studyRoom");
