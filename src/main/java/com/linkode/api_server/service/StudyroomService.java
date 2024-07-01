@@ -19,11 +19,11 @@ public class StudyroomService {
 
     @Autowired
     private StudyroomRepository studyroomRepository;
-
     @Autowired
     private MemberstudyroomRepository memberstudyroomRepository;
     @Autowired
     MemberRepository memberRepository;
+
     public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request) {
         Studyroom studyroom = new Studyroom(
                 request.getStudyroomName(),
@@ -36,7 +36,7 @@ public class StudyroomService {
                 ,request.getMemberId()
                 ,MemberRole.CAPTAIN);
 
-        joinStudyroomCaptain(joinStudyroomRequest);
+        joinStudyroom(joinStudyroomRequest);
 
         return new CreateStudyroomResponse(
                 studyroom.getStudyroomId(),
@@ -44,11 +44,12 @@ public class StudyroomService {
                 studyroom.getStudyroomProfile());
     }
 
-    public void joinStudyroomCaptain(JoinStudyroomRequest request){
+    /** 초대 코드가 필요없음 */
+    public void joinStudyroom(JoinStudyroomRequest request){
         Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 맴버 ID"));
+                .orElseThrow(()->new IllegalArgumentException("Error because of Invalid Member Id"));
         Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
-                .orElseThrow(() -> new IllegalArgumentException("유효하지않은 스터디룸 ID"));
+                .orElseThrow(()->new RuntimeException("Error because of Invalid StudyRoom Id"));
 
         MemberStudyroom memberStudyroom = new MemberStudyroom(
                 null,
