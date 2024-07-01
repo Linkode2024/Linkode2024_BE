@@ -11,10 +11,12 @@ import com.linkode.api_server.dto.JoinStudyroomRequest;
 import com.linkode.api_server.repository.MemberRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class StudyroomService {
 
     @Autowired
@@ -25,18 +27,21 @@ public class StudyroomService {
     MemberRepository memberRepository;
 
     public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request) {
+        log.info("Start createStudyroom method of StudyroomService Class");
         Studyroom studyroom = new Studyroom(
                 request.getStudyroomName(),
                 request.getStudyroomProfile(),
                 BaseStatus.ACTIVE);
 
         studyroomRepository.save(studyroom);
+        log.info("Success Create Studyroom");
 
         JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroom.getStudyroomId()
                 ,request.getMemberId()
                 ,MemberRole.CAPTAIN);
 
         joinStudyroom(joinStudyroomRequest);
+        log.info("Success Join Studyroom as Captain");
 
         return new CreateStudyroomResponse(
                 studyroom.getStudyroomId(),
