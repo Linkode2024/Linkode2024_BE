@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface StudyroomRepository extends JpaRepository<Studyroom, Long> {
     @Transactional
     @Modifying
-    @Query("UPDATE Studyroom sr SET sr.status = 'DELETE' WHERE sr.studyroomId = :#{#request.studyroomId}")
-    int deleteStudyroom(DeleteStudyroomRequest request);
+    @Query("UPDATE Studyroom sr SET sr.status = 'DELETE' WHERE sr.studyroomId = :studyroomId")
+    int deleteStudyroom(long studyroomId);
 
 }
