@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom, Long> {
 
-    @Query("SELECT ms FROM Memberstudyroom ms WHERE ms.member.id = :memberId AND ms.studyroom.id = :studyroomId")
+    @Query("SELECT ms FROM MemberStudyroom ms WHERE ms.member.id = :memberId AND ms.studyroom.id = :studyroomId")
     Optional<MemberStudyroom> findByMemberIdAndStudyroomId(long studyroomId, long memberId);
 
 
