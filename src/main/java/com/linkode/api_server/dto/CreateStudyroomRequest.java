@@ -15,7 +15,4 @@ public class CreateStudyroomRequest {
 
     private String studyroomProfile;
 
-    private long memberId;
-
-
 }

@@ -18,9 +18,9 @@ public class StudyroomController {
     StudyroomService studyroomService;
 
     @PostMapping("/generation")
-    public CreateStudyroomResponse createStudyroom(@RequestBody CreateStudyroomRequest request){
+    public CreateStudyroomResponse createStudyroom(@RequestBody CreateStudyroomRequest request, @RequestParam long memberId){
         log.info("Success createStudyroom API");
-        return studyroomService.createStudyroom(request);
+        return studyroomService.createStudyroom(request, memberId);
     }
 
 }

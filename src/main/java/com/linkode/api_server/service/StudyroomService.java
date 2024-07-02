@@ -26,7 +26,7 @@ public class StudyroomService {
     @Autowired
     MemberRepository memberRepository;
 
-    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request) {
+    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) {
         log.info("Start createStudyroom method of StudyroomService Class");
         Studyroom studyroom = new Studyroom(
                 request.getStudyroomName(),
@@ -37,7 +37,7 @@ public class StudyroomService {
         log.info("Success Create Studyroom");
 
         JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroom.getStudyroomId()
-                ,request.getMemberId()
+                ,memberId
                 ,MemberRole.CAPTAIN);
 
         joinStudyroom(joinStudyroomRequest);
