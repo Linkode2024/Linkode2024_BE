@@ -24,7 +24,7 @@ public class StudyroomService {
     @Autowired
     private MemberstudyroomRepository memberstudyroomRepository;
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) {
         log.info("Start createStudyroom method of StudyroomService Class");
