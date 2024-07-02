@@ -47,7 +47,7 @@ public class Member extends BaseTime {
 
 
     /** 캐릭터와의 연관관계의 주인 */
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
