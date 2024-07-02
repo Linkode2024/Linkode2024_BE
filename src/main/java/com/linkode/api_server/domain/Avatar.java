@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -25,7 +28,13 @@ public class Avatar extends BaseTime {
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
-    @OneToOne(mappedBy = "avatar")
-    private Member member;
+    @OneToMany(mappedBy = "avatar")
+    private List<Member> members = new ArrayList<>();
+
+    public Avatar(Long avatarId, String avatarImg, BaseStatus status) {
+        this.avatarId = avatarId;
+        this.avatarImg = avatarImg;
+        this.status = status;
+    }
 
 }
