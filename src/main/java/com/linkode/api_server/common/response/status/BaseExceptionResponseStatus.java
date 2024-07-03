@@ -9,7 +9,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     /**
      * 1000: 요청 성공 (OK)
      */
-    SUCCESS(1000,HttpStatus.OK.value(), "요청에 성공하였습니다.");
+    SUCCESS(1000,HttpStatus.OK.value(), "요청에 성공하였습니다."),
+
+    INVALID_TOKEN(2000, HttpStatus.OK.value(), "유효하지 않은 토큰입니다.");
 
     private final int code;
     private final int status;
