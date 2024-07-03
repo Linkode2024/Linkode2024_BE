@@ -22,6 +22,7 @@ jobs:
       SOCIAL_CLIENT_ID: ${{ secrets.SOCIAL_CLIENT_ID }}
       SOCIAL_CLIENT_PASSWD: ${{ secrets.SOCIAL_CLIENT_PASSWD }}
       SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Checkout repository
@@ -66,6 +67,7 @@ jobs:
           --build-arg SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
           --build-arg SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
           --build-arg SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
+          --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
           -t linkode/linkode:latest .
           docker images
           docker push linkode/linkode:latest
@@ -91,6 +93,7 @@ jobs:
             -e SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
             -e SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
             -e SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }}
             -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}            
             
             sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
