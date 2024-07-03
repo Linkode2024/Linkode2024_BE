@@ -1,4 +1,4 @@
-package com.linkode.api_server;
+package com.linkode.api_server.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
