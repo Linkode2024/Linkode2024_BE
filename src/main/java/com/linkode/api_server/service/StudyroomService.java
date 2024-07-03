@@ -40,6 +40,7 @@ public class StudyroomService {
                 ,memberId
                 ,MemberRole.CAPTAIN);
 
+
         joinStudyroom(joinStudyroomRequest);
         log.info("Success Join Studyroom as Captain");
 

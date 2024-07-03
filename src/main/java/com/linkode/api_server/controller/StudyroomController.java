@@ -22,5 +22,4 @@ public class StudyroomController {
         log.info("Success createStudyroom API");
         return studyroomService.createStudyroom(request, memberId);
     }
-
 }
