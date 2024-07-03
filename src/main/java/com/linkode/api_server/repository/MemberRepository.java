@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByGithubIdAndStatus(String githubId, BaseStatus ACTIVE);
+    long findByGithubIdAndStatus(String githubId, BaseStatus ACTIVE);
 }
