@@ -16,6 +16,9 @@ spring:
   config:
     activate:
       on-profile: local
+  redis:
+    host: localhost
+    port: 6379
 
 ---
 
@@ -38,3 +41,5 @@ jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: 3600000  # 1 hour in milliseconds
   refresh-token-expiration: 86400000  # 1 day in milliseconds
+
+
