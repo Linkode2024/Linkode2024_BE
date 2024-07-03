@@ -26,6 +26,7 @@ public class LoginService {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private final TokenService tokenService;
 
     /**
      * 소셜 로그인
@@ -40,6 +41,8 @@ public class LoginService {
         if(memberStatus){
             jwtAccessToken = jwtProvider.createAccessToken(githubId);
             jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
+            // 레디스 저장
+            tokenService.storeToken(jwtRefreshToken, githubId);
         }
 
         return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken);
