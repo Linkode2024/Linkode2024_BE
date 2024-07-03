@@ -44,7 +44,6 @@ public class LoginService {
             // 레디스 저장
             tokenService.storeToken(jwtRefreshToken, githubId);
         }
-
         return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken);
     }
     private String getAccessToken(String code) {
