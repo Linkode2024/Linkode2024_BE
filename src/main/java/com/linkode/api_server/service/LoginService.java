@@ -1,5 +1,6 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.JwtProvider;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.LoginResponse;
 import com.linkode.api_server.repository.MemberRepository;
@@ -24,16 +25,24 @@ public class LoginService {
     private String clientSecret;
 
     private final MemberRepository memberRepository;
+    private final JwtProvider jwtProvider;
 
     /**
-     * 소셜로그인
+     * 소셜 로그인
      */
     public LoginResponse githubLogin(String code){
         log.info("[LoginService.githubLogin]");
         String accessToken = getAccessToken(code);
         String githubId = getUserInfo(accessToken);
         boolean memberStatus = checkMember(githubId);
-        return new LoginResponse(memberStatus,githubId);
+        String jwtAccessToken = null;
+        String jwtRefreshToken = null;
+        if(memberStatus){
+            jwtAccessToken = jwtProvider.createAccessToken(githubId);
+            jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
+        }
+
+        return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken);
     }
     private String getAccessToken(String code) {
         log.info("[LoginService.githubLogin.getAccessToken]");
@@ -84,4 +93,5 @@ public class LoginService {
         boolean memberStatus = memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE);
         return memberStatus;
     }
+
 }

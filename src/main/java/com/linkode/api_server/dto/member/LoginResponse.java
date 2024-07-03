@@ -12,4 +12,6 @@ public class LoginResponse {
      */
     private boolean memberStatus;
     private String githubId;
+    private String accessToken;
+    private String refreshToken;
 }
