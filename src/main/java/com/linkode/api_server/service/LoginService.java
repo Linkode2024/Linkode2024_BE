@@ -1,36 +1,53 @@
-package com.linkode.api_server.controller;
+package com.linkode.api_server.service;
 
+import com.linkode.api_server.JwtProvider;
+import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.dto.member.LoginResponse;
+import com.linkode.api_server.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 
-@Controller
 @Slf4j
+@Service
 @RequiredArgsConstructor
-public class LoginController {
+public class LoginService {
     @Value("${SOCIAL_CLIENT_ID}")
     private String clientId;
     @Value("${SOCIAL_CLIENT_SECRET}")
     private String clientSecret;
 
-    @GetMapping("/oauth2/redirect")
-    public ResponseEntity<String> githubLogin(@RequestParam String code) {
+    private final MemberRepository memberRepository;
+    private final JwtProvider jwtProvider;
+    private final TokenService tokenService;
+
+    /**
+     * 소셜 로그인
+     */
+    public LoginResponse githubLogin(String code){
+        log.info("[LoginService.githubLogin]");
         String accessToken = getAccessToken(code);
-        String userInfo = getUserInfo(accessToken);
-
-        return new ResponseEntity<>(userInfo, HttpStatus.OK);
+        String githubId = getUserInfo(accessToken);
+        boolean memberStatus = checkMember(githubId);
+        String jwtAccessToken = null;
+        String jwtRefreshToken = null;
+        if(memberStatus){
+            jwtAccessToken = jwtProvider.createAccessToken(githubId);
+            jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
+            // 레디스 저장
+            tokenService.storeToken(jwtRefreshToken, githubId);
+        }
+        return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken);
     }
-
     private String getAccessToken(String code) {
+        log.info("[LoginService.githubLogin.getAccessToken]");
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://github.com/login/oauth/access_token")
                 .queryParam("client_id", clientId)
                 .queryParam("client_secret", clientSecret)
@@ -49,11 +66,11 @@ public class LoginController {
         );
         log.info(response.getBody());
         JSONObject jsonObject = new JSONObject(response.getBody());
-        // 토큰 저장 하는 redis 구현 해야하는 곳
         return jsonObject.getString("access_token"); // access_token 값만 반환
     }
 
     private String getUserInfo(String accessToken) {
+        log.info("[LoginService.githubLogin.getUserInfo]");
         String userInfoUri = "https://api.github.com/user";
 
         HttpHeaders headers = new HttpHeaders();
@@ -73,22 +90,10 @@ public class LoginController {
         return jsonObject.getString("login");
     }
 
-    private String getUserEmailInfo(String accessToken) {
-        String userEmailInfoUri = "https://api.github.com/user/emails";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "token " + accessToken);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                userEmailInfoUri,
-                HttpMethod.GET,
-                entity,
-                String.class
-        );
-
-        return response.getBody();
+    private boolean checkMember(String githubId){
+        log.info("[LoginService.githubLogin.checkMember]");
+        boolean memberStatus = memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE);
+        return memberStatus;
     }
+
 }
