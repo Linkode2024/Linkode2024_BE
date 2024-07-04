@@ -29,7 +29,7 @@ public class StudyroomController {
 
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId,memberId);
-        log.info("Rub Delete Studyroom API ");
+        log.info("Run Delete Studyroom API ");
         if (responseStatus == BaseExceptionResponseStatus.SUCCESS) {
             return new BaseResponse<>(responseStatus);
         } else {
