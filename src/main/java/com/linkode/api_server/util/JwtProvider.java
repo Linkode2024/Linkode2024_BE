@@ -66,13 +66,13 @@ public class JwtProvider {
     }
 
     // Access Token 검증
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public String validateTokenAndGetSubject(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     // 토큰에서 사용자 정보 추출

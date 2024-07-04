@@ -1,38 +1,35 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.common.exception.MemberException;
-import com.linkode.api_server.util.JwtProvider;
 import com.linkode.api_server.common.response.BaseResponse;
-import com.linkode.api_server.dto.member.CreateAvatarRequest;
-import com.linkode.api_server.service.MemberService;
+import com.linkode.api_server.dto.member.LoginResponse;
+import com.linkode.api_server.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.INVALID_TOKEN;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/user")
 public class MemberController {
 
-    private final MemberService memberService;
-    private final JwtProvider jwtProvider;
+    private final LoginService loginService;
 
     /**
-     * 캐릭터 생성(회원가입)
+     * 소셜 로그인
      */
-    @PostMapping("/avatar")
-    public BaseResponse<Void> createAvatar(@RequestHeader("Authorization") String authorization,
-                                           @RequestBody CreateAvatarRequest createAvatarRequest){
-        log.info("[MemberController.createAvatar]");
-        if(jwtProvider.validateToken(authorization)) {
-            memberService.createAvatar(createAvatarRequest);
-        }else{
-            throw new MemberException(INVALID_TOKEN);
-        }
-        return new BaseResponse<>(null);
+    @GetMapping("/oauth2/redirect")
+    public BaseResponse<LoginResponse> githubLogin(@RequestParam String code) {
+        log.info("[MemberController.githubLogin]");
+        return new BaseResponse<>(loginService.githubLogin(code));
     }
+
+    @GetMapping("/test")
+    public String test(@RequestHeader("authorization") String authorization){
+
+        return "success!";
+    }
+
 }
