@@ -25,11 +25,9 @@ public class MemberController {
      * 캐릭터 생성(회원가입)
      */
     @PostMapping("/avatar")
-    public BaseResponse<Void> createAvatar(@RequestHeader("Authorization") String authorization,
-                                           @RequestBody CreateAvatarRequest createAvatarRequest) {
+    public BaseResponse<Void> createAvatar(@RequestBody CreateAvatarRequest createAvatarRequest) {
         log.info("[MemberController.createAvatar]");
-        Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        memberService.createAvatar(createAvatarRequest,memberId);
+        memberService.createAvatar(createAvatarRequest);
         return new BaseResponse<>(null);
     }
 }
