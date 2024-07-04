@@ -25,7 +25,7 @@ public class StudyroomController {
     JwtProvider jwtProvider;
 
     @PatchMapping("/removal")
-    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestHeader @RequestParam long studyroomId){
+    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
 
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId,memberId);
