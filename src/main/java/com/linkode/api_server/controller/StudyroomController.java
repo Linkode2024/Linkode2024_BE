@@ -1,9 +1,9 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.JwtProvider;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.service.StudyroomService;
+import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +21,13 @@ public class StudyroomController {
     @Autowired
     StudyroomService studyroomService;
 
+    @Autowired
     JwtProvider jwtProvider;
 
     @PatchMapping("/removal")
-    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestHeader @RequestParam long studyroomId, @RequestParam  long memberId){
+    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestHeader @RequestParam long studyroomId){
 
-//        long memberId = jwtProvider.extractIdFromHeader(authorization);
+        long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId,memberId);
         log.info("Rub Delete Studyroom API ");
         if (responseStatus == BaseExceptionResponseStatus.SUCCESS) {
