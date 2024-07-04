@@ -76,28 +76,49 @@ public class JwtProvider {
     }
 
     // 토큰에서 사용자 정보 추출
-    public String extractGithubId(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public Long extractIdFromHeader(String authorization) {
+        // Authorization 헤더에서 JWT 토큰 추출
+        String jwtToken;
+        try {
+            jwtToken = extractJwtToken(authorization);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("유효하지 않은 헤더 포멧입니다.");
+        }
+
+        // JWT 토큰에서 사용자 정보 추출
+        Long memberId;
+        try {
+            memberId = extractMemberIdFromJwtToken(jwtToken);
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("토큰에서 멤버 아이디를 찾을 수 없습니다.");
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("잘못된 토큰 형식입니다.");
+        }
+
+        return memberId;
     }
 
-    // Validate JWT token
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String githubId = extractGithubId(token);
-        return (githubId.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public String extractJwtToken(String authorizationHeader) {
+        String[] parts = authorizationHeader.split(" ");
+        if (parts.length == 2) {
+            return parts[1]; // 토큰 부분 추출
+        }
+        throw new IllegalArgumentException("유효하지 않은 헤더 포멧입니다.");
     }
 
-    private boolean isTokenExpired(String token) {
-        return Jwts.parserBuilder()
+    public Long extractMemberIdFromJwtToken(String jwtToken) {
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration()
-                .before(new Date());
+                .parseClaimsJws(jwtToken)
+                .getBody();
+
+        Long memberId = claims.get("memberId", Long.class);
+
+        if (memberId == null) {
+            throw new NoSuchElementException("토큰에서 멤버 아이디를 찾을 수 없습니다.");
+        }
+
+        return memberId;
     }
 }
