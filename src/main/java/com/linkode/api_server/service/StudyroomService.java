@@ -14,6 +14,7 @@ import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -26,6 +27,7 @@ public class StudyroomService {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Transactional
     public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) {
         log.info("Start createStudyroom method of StudyroomService Class");
         Studyroom studyroom = new Studyroom(
@@ -51,6 +53,7 @@ public class StudyroomService {
     }
 
     /** 초대 코드가 필요없음 */
+    @Transactional
     public void joinStudyroom(JoinStudyroomRequest request){
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(()->new IllegalArgumentException("Error because of Invalid Member Id"));
