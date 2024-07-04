@@ -23,7 +23,7 @@ public class StudyroomController {
     @PostMapping("/generation")
     public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,  @RequestBody CreateStudyroomRequest request, @RequestParam long memberId){
         log.info("Success createStudyroom API");
-//        long memberId = jwtProvider.getGithubId(authorization);
+//        long memberId = jwtProvider.extractIdFromHeader(authorization);
         return studyroomService.createStudyroom(request, memberId);
     }
 }
