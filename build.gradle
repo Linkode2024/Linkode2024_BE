@@ -42,6 +42,9 @@ dependencies {
 
 	// Spring Boot Redis Starter
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// Jakarta Servlet API
+	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 }
 
 tasks.named('test') {
