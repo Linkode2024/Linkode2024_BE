@@ -1,6 +1,7 @@
 package com.linkode.api_server.controller;
 
 import com.linkode.api_server.JwtProvider;
+import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.service.StudyroomService;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +24,13 @@ public class StudyroomController {
     JwtProvider jwtProvider;
 
     @PatchMapping("/removal")
-    public ResponseEntity<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization,@RequestHeader @RequestParam long studyroomId, @RequestParam  long memberId){
+    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestHeader @RequestParam long studyroomId, @RequestParam  long memberId){
 
 //        long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId,memberId);
         log.info("Success Delete Studyroom API ");
         HttpStatus httpStatus = HttpStatus.OK;
-        return new ResponseEntity<>(responseStatus,httpStatus);
+        return new BaseResponse<>(responseStatus);
     }
 
 }
