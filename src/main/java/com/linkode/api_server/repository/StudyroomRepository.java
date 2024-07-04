@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface StudyroomRepository extends JpaRepository<Studyroom, Long> {
     @Transactional
     @Modifying
