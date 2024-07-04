@@ -28,9 +28,11 @@ public class StudyroomController {
 
 //        long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId,memberId);
-        log.info("Success Delete Studyroom API ");
-        HttpStatus httpStatus = HttpStatus.OK;
-        return new BaseResponse<>(responseStatus);
-    }
+        log.info("Rub Delete Studyroom API ");
+        if (responseStatus == BaseExceptionResponseStatus.SUCCESS) {
+            return new BaseResponse<>(responseStatus);
+        } else {
+            return new BaseResponse<>(responseStatus, responseStatus);
+        }    }
 
 }

@@ -23,11 +23,17 @@ public class StudyroomService {
 
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
 
-        MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomId(memberId, studyroomId)
+
+        if(!studyroomRepository.findById(studyroomId).isPresent()){
+            log.info("StudyRoom Id is Invalid");
+            return BaseExceptionResponseStatus.FAILURE;
+        }
+
+
+        MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(memberId, studyroomId)
                 .orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
 
-
-        if (memberStudyroom.getRole().equals(MemberRole.CAPTAIN)) {
+        if (memberRole .equals(MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
                 log.info("Success delete studyRoom in Service layer");
                 return BaseExceptionResponseStatus.SUCCESS;
@@ -39,5 +45,6 @@ public class StudyroomService {
             log.info("Crew Member can't delete studyRoom");
             return BaseExceptionResponseStatus.FAILURE;
         }
+
     }
 }

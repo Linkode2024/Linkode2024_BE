@@ -26,6 +26,13 @@ public class BaseResponse<T> implements ResponseStatus {
         this.result = result;
     }
 
+    public BaseResponse(ResponseStatus status, T result) {
+        this.code = status.getCode();
+        this.status = status.getStatus();
+        this.message = status.getMessage();
+        this.result = result;
+    }
+
     @Override
     public int getCode() {
         return code;
