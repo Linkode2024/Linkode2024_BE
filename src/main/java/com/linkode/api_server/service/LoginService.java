@@ -1,6 +1,6 @@
 package com.linkode.api_server.service;
 
-import com.linkode.api_server.JwtProvider;
+import com.linkode.api_server.util.JwtProvider;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.LoginResponse;
 import com.linkode.api_server.repository.MemberRepository;
