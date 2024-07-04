@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -29,9 +31,12 @@ public class StudyroomService {
             return BaseExceptionResponseStatus.FAILURE;
         }
 
-
-        MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(memberId, studyroomId)
-                .orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
+        Optional<MemberRole> optionalMemberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(studyroomId, memberId);
+        if (optionalMemberRole.isEmpty()) {
+            log.info("Member Role not found for memberId: " + memberId + " and studyroomId: " + studyroomId);
+            return BaseExceptionResponseStatus.FAILURE;
+        }
+        MemberRole memberRole = optionalMemberRole.orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
 
         if (memberRole .equals(MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){

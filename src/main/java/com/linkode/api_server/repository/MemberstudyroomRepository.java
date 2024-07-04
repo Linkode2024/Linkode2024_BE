@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom, Long> {
 
-    @Query("SELECT ms.role FROM MemberStudyroom ms WHERE ms.member.id = :memberId AND ms.studyroom.id = :studyroomId")
+    @Query("SELECT ms.role FROM MemberStudyroom ms WHERE ms.studyroom.studyroomId = :studyroomId AND ms.member.memberId = :memberId")
     Optional<MemberRole> findRoleByMemberIdAndStudyroomId(long studyroomId, long memberId);
 
 }
