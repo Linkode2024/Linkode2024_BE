@@ -2,14 +2,13 @@ package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.dto.CreateStudyroomRequest;
+import com.linkode.api_server.dto.CreateStudyroomResponse;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,4 +35,10 @@ public class StudyroomController {
             return new BaseResponse<>(responseStatus, responseStatus);
         }    }
 
+    @PostMapping("/generation")
+    public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,  @RequestBody CreateStudyroomRequest request){
+        log.info("Success createStudyroom API");
+        long memberId = jwtProvider.extractIdFromHeader(authorization);
+        return studyroomService.createStudyroom(request, memberId);
+    }
 }
