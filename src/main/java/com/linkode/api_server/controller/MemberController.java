@@ -1,35 +1,35 @@
 package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
-import com.linkode.api_server.dto.member.LoginResponse;
-import com.linkode.api_server.service.LoginService;
+import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.service.MemberService;
+import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
 @Slf4j
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/user")
 public class MemberController {
 
-    private final LoginService loginService;
+    @Autowired
+    private final MemberService memberService;
+
+    @Autowired
+    private final JwtProvider jwtProvider;
 
     /**
-     * 소셜 로그인
+     * 캐릭터 생성(회원가입)
      */
-    @GetMapping("/oauth2/redirect")
-    public BaseResponse<LoginResponse> githubLogin(@RequestParam String code) {
-        log.info("[MemberController.githubLogin]");
-        return new BaseResponse<>(loginService.githubLogin(code));
-    }
-
-    @GetMapping("/test")
-    public String test(@RequestHeader("authorization") String authorization){
-
-        return "success!";
+    @PostMapping("/avatar")
+    public BaseResponse<Void> createAvatar(@RequestBody CreateAvatarRequest createAvatarRequest) {
+        log.info("[MemberController.createAvatar]");
+        memberService.createAvatar(createAvatarRequest);
+        return new BaseResponse<>(null);
     }
 
 }
