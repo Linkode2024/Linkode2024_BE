@@ -2,8 +2,8 @@ package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
-import com.linkode.api_server.dto.CreateStudyroomRequest;
-import com.linkode.api_server.dto.CreateStudyroomResponse;
+import com.linkode.api_server.dto.studyroom.CreateStudyroomRequest;
+import com.linkode.api_server.dto.studyroom.CreateStudyroomResponse;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;

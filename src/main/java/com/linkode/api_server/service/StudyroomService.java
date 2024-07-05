@@ -5,7 +5,6 @@ import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,17 +12,10 @@ import java.util.Optional;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
-import com.linkode.api_server.domain.memberstudyroom.MemberRole;
-import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
-import com.linkode.api_server.dto.CreateStudyroomRequest;
-import com.linkode.api_server.dto.CreateStudyroomResponse;
-import com.linkode.api_server.dto.JoinStudyroomRequest;
+import com.linkode.api_server.dto.studyroom.CreateStudyroomRequest;
+import com.linkode.api_server.dto.studyroom.CreateStudyroomResponse;
+import com.linkode.api_server.dto.studyroom.JoinStudyroomRequest;
 import com.linkode.api_server.repository.MemberRepository;
-import com.linkode.api_server.repository.MemberstudyroomRepository;
-import com.linkode.api_server.repository.StudyroomRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service

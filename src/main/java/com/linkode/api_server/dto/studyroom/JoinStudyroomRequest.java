@@ -1,4 +1,4 @@
-package com.linkode.api_server.dto;
+package com.linkode.api_server.dto.studyroom;
 
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import lombok.AllArgsConstructor;
