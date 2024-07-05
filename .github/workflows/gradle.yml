@@ -10,7 +10,6 @@ on:
 permissions:
   contents: read
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -50,18 +49,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permisson for gradlew
+      - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle (without Test)
         run: ./gradlew clean build -x test --stacktrace
 
-
       - name: Docker Hub build & push
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
           docker build --build-arg PROFILE=${{ secrets.PROFILE }} \
-          --build-arg DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
+          --build-arg DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
           --build-arg DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
           --build-arg DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
           --build-arg SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
@@ -93,8 +91,8 @@ jobs:
             -e SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
             -e SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
             -e SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
-            -e JWT_SECRET=${{ secrets.JWT_SECRET }}
-            -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}            
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
             
             sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
 
