@@ -31,4 +31,5 @@ public class MemberController {
         memberService.createAvatar(createAvatarRequest);
         return new BaseResponse<>(null);
     }
+
 }
