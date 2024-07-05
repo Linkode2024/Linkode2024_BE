@@ -23,5 +23,4 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     int deleteMemberStudyroom(long studyroomId);
 
     Optional<MemberStudyroom> findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(Long memberId, Long studyroomId, BaseStatus status);
-
 }
