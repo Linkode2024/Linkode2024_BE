@@ -1,8 +1,6 @@
 package com.linkode.api_server.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.linkode.api_server.domain.Avatar;
-import com.linkode.api_server.domain.Data;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
@@ -61,5 +59,13 @@ public class Member extends BaseTime {
         this.color=color;
         this.status = status;
         this.avatar = avatar;
+    }
+
+    public Member(String githubId, String nickname, Avatar avatar, String color, BaseStatus status) {
+        this.githubId = githubId;
+        this.nickname = nickname;
+        this.color = color;
+        this.avatar = avatar;
+        this.status = status;
     }
 }
