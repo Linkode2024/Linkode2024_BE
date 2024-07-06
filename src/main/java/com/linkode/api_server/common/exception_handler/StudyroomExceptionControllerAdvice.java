@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class StudyroomExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MemberException.class)
+    @ExceptionHandler(StudyroomException.class)
     public BaseErrorResponse handle_StudyroomException(StudyroomException e) {
         log.error("[handle_StudyroomException]", e);
         return new BaseErrorResponse(e.getExceptionStatus(), e.getMessage());
