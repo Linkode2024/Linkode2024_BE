@@ -117,8 +117,6 @@ public class StudyroomService {
     public void modifyStudyroom(Long memberId, PatchStudyroomRequest patchStudyroomRequest){
         log.info("[StudyroomService.modifyStudyroom]");
         Long studyroomId = patchStudyroomRequest.getStudyroomId();
-        System.out.println("memberId: " + memberId);
-        System.out.println("studyroomId: " + studyroomId);
         MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(studyroomId, memberId,BaseStatus.ACTIVE)
                 .orElseThrow(()->new StudyroomException(NOT_FOUND_MEMBERROLE));
         if(memberStudyroom.getRole().equals(MemberRole.CAPTAIN)){
