@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 @Transactional(readOnly = true)
 public interface StudyroomRepository extends JpaRepository<Studyroom, Long> {
-    @Transactional
     @Modifying
     @Query("UPDATE Studyroom sr SET sr.status = 'DELETE' WHERE sr.studyroomId = :studyroomId")
     int deleteStudyroom(long studyroomId);
