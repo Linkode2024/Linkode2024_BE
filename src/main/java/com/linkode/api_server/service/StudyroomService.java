@@ -122,12 +122,15 @@ public class StudyroomService {
         if(memberStudyroom.getRole().equals(MemberRole.CAPTAIN)){
             Studyroom studyroom = studyroomRepository.findById(studyroomId)
                     .orElseThrow(()-> new StudyroomException(NOT_FOUND_STUDYROOM));
+            String studyroomName = studyroom.getStudyroomName();
+            String studyroomImg = studyroom.getStudyroomProfile();
             if(patchStudyroomRequest.getStudyroomName() != null){
-                studyroom.setStudyroomName(patchStudyroomRequest.getStudyroomName());
+                studyroomName = patchStudyroomRequest.getStudyroomName();
             }
             if(patchStudyroomRequest.getStudyroomImg() != null){
-                studyroom.setStudyroomProfile(patchStudyroomRequest.getStudyroomImg());
+                studyroomImg = patchStudyroomRequest.getStudyroomImg();
             }
+            studyroom.updateStudyroomInfo(studyroomName,studyroomImg);
             studyroomRepository.save(studyroom);
         }else{
             throw new StudyroomException(INVALID_ROLE);

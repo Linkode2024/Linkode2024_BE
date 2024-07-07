@@ -15,7 +15,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Studyroom extends BaseTime {
@@ -50,5 +49,10 @@ public class Studyroom extends BaseTime {
         this.studyroomName = studyroomName;
         this.studyroomProfile = studyroomProfile;
         this.status = status;
+    }
+
+    public void updateStudyroomInfo(String studyroomName, String studyroomProfile){
+        this.studyroomName = studyroomName;
+        this.studyroomProfile = studyroomProfile;
     }
 }
