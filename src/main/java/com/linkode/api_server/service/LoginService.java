@@ -53,13 +53,16 @@ public class LoginService {
      * 로그아웃
      */
     public BaseExceptionResponseStatus logout(String token){
+        log.info("[LoginService.githubLogin.logout]");
         try{
             long memberId = jwtProvider.extractMemberIdFromJwtToken(token);
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(()->new IllegalArgumentException("Error because of Invalid Member Id"));
             tokenService.invalidateToken(token);
+            log.info("InvalidateToken Success!");
             return BaseExceptionResponseStatus.SUCCESS;
         }catch (IllegalArgumentException e){
+            log.info("Logout Failure");
             return BaseExceptionResponseStatus.FAILURE;
         }
     }

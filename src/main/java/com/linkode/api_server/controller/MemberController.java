@@ -3,6 +3,7 @@ package com.linkode.api_server.controller;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.service.LoginService;
 import com.linkode.api_server.service.MemberService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,9 @@ public class MemberController {
     @Autowired
     private final JwtProvider jwtProvider;
 
+    @Autowired
+    private final LoginService loginService;
+
     /**
      * 캐릭터 생성(회원가입)
      */
@@ -32,4 +36,10 @@ public class MemberController {
         return new BaseResponse<>(null);
     }
 
+    @PostMapping("/logout")
+    public BaseResponse<Void> logout(@RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        BaseExceptionResponseStatus responseStatus = loginService.logout(token);
+        return new BaseResponse<>(responseStatus,null);
+    }
 }
