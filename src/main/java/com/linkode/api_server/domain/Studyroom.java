@@ -1,6 +1,7 @@
 package com.linkode.api_server.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
@@ -54,5 +55,9 @@ public class Studyroom extends BaseTime {
     public void updateStudyroomInfo(String studyroomName, String studyroomProfile){
         this.studyroomName = studyroomName;
         this.studyroomProfile = studyroomProfile;
+    }
+
+    public void updateStudyroomStatus(BaseStatus status){
+        this.status = status;
     }
 }
