@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,5 +49,10 @@ public class Studyroom extends BaseTime {
         this.studyroomName = studyroomName;
         this.studyroomProfile = studyroomProfile;
         this.status = status;
+    }
+
+    public void updateStudyroomInfo(String studyroomName, String studyroomProfile){
+        this.studyroomName = studyroomName;
+        this.studyroomProfile = studyroomProfile;
     }
 }
