@@ -36,6 +36,17 @@ public class MemberController {
         return new BaseResponse<>(null);
     }
 
+    /**
+     * 회원탈퇴
+     */
+    @PatchMapping("")
+    public BaseResponse<Void> deleteMember(@RequestHeader("Authorization") String authorization){
+        log.info("[MemberController.deleteMember]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        memberService.deleteMember(memberId);
+        return new BaseResponse<>(null);
+    }
+
     @PostMapping("/logout")
     public BaseResponse<Void> logout(@RequestHeader("Authorization") String authorization) {
         String token = authorization.replace("Bearer ", "").trim();
