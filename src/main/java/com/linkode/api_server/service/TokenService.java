@@ -19,7 +19,7 @@ public class TokenService {
 
     public void storeToken(String token, String githubId) {
         // redis 에 토큰 저장
-        redisTemplate.opsForValue().set(token, githubId, refreshTokenExpiration, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(githubId, token, refreshTokenExpiration, TimeUnit.MILLISECONDS);
     }
 
     public boolean checkTokenExists(String token) {
@@ -28,8 +28,8 @@ public class TokenService {
         return result != null && result;
     }
 
-    public void invalidateToken(String token) {
+    public void invalidateToken(String githubId) {
         // redis 에서 토큰 삭제
-        redisTemplate.delete(token);
+        redisTemplate.delete(githubId);
     }
 }
