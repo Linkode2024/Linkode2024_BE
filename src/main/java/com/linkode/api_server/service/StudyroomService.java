@@ -29,6 +29,7 @@ public class StudyroomService {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
 
 
@@ -45,8 +46,7 @@ public class StudyroomService {
         MemberRole memberRole = optionalMemberRole.orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
 
         if (memberRole .equals(MemberRole.CAPTAIN)) {
-            if(studyroomRepository.deleteStudyroom(studyroomId)==1){
-                memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
+            if(studyroomRepository.deleteStudyroom(studyroomId)==1 && memberstudyroomRepository.deleteMemberStudyroom(studyroomId)>0){
                 log.info("Success delete studyRoom in Service layer");
                 return BaseExceptionResponseStatus.SUCCESS;
             }else {

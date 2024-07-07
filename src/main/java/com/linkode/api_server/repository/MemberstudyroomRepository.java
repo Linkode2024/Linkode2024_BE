@@ -16,7 +16,7 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
 
     @Query("SELECT ms.role FROM MemberStudyroom ms WHERE ms.studyroom.studyroomId = :studyroomId AND ms.member.memberId = :memberId")
     Optional<MemberRole> findRoleByMemberIdAndStudyroomId(long studyroomId, long memberId);
-    @Transactional
+
     @Modifying
     @Query("UPDATE MemberStudyroom ms SET ms.status = 'DELETE' WHERE ms.studyroom.studyroomId = :studyroomId")
     int deleteMemberStudyroom(long studyroomId);
