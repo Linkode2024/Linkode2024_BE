@@ -20,11 +20,17 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      */
     ALREADY_EXIST_MEMBER(4000, HttpStatus.OK.value(), "이미 존재하는 회원입니다."),
     NOT_FOUND_MEMBERROLE(4001, HttpStatus.OK.value(), "해당 회원의 역할을 찾을 수 없습니다." ),
+    NOT_FOUND_MEMBER(4002, HttpStatus.OK.value(), "회원을 찾을 수 없습니다."),
     /**
      * 스터디룸 관련 code : 5000 대
      */
     INVALID_ROLE(5000,HttpStatus.OK.value(), "해당 스터디룸에 접근할 권한이 없습니다."),
-    NOT_FOUND_STUDYROOM(5001,HttpStatus.OK.value(), "스터디룸을 찾을 수 없습니다.");
+    NOT_FOUND_STUDYROOM(5001,HttpStatus.OK.value(), "스터디룸을 찾을 수 없습니다."),
+    /**
+     * 멤버_스터디룸 관련 code : 6000 대
+     */
+    NOT_FOUND_MEMBER_STUDYROOM(6000, HttpStatus.OK.value(), "조건에 맞는 멤버_스터디룸을 찾을 수 없습니다."),
+    NOT_FOUND_CREW(6001, HttpStatus.OK.value(), "해당 스터디룸의 CREW 를 찾을 수 없습니다.");
 
     private final int code;
     private final int status;
