@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    boolean existsByGithubIdAndStatus(String githubId, BaseStatus ACTIVE);
-    Optional<Member> findByGithubIdAndStatus(String githubId, BaseStatus ACTIVE);
+    boolean existsByGithubIdAndStatus(String githubId, BaseStatus status);
+    Optional<Member> findByGithubIdAndStatus(String githubId, BaseStatus status);
+    Optional<Member> findByMemberIdAndStatus(Long memberId, BaseStatus status);
 }

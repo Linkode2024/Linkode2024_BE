@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +25,6 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     int deleteMemberStudyroom(long studyroomId);
 
     Optional<MemberStudyroom> findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(Long memberId, Long studyroomId, BaseStatus status);
+    Optional<List<MemberStudyroom>> findByMember_MemberIdAndStatus(Long memberId, BaseStatus status);
+    Optional<List<MemberStudyroom>> findByStudyroom_StudyroomIdAndStatus(Long studyroomId, BaseStatus status);
 }
