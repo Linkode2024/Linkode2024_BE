@@ -16,7 +16,7 @@ public class GetAvatarResponse {
     @Getter
     @AllArgsConstructor
     public static class Avatar{
-        private String avatarType;
+        private Long avatarId;
         private String avatarColor;
     }
 }
