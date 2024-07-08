@@ -70,4 +70,11 @@ public class Member extends BaseTime {
     public void updateMemberStatus(BaseStatus status){
         this.status = status;
     }
+  
+    public void updateMemberInfo(String nickname, Avatar avatar, String color){
+        this.nickname=nickname;
+        this.avatar=avatar;
+        this.color=color;
+    }
+
 }
