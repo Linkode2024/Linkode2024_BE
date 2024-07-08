@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_CREW;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
@@ -34,26 +37,28 @@ public class MemberStudyroomService {
         List<MemberStudyroom> memberStudyroomList = memberstudyroomRepository.findByMember_MemberIdAndStatus(memerId, BaseStatus.ACTIVE)
                 .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
-        for(MemberStudyroom memberStudyroom : memberStudyroomList) {
-            if(memberStudyroom.getRole() == MemberRole.CAPTAIN){
-                log.info("[MemberStudyroomService.deleteMember.CAPTAIN_VERSION]");
-                Long studyroomId = memberStudyroom.getStudyroom().getStudyroomId();
-                // 지우려는 스터디룸에 포함된 crew 들도 delete
-                List<MemberStudyroom> crewList = memberstudyroomRepository.findByStudyroom_StudyroomIdAndStatus(studyroomId, BaseStatus.ACTIVE)
-                        .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_CREW));
-                for(MemberStudyroom crew : crewList){
-                    log.info("[[MemberStudyroomService.deleteMember.CAPTAIN_VERSION.crewDelete]");
-                    crew.updateMemberStudyroomStatus(BaseStatus.DELETE);
-                    memberstudyroomRepository.save(crew);
-                }
-                //스터디룸도 delete
-                memberStudyroom.getStudyroom().updateStudyroomStatus(BaseStatus.DELETE);
-                memberstudyroomRepository.save(memberStudyroom);
-            }else{
-                log.info("[MemberStudyroomService.deleteMember.CREW_VERSION]");
-                memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE);
-                memberstudyroomRepository.save(memberStudyroom);
-            }
-        }
+        // CAPTAIN인 스터디룸 ID를 미리 수집합니다.
+        Set<Long> captainStudyroomIds = memberStudyroomList.stream()
+                .filter(memberStudyroom -> memberStudyroom.getRole() == MemberRole.CAPTAIN)
+                .map(memberStudyroom -> memberStudyroom.getStudyroom().getStudyroomId())
+                .collect(Collectors.toSet());
+
+        // CAPTAIN의 스터디룸에 속한 모든 CREW를 미리 가져옵니다.
+        List<MemberStudyroom> crewList = memberstudyroomRepository.findByStudyroom_StudyroomIdInAndStatus(captainStudyroomIds, BaseStatus.ACTIVE)
+                .orElse(Collections.emptyList());
+
+        // CAPTAIN의 스터디룸 상태를 DELETE로 업데이트합니다.
+        memberstudyroomRepository.updateStudyroomStatus(captainStudyroomIds, BaseStatus.DELETE);
+
+        // CAPTAIN의 CREW 상태를 DELETE로 업데이트합니다.
+        memberstudyroomRepository.updateMemberStudyroomStatus(crewList, BaseStatus.DELETE);
+
+        // 일반 CREW의 상태를 DELETE로 업데이트합니다.
+        memberStudyroomList.stream()
+                .filter(memberStudyroom -> memberStudyroom.getRole() != MemberRole.CAPTAIN)
+                .forEach(memberStudyroom -> memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE));
+
+        memberstudyroomRepository.saveAll(memberStudyroomList);
+        memberstudyroomRepository.saveAll(crewList);
     }
 }
