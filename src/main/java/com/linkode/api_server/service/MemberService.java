@@ -6,6 +6,7 @@ import com.linkode.api_server.domain.Avatar;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.repository.AvatarRepository;
 import com.linkode.api_server.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,6 @@ public class MemberService {
          * TODO : 자료실 delete 작업 -> 아직 자료실이 없어서 구현 불가 추후에 작업
          */
     }
-
 
     @Transactional
     public void updateAvatar(long memberId, UpdateAvatarRequest request){
