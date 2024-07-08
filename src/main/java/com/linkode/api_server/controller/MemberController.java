@@ -40,6 +40,7 @@ public class MemberController {
         log.info("[MemberController.deleteMember]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         memberService.deleteMember(memberId);
+        return new BaseResponse<>(null);
     }
   
     /**
