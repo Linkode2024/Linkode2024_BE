@@ -40,4 +40,8 @@ public class MemberStudyroom extends BaseTime {
     @JoinColumn(name = "studyroom_id")
     private Studyroom studyroom;
 
+    public void updateMemberStudyroomStatus(BaseStatus status){
+        this.status = status;
+    }
+
 }

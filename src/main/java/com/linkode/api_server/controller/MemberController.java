@@ -1,7 +1,6 @@
 package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
-import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
 import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.service.MemberService;
@@ -33,6 +32,17 @@ public class MemberController {
         return new BaseResponse<>(null);
     }
 
+    /**
+     * 회원탈퇴
+     */
+    @PatchMapping("")
+    public BaseResponse<Void> deleteMember(@RequestHeader("Authorization") String authorization){
+        log.info("[MemberController.deleteMember]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        memberService.deleteMember(memberId);
+        return new BaseResponse<>(null);
+    }
+  
     /**
      * 캐릭터 수정(프로필 수정)
      */
