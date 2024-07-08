@@ -55,10 +55,10 @@ public class LoginService {
     public BaseExceptionResponseStatus logout(String token){
         log.info("[LoginService.githubLogin.logout]");
         try{
-            long memberId = jwtProvider.extractMemberIdFromJwtToken(token);
-            Member member = memberRepository.findById(memberId)
+            String githubId = jwtProvider.extractGithubIdFromToken(token);
+            Member member = memberRepository.findByGithubIdAndStatus(githubId,BaseStatus.ACTIVE)
                     .orElseThrow(()->new IllegalArgumentException("Error because of Invalid Member Id"));
-            tokenService.invalidateToken(token);
+            tokenService.invalidateToken(githubId);
             log.info("InvalidateToken Success!");
             return BaseExceptionResponseStatus.SUCCESS;
         }catch (IllegalArgumentException e){

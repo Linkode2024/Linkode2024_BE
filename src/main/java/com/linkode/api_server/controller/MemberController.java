@@ -3,6 +3,7 @@ package com.linkode.api_server.controller;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.service.LoginService;
 import com.linkode.api_server.service.MemberService;
 import com.linkode.api_server.util.JwtProvider;
