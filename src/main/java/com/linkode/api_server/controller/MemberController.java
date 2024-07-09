@@ -62,7 +62,7 @@ public class MemberController {
     @PostMapping("/logout")
     public BaseResponse<Void> logout(@RequestHeader("Authorization") String authorization) {
         String token = authorization.replace("Bearer ", "").trim();
-        BaseExceptionResponseStatus responseStatus = loginService.logout(token);
+        BaseExceptionResponseStatus responseStatus = loginService.logout(authorization);
         return new BaseResponse<>(responseStatus,null);
     }
 
