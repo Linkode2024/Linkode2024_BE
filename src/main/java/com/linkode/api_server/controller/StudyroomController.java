@@ -4,6 +4,7 @@ import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.CreateStudyroomRequest;
 import com.linkode.api_server.dto.studyroom.CreateStudyroomResponse;
+import com.linkode.api_server.dto.studyroom.PatchStudyroomRequest;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +41,16 @@ public class StudyroomController {
         log.info("Success createStudyroom API");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         return studyroomService.createStudyroom(request, memberId);
+    }
+
+    /**
+     * 스터디룸 수정
+     */
+    @PatchMapping("")
+    public BaseResponse<Void> modifyStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody PatchStudyroomRequest patchStudyroomRequest){
+        log.info("[StudyroomController.modifyStudyroom]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        studyroomService.modifyStudyroom(memberId,patchStudyroomRequest);
+        return new BaseResponse<>(null);
     }
 }

@@ -1,5 +1,7 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.util.JwtProvider;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.LoginResponse;
@@ -46,6 +48,25 @@ public class LoginService {
         }
         return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken);
     }
+
+    /**
+     * 로그아웃
+     */
+    public BaseExceptionResponseStatus logout(String token){
+        log.info("[LoginService.githubLogin.logout]");
+        try{
+            String githubId = jwtProvider.extractGithubIdFromToken(jwtProvider.extractJwtToken(token));
+            Member member = memberRepository.findByGithubIdAndStatus(githubId,BaseStatus.ACTIVE)
+                    .orElseThrow(()->new IllegalArgumentException("Error because of Invalid Member Id"));
+            tokenService.invalidateToken(githubId);
+            log.info("InvalidateToken Success!");
+            return BaseExceptionResponseStatus.SUCCESS;
+        }catch (IllegalArgumentException e){
+            log.info("Logout Failure");
+            return BaseExceptionResponseStatus.FAILURE;
+        }
+    }
+
     private String getAccessToken(String code) {
         log.info("[LoginService.githubLogin.getAccessToken]");
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://github.com/login/oauth/access_token")
@@ -95,5 +116,7 @@ public class LoginService {
         boolean memberStatus = memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE);
         return memberStatus;
     }
+
+
 
 }

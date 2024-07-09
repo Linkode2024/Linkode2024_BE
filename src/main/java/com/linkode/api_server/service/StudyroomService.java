@@ -1,10 +1,13 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
+import com.linkode.api_server.dto.studyroom.PatchStudyroomRequest;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,17 +21,21 @@ import com.linkode.api_server.dto.studyroom.JoinStudyroomRequest;
 import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
+
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class StudyroomService {
 
     @Autowired
-    private StudyroomRepository studyroomRepository;
+    private final StudyroomRepository studyroomRepository;
     @Autowired
-    private MemberstudyroomRepository memberstudyroomRepository;
+    private final MemberstudyroomRepository memberstudyroomRepository;
     @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
+    @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
 
 
@@ -45,8 +52,7 @@ public class StudyroomService {
         MemberRole memberRole = optionalMemberRole.orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
 
         if (memberRole .equals(MemberRole.CAPTAIN)) {
-            if(studyroomRepository.deleteStudyroom(studyroomId)==1){
-                memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
+            if(studyroomRepository.deleteStudyroom(studyroomId)==1 && memberstudyroomRepository.deleteMemberStudyroom(studyroomId)>0){
                 log.info("Success delete studyRoom in Service layer");
                 return BaseExceptionResponseStatus.SUCCESS;
             }else {
@@ -102,5 +108,32 @@ public class StudyroomService {
 
         memberstudyroomRepository.save(memberStudyroom);
 
+    }
+
+    /**
+     * 스터디룸 수정
+     */
+    @Transactional
+    public void modifyStudyroom(Long memberId, PatchStudyroomRequest patchStudyroomRequest){
+        log.info("[StudyroomService.modifyStudyroom]");
+        Long studyroomId = patchStudyroomRequest.getStudyroomId();
+        MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId, studyroomId,BaseStatus.ACTIVE)
+                .orElseThrow(()->new StudyroomException(NOT_FOUND_MEMBERROLE));
+        if(memberStudyroom.getRole().equals(MemberRole.CAPTAIN)){
+            Studyroom studyroom = studyroomRepository.findById(studyroomId)
+                    .orElseThrow(()-> new StudyroomException(NOT_FOUND_STUDYROOM));
+            String studyroomName = studyroom.getStudyroomName();
+            String studyroomImg = studyroom.getStudyroomProfile();
+            if(patchStudyroomRequest.getStudyroomName() != null){
+                studyroomName = patchStudyroomRequest.getStudyroomName();
+            }
+            if(patchStudyroomRequest.getStudyroomImg() != null){
+                studyroomImg = patchStudyroomRequest.getStudyroomImg();
+            }
+            studyroom.updateStudyroomInfo(studyroomName,studyroomImg);
+            studyroomRepository.save(studyroom);
+        }else{
+            throw new StudyroomException(INVALID_ROLE);
+        }
     }
 }

@@ -1,12 +1,13 @@
 package com.linkode.api_server.service;
 
 import com.linkode.api_server.common.exception.MemberException;
-import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Avatar;
 import com.linkode.api_server.domain.Color;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.dto.member.GetAvatarResponse;
+import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.repository.AvatarRepository;
 import com.linkode.api_server.repository.ColorRepository;
 import com.linkode.api_server.repository.MemberRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.ALREADY_EXIST_MEMBER;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
 
 @Slf4j
 @Service
@@ -25,17 +27,19 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final AvatarRepository avatarRepository;
     private final ColorRepository colorRepository;
+    private final MemberStudyroomService memberStudyroomService;
+    private final TokenService tokenService;
 
     /**
      * 캐릭터 생성(회원가입)
      */
     @Transactional
-    public void createAvatar(CreateAvatarRequest createAvatarRequest){
+    public void createAvatar(CreateAvatarRequest createAvatarRequest) {
         log.info("[MemberService.createAvatar]");
         String githubId = createAvatarRequest.getGithubId();
-        if(memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)){
+        if (memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)) {
             throw new MemberException(ALREADY_EXIST_MEMBER);
-        } else{
+        } else {
             String nickname = createAvatarRequest.getNickname();
             Long avatarId = createAvatarRequest.getAvatarId();
             Avatar avatar = avatarRepository.findById(avatarId)
@@ -43,9 +47,60 @@ public class MemberService {
             Long colorId = createAvatarRequest.getColorId();
             Color color = colorRepository.findByColorIdAndStuatus(colorId, BaseStatus.ACTIVE)
                     .orElseThrow(()->);
-
             Member member = new Member(githubId, nickname, avatar, color, BaseStatus.ACTIVE);
             memberRepository.save(member);
         }
     }
+
+    /**
+     * 회원탈퇴
+     */
+    @Transactional
+    public void deleteMember(Long memberId) {
+        log.info("[MemberService.deleteMember]");
+        Member member = memberRepository.findByMemberIdAndStatus(memberId, BaseStatus.ACTIVE)
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        memberStudyroomService.deleteMember(memberId); // member_studyroom 테이블에서 상태 delete 작업 수행
+        member.updateMemberStatus(BaseStatus.DELETE); // member 테이블에서 상태 delete 작업 수행
+        memberRepository.save(member);
+        tokenService.invalidateToken(member.getGithubId());
+        /**
+         * TODO : 자료실 delete 작업 -> 아직 자료실이 없어서 구현 불가 추후에 작업
+         */
+    }
+
+    @Transactional
+    public void updateAvatar(long memberId, UpdateAvatarRequest request) {
+        log.info("[MemberService.updateAvatar]");
+        Member member = memberRepository.findByMemberIdAndStatus(memberId, BaseStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid memberId: " + memberId));
+
+        String newNickname = request.getNickname() == null ? member.getNickname() : request.getNickname();
+
+        Avatar newAvatar = request.getAvatarId() == null ? member.getAvatar() : avatarRepository.findById(request.getAvatarId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid avatarId: " + request.getAvatarId()));
+
+        String newColor = request.getColor() == null ? member.getColor() : request.getColor();
+
+        member.updateMemberInfo(newNickname, newAvatar, newColor);
+
+        memberRepository.save(member);
+
+    }
+
+    /**
+     * 캐릭터 조회
+     */
+    @Transactional
+    public GetAvatarResponse getAvatar(Long memberId){
+        log.info("[MemberService.getAvatar]");
+        Member member = memberRepository.findByMemberIdWithAvatarAndStatus(memberId, BaseStatus.ACTIVE)
+                .orElseThrow(()-> new MemberException(NOT_FOUND_MEMBER));
+        String nickname = member.getNickname();
+        Long avatarId= member.getAvatar().getAvatarId();
+        String backgroundColor = member.getColor();
+
+        return new GetAvatarResponse(nickname, avatarId, backgroundColor);
+    }
+
 }

@@ -121,4 +121,14 @@ public class JwtProvider {
 
         return memberId;
     }
+    // Access Token에서 githubId 추출
+    public String extractGithubIdFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 }

@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Member extends BaseTime {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,9 +42,8 @@ public class Member extends BaseTime {
     @OneToMany(mappedBy = "member")
     private List<Data> dataList= new ArrayList<>();
 
-
     /** 캐릭터와의 연관관계의 주인 */
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
@@ -69,4 +68,15 @@ public class Member extends BaseTime {
         this.avatar = avatar;
         this.status = status;
     }
+
+    public void updateMemberStatus(BaseStatus status){
+        this.status = status;
+    }
+  
+    public void updateMemberInfo(String nickname, Avatar avatar, String color){
+        this.nickname=nickname;
+        this.avatar=avatar;
+        this.color=color;
+    }
+
 }
