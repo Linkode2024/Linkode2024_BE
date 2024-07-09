@@ -1,21 +1,23 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.ColorException;
 import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.domain.Avatar;
+import com.linkode.api_server.domain.Color;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
 import com.linkode.api_server.dto.member.GetAvatarResponse;
 import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.repository.AvatarRepository;
+import com.linkode.api_server.repository.ColorRepository;
 import com.linkode.api_server.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.ALREADY_EXIST_MEMBER;
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -25,6 +27,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final AvatarRepository avatarRepository;
     private final MemberStudyroomService memberStudyroomService;
+    private final ColorRepository colorRepository;
     private final TokenService tokenService;
 
     /**
@@ -41,7 +44,9 @@ public class MemberService {
             Long avatarId = createAvatarRequest.getAvatarId();
             Avatar avatar = avatarRepository.findById(avatarId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid avatarId: " + avatarId));
-            String color = createAvatarRequest.getColor();
+            Long colorId = createAvatarRequest.getColorId();
+            Color color = colorRepository.findByColorIdAndStatus(colorId, BaseStatus.ACTIVE)
+                    .orElseThrow(()-> new ColorException(NOT_FOUND_COLOR));
 
             Member member = new Member(githubId, nickname, avatar, color, BaseStatus.ACTIVE);
             memberRepository.save(member);
@@ -76,7 +81,8 @@ public class MemberService {
         Avatar newAvatar = request.getAvatarId() == null ? member.getAvatar() : avatarRepository.findById(request.getAvatarId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid avatarId: " + request.getAvatarId()));
 
-        String newColor = request.getColor() == null ? member.getColor() : request.getColor();
+        Color newColor = request.getColorId() == null ? member.getColor() : colorRepository.findByColorIdAndStatus(request.getColorId(),BaseStatus.ACTIVE)
+                .orElseThrow(()-> new ColorException(NOT_FOUND_COLOR));
 
         member.updateMemberInfo(newNickname, newAvatar, newColor);
 
@@ -94,9 +100,9 @@ public class MemberService {
                 .orElseThrow(()-> new MemberException(NOT_FOUND_MEMBER));
         String nickname = member.getNickname();
         Long avatarId= member.getAvatar().getAvatarId();
-        String backgroundColor = member.getColor();
+        Long colorId = member.getColor().getColorId();
 
-        return new GetAvatarResponse(nickname, avatarId, backgroundColor);
+        return new GetAvatarResponse(nickname, avatarId, colorId);
     }
 
 }

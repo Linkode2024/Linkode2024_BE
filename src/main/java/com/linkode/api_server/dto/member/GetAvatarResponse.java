@@ -12,5 +12,5 @@ public class GetAvatarResponse {
      */
     private String nickname;
     private Long avatarId;
-    private String backgroundColor;
+    private Long colorId;
 }
