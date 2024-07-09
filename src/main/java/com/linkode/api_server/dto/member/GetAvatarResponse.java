@@ -11,12 +11,6 @@ public class GetAvatarResponse {
      * 캐릭터 조회
      */
     private String nickname;
-    private Avatar avatar;
-
-    @Getter
-    @AllArgsConstructor
-    public static class Avatar{
-        private Long avatarId;
-        private String avatarColor;
-    }
+    private Long avatarId;
+    private String backgroundColor;
 }
