@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-@Transactional(readOnly = true)
 public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom, Long> {
 
     @Query("SELECT ms.role FROM MemberStudyroom ms WHERE ms.studyroom.studyroomId = :studyroomId AND ms.member.memberId = :memberId")
