@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.info(token);
                 String githubId = jwtProvider.extractGithubIdFromToken(token);
                 if (tokenService.checkTokenExists(githubId)) { // 리프레시 토큰이 존재하는지 확인
-                    Member member = new Member(null, githubId, "", "", null, null);
+                    Member member = new Member(null, githubId, "", null, null, null);
                     AbstractAuthenticationToken authenticated = new UsernamePasswordAuthenticationToken(member, null, null);
                     authenticated.setDetails(new WebAuthenticationDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticated);

@@ -11,5 +11,5 @@ import lombok.Setter;
 public class UpdateAvatarRequest {
     private String nickname;
     private Long avatarId;
-    private String color;
+    private Long colorId;
 }
