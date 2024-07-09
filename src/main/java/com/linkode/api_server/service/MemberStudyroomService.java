@@ -22,6 +22,7 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberStudyroomService {
 
     private final MemberstudyroomRepository memberstudyroomRepository;

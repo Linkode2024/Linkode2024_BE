@@ -3,6 +3,7 @@ package com.linkode.api_server.controller;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.dto.member.GetAvatarAllResponse;
 import com.linkode.api_server.dto.member.GetAvatarResponse;
 import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.service.LoginService;
@@ -75,6 +76,15 @@ public class MemberController {
         String token = authorization.replace("Bearer ", "").trim();
         BaseExceptionResponseStatus responseStatus = loginService.logout(authorization);
         return new BaseResponse<>(responseStatus,null);
+    }
+
+    /**
+     * 전체 캐릭터 조회
+     */
+    @GetMapping("/avatar/all")
+    public BaseResponse<GetAvatarAllResponse> getAvatarAll(){
+        log.info("[MemberController.getAvatarAll]");
+        return new BaseResponse<>(memberService.getAvatarAll());
     }
 
 }
