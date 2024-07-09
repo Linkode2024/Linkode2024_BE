@@ -7,6 +7,7 @@ import com.linkode.api_server.domain.Color;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.dto.member.GetAvatarAllResponse;
 import com.linkode.api_server.dto.member.GetAvatarResponse;
 import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.repository.AvatarRepository;
@@ -17,11 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -93,7 +98,6 @@ public class MemberService {
     /**
      * 캐릭터 조회
      */
-    @Transactional
     public GetAvatarResponse getAvatar(Long memberId){
         log.info("[MemberService.getAvatar]");
         Member member = memberRepository.findByMemberIdWithAvatarAndStatus(memberId, BaseStatus.ACTIVE)
@@ -103,6 +107,25 @@ public class MemberService {
         Long colorId = member.getColor().getColorId();
 
         return new GetAvatarResponse(nickname, avatarId, colorId);
+    }
+
+    /**
+     * 전체 캐릭터 조회
+     */
+    public GetAvatarAllResponse getAvatarAll(){
+        log.info("[MemberService.getAvatarAll]");
+
+        List<GetAvatarAllResponse.Avatar> avatars = avatarRepository.findAll().stream()
+                .filter(avatar -> avatar != null && avatar.getAvatarId() != null && avatar.getAvatarImg() != null)
+                .map(avatar -> new GetAvatarAllResponse.Avatar(avatar.getAvatarId(), avatar.getAvatarImg()))
+                .collect(Collectors.toList());
+
+        List<GetAvatarAllResponse.Color> colors = colorRepository.findAll().stream()
+                .filter(color -> color != null && color.getColorId() != null && color.getHexCode() != null)
+                .map(color -> new GetAvatarAllResponse.Color(color.getColorId(), color.getHexCode()))
+                .collect(Collectors.toList());
+
+        return new GetAvatarAllResponse(avatars, colors);
     }
 
 }
