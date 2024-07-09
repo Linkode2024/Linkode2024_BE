@@ -3,6 +3,7 @@ package com.linkode.api_server.controller;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.member.CreateAvatarRequest;
+import com.linkode.api_server.dto.member.GetAvatarResponse;
 import com.linkode.api_server.dto.member.UpdateAvatarRequest;
 import com.linkode.api_server.service.LoginService;
 import com.linkode.api_server.service.MemberService;
@@ -46,6 +47,16 @@ public class MemberController {
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         memberService.deleteMember(memberId);
         return new BaseResponse<>(null);
+    }
+
+    /**
+     * 캐릭터 조회
+     */
+    @GetMapping("/avatar")
+    public BaseResponse<GetAvatarResponse> getAvatar(@RequestHeader("Authorization") String authorization){
+        log.info("[MemberController.getAvatar]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        return new BaseResponse<>(memberService.getAvatar(memberId));
     }
   
     /**
