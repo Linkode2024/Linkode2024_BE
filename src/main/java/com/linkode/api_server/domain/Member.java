@@ -30,13 +30,9 @@ public class Member extends BaseTime {
     @Column(nullable = false)
     private String nickname;
 
-    @Column(nullable = false)
-    private String color;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
-
 
     @JsonIgnore
     @OneToMany(mappedBy = "member")
@@ -52,7 +48,12 @@ public class Member extends BaseTime {
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
-    public Member(Long memberId, String githubId, String nickname, String color,BaseStatus status, Avatar avatar) {
+    /** 캐릭터와의 연관관계의 주인 */
+    @ManyToOne
+    @JoinColumn(name = "color_id")
+    private Color color;
+
+    public Member(Long memberId, String githubId, String nickname, Color color,BaseStatus status, Avatar avatar) {
         this.memberId = memberId;
         this.githubId = githubId;
         this.nickname = nickname;
@@ -61,7 +62,7 @@ public class Member extends BaseTime {
         this.avatar = avatar;
     }
 
-    public Member(String githubId, String nickname, Avatar avatar, String color, BaseStatus status) {
+    public Member(String githubId, String nickname, Avatar avatar, Color color, BaseStatus status) {
         this.githubId = githubId;
         this.nickname = nickname;
         this.color = color;

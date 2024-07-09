@@ -49,6 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .orElse("anonymous:ANONYMOUS")
                 .split(":");
 
-        return new Member(null, split[0], "", "", null, null);
+        return new Member(null, split[0], "", null, null, null);
     }
 }
