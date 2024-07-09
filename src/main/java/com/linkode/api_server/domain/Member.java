@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -46,7 +47,7 @@ public class Member extends BaseTime {
     private List<Data> dataList= new ArrayList<>();
 
     /** 캐릭터와의 연관관계의 주인 */
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "avatar_id")
     private Avatar avatar;
 
