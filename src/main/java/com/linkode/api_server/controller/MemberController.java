@@ -2,10 +2,7 @@ package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
-import com.linkode.api_server.dto.member.CreateAvatarRequest;
-import com.linkode.api_server.dto.member.GetAvatarAllResponse;
-import com.linkode.api_server.dto.member.GetAvatarResponse;
-import com.linkode.api_server.dto.member.UpdateAvatarRequest;
+import com.linkode.api_server.dto.member.*;
 import com.linkode.api_server.service.LoginService;
 import com.linkode.api_server.service.MemberService;
 import com.linkode.api_server.util.JwtProvider;
@@ -33,10 +30,9 @@ public class MemberController {
      * 캐릭터 생성(회원가입)
      */
     @PostMapping("/avatar")
-    public BaseResponse<Void> createAvatar(@RequestBody CreateAvatarRequest createAvatarRequest) {
+    public BaseResponse<CreateAvatarResponse> createAvatar(@RequestBody CreateAvatarRequest createAvatarRequest) {
         log.info("[MemberController.createAvatar]");
-        memberService.createAvatar(createAvatarRequest);
-        return new BaseResponse<>(null);
+        return new BaseResponse<>(memberService.createAvatar(createAvatarRequest));
     }
 
     /**
