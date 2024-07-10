@@ -10,7 +10,7 @@ spring:
     activate:
       on-profile: prod
   redis:
-    host: localhost
+    host: ${WAS_HOST}
     port: 6379
 ---
 

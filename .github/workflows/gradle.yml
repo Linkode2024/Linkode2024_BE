@@ -22,6 +22,7 @@ jobs:
       SOCIAL_CLIENT_PASSWD: ${{ secrets.SOCIAL_CLIENT_PASSWD }}
       SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      WAS_HOST: ${{ secrets.WAS_HOST }}
 
     steps:
       - name: Checkout repository
