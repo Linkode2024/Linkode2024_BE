@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROFILE: prod
-      PROD_DB_HOST: ${{ secrets.PROD_DB_HOST }}
-      PROD_DB_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
-      PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+      PROD_DB_HOST: ${{ secrets.DB_PROD_HOST }}
+      PROD_DB_USERNAME: ${{ secrets.DB_PROD_USERNAME }}
+      PROD_DB_PASSWORD: ${{ secrets.DB_PROD_PASSWD }}
       SOCIAL_CLIENT_ID: ${{ secrets.SOCIAL_CLIENT_ID }}
       SOCIAL_CLIENT_PASSWD: ${{ secrets.SOCIAL_CLIENT_PASSWD }}
       SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }}
