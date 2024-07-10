@@ -26,12 +26,8 @@ RUN apk update && \
 ARG JAR_PATH=build/libs/*.jar
 COPY ${JAR_PATH} /home/server.jar
 
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Expose ports
 EXPOSE 8080 6379
 
 # Entry point
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT sh -c "redis-server --daemonize yes && java -jar /home/server.jar"
