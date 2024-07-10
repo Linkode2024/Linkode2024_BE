@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
 
@@ -42,18 +43,19 @@ public class LoginService {
         log.info("[LoginService.githubLogin]");
         String accessToken = getAccessToken(code);
         String githubId = getUserInfo(accessToken);
-        boolean memberStatus = checkMember(githubId);
+        boolean memberStatus = false;
+        Optional<Member> member = memberRepository.findByGithubIdAndStatus(githubId, BaseStatus.ACTIVE);
         String jwtAccessToken = null;
         String jwtRefreshToken = null;
         LoginResponse.Profile profile = null;
-        if(memberStatus){
-            Member member = memberRepository.findByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)
-                    .orElseThrow(()-> new MemberException(NOT_FOUND_MEMBER));
+        if(member.isPresent()){
+            Member member1 = member.get();
+            memberStatus = true;
             jwtAccessToken = jwtProvider.createAccessToken(githubId);
             jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
             // 레디스 저장
             tokenService.storeToken(jwtRefreshToken, githubId);
-            profile = new LoginResponse.Profile(member.getNickname(), member.getAvatar().getAvatarId(), member.getColor().getColorId());
+            profile = new LoginResponse.Profile(member1.getNickname(), member1.getAvatar().getAvatarId(), member1.getColor().getColorId());
         }
         return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken, profile);
     }
