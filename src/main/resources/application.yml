@@ -19,7 +19,7 @@ spring:
     activate:
       on-profile: local
   redis:
-    host: localhost
+    host: ${WAS_HOST}
     port: 6379
 ---
 
