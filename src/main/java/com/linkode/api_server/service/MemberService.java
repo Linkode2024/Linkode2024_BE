@@ -47,8 +47,8 @@ public class MemberService {
         } else {
             String nickname = createAvatarRequest.getNickname();
             Long avatarId = createAvatarRequest.getAvatarId();
-            Avatar avatar = avatarRepository.findById(avatarId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid avatarId: " + avatarId));
+            Avatar avatar = avatarRepository.findByAvatarIdAndStatus(avatarId, BaseStatus.ACTIVE)
+                    .orElseThrow(() -> new MemberException(NOT_FOUND_AVATAR));
             Long colorId = createAvatarRequest.getColorId();
             Color color = colorRepository.findByColorIdAndStatus(colorId, BaseStatus.ACTIVE)
                     .orElseThrow(()-> new ColorException(NOT_FOUND_COLOR));
