@@ -1,5 +1,6 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.util.JwtProvider;
@@ -17,6 +18,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
+
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
 
 @Slf4j
 @Service
@@ -42,13 +45,17 @@ public class LoginService {
         boolean memberStatus = checkMember(githubId);
         String jwtAccessToken = null;
         String jwtRefreshToken = null;
+        LoginResponse.Profile profile = null;
         if(memberStatus){
+            Member member = memberRepository.findByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)
+                    .orElseThrow(()-> new MemberException(NOT_FOUND_MEMBER));
             jwtAccessToken = jwtProvider.createAccessToken(githubId);
             jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
             // 레디스 저장
             tokenService.storeToken(jwtRefreshToken, githubId);
+            profile = new LoginResponse.Profile(member.getNickname(), member.getAvatar().getAvatarId(), member.getColor().getColorId());
         }
-        return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken);
+        return new LoginResponse(memberStatus,githubId,jwtAccessToken,jwtRefreshToken, profile);
     }
 
     /**

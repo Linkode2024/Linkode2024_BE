@@ -3,6 +3,8 @@ package com.linkode.api_server.dto.member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import javax.swing.*;
+
 @Getter
 @AllArgsConstructor
 public class LoginResponse {
@@ -13,4 +15,13 @@ public class LoginResponse {
     private String githubId;
     private String accessToken;
     private String refreshToken;
+    private Profile profile;
+
+    @Getter
+    @AllArgsConstructor
+    public static class Profile{
+        private String nickname;
+        private Long avatarId;
+        private Long colorId;
+    }
 }
