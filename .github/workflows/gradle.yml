@@ -79,6 +79,8 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
           script: |
+            sudo docker-compose -f docker-compose.yml up -d
+
             CONTAINER_ID=$(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
