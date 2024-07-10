@@ -6,13 +6,11 @@ import com.linkode.api_server.domain.Avatar;
 import com.linkode.api_server.domain.Color;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.base.BaseStatus;
-import com.linkode.api_server.dto.member.CreateAvatarRequest;
-import com.linkode.api_server.dto.member.GetAvatarAllResponse;
-import com.linkode.api_server.dto.member.GetAvatarResponse;
-import com.linkode.api_server.dto.member.UpdateAvatarRequest;
+import com.linkode.api_server.dto.member.*;
 import com.linkode.api_server.repository.AvatarRepository;
 import com.linkode.api_server.repository.ColorRepository;
 import com.linkode.api_server.repository.MemberRepository;
+import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,12 +32,14 @@ public class MemberService {
     private final MemberStudyroomService memberStudyroomService;
     private final ColorRepository colorRepository;
     private final TokenService tokenService;
+    private final JwtProvider jwtProvider;
+
 
     /**
      * 캐릭터 생성(회원가입)
      */
     @Transactional
-    public void createAvatar(CreateAvatarRequest createAvatarRequest) {
+    public CreateAvatarResponse createAvatar(CreateAvatarRequest createAvatarRequest) {
         log.info("[MemberService.createAvatar]");
         String githubId = createAvatarRequest.getGithubId();
         if (memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)) {
@@ -47,14 +47,20 @@ public class MemberService {
         } else {
             String nickname = createAvatarRequest.getNickname();
             Long avatarId = createAvatarRequest.getAvatarId();
-            Avatar avatar = avatarRepository.findById(avatarId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid avatarId: " + avatarId));
+            Avatar avatar = avatarRepository.findByAvatarIdAndStatus(avatarId, BaseStatus.ACTIVE)
+                    .orElseThrow(() -> new MemberException(NOT_FOUND_AVATAR));
             Long colorId = createAvatarRequest.getColorId();
             Color color = colorRepository.findByColorIdAndStatus(colorId, BaseStatus.ACTIVE)
                     .orElseThrow(()-> new ColorException(NOT_FOUND_COLOR));
 
             Member member = new Member(githubId, nickname, avatar, color, BaseStatus.ACTIVE);
             memberRepository.save(member);
+
+            String jwtAccessToken = jwtProvider.createAccessToken(githubId);
+            String jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
+            // 레디스 저장
+            tokenService.storeToken(jwtRefreshToken, githubId);
+            return new CreateAvatarResponse(jwtAccessToken,jwtRefreshToken);
         }
     }
 
