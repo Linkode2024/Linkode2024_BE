@@ -4,8 +4,16 @@ spring:
     url: jdbc:mysql://${DB_PROD_HOST}:3306/linkode?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
     username: ${DB_PROD_USERNAME}
     password: ${DB_PROD_PASSWD}
+
   jpa:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         ddl-auto: create
+        format_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.type: trace
