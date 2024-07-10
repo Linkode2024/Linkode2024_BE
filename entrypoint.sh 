@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Start Redis server
+redis-server --daemonize yes
+
+# Start Spring Boot application
+java -jar /home/server.jar

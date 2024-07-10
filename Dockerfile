@@ -18,6 +18,20 @@ ENV SOCIAL_CLIENT_PASSWD=${SOCIAL_CLIENT_PASSWD}
 ENV SOCIAL_CLIENT_SECRET=${SOCIAL_CLIENT_SECRET}
 ENV JWT_SECRET=${JWT_SECRET}
 
+# Install Redis
+RUN apk update && \
+    apk add redis
+
+# Copy application JAR
 ARG JAR_PATH=build/libs/*.jar
 COPY ${JAR_PATH} /home/server.jar
-ENTRYPOINT ["java","-jar","/home/server.jar"]
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Expose ports
+EXPOSE 8080 6379
+
+# Entry point
+ENTRYPOINT ["/entrypoint.sh"]
