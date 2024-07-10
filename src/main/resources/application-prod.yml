@@ -2,7 +2,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${PROD_DB_HOST}:3306/linkode?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: ${PROD_DB_USER}
+    username: ${PROD_DB_USERNAME}
     password: ${PROD_DB_PASSWORD}
   jpa:
     properties:
