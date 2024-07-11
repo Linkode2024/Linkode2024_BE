@@ -1,7 +1,6 @@
 package com.linkode.api_server.dto.studyroom;
 
-import com.linkode.api_server.dto.member.GetAvatarAllResponse;
-import jakarta.persistence.Column;
+import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,10 +14,10 @@ import java.util.List;
 public class DetailStudyroomResponse {
 
     private Long studyroomId;
-    private String role;
+    private MemberRole role;
     private List<Member> members;
 
-    @Getter
+    @Getter @Setter
     @AllArgsConstructor
     public static class Member{
         Long memberId;

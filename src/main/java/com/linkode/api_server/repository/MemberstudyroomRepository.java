@@ -36,8 +36,12 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     @Query("UPDATE MemberStudyroom ms SET ms.status = :status WHERE ms IN :memberStudyrooms")
     void updateMemberStudyroomStatus(@Param("memberStudyrooms") List<MemberStudyroom> memberStudyrooms, @Param("status") BaseStatus status);
 
-
-
-    @Query("SELECT ms FROM MemberStudyroom ms JOIN FETCH ms.member WHERE ms.studyroom.studyroomId = :studyroomId AND ms.status = :status")
-    Optional<MemberStudyroom> getStudyroomDetail(long studyroomId,BaseStatus status);
+    @Query("SELECT ms FROM MemberStudyroom ms " +
+            "JOIN FETCH ms.member JOIN FETCH ms.studyroom s " +
+            "LEFT JOIN FETCH s.memberStudyroomList msl " +
+            "LEFT JOIN FETCH msl.member " +
+            "WHERE ms.studyroom.studyroomId = :studyroomId " +
+            "AND ms.member.memberId = :memberId " +
+            "AND ms.status = :status")
+    Optional<MemberStudyroom> getStudyroomDetail(long studyroomId,long memberId, BaseStatus status);
 }
