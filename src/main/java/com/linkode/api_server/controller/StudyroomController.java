@@ -57,6 +57,9 @@ public class StudyroomController {
         return new BaseResponse<>(null);
     }
 
+    /**
+     * 스터디룸 입장 (재입장)
+     */
     @GetMapping("/detail")
     public DetailStudyroomResponse getStudyroomDetail(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
         log.info("[StudyroomController.getStudyroomDetail]");
