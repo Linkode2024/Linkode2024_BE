@@ -48,7 +48,7 @@ public class SignalingHandler extends TextWebSocketHandler {
             }
         }
 
-        session.sendMessage(new TextMessage("My Socket Message" + message.getPayload()));
+        session.sendMessage(new TextMessage("My Socket Message : " + message.getPayload()));
     }
 
     @Override
