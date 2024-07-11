@@ -25,6 +25,8 @@ public class SignalingHandler extends TextWebSocketHandler {
             String studyroomId = getStudyroomId(session);
             log.info("WebSocket connection established for studyroomId: {}", studyroomId);
             studyroomSessions.computeIfAbsent(studyroomId, k -> ConcurrentHashMap.newKeySet()).add(session);
+
+            session.sendMessage(new TextMessage("Connection Success! for studyroomId : " + studyroomId));
         } catch (Exception e) {
             log.info("Error during WebSocket connection establishment", e);
             session.close(CloseStatus.NOT_ACCEPTABLE);
