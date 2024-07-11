@@ -38,8 +38,8 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
 
     @Query("SELECT ms FROM MemberStudyroom ms " +
             "JOIN FETCH ms.member JOIN FETCH ms.studyroom s " +
-            "LEFT JOIN FETCH s.memberStudyroomList msl " +
-            "LEFT JOIN FETCH msl.member " +
+            "JOIN FETCH s.memberStudyroomList msl " +
+            "JOIN FETCH msl.member " +
             "WHERE ms.studyroom.studyroomId = :studyroomId " +
             "AND ms.member.memberId = :memberId " +
             "AND ms.status = :status")
