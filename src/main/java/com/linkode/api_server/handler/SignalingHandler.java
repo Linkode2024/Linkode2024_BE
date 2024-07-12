@@ -31,6 +31,7 @@ public class SignalingHandler extends TextWebSocketHandler {
             userSessions.put(userId, session);
 
             session.sendMessage(new TextMessage("Connection Success! for studyroomId : " + studyroomId));
+            broadcastMessage(studyroomId, userId, "User " + userId + " has joined the room.");
         } catch (Exception e) {
             log.info("Error during WebSocket connection establishment", e);
             session.close(CloseStatus.NOT_ACCEPTABLE);
@@ -41,17 +42,31 @@ public class SignalingHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String studyroomId = getStudyroomId(session);
         String userId = getUserId(session);
+        String payload = message.getPayload();
+
         log.info("Received message for studyroomId: {}, userId: {}: {}", studyroomId, userId, message.getPayload());
 
-        /** 수신한 메시지를 동일한 스터디룸의 모든 세션에 브로드캐스트 */
-        Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
-        if (sessions != null) {
-            for (WebSocketSession s : sessions) {
-                if (!s.getId().equals(session.getId())) {
-                    s.sendMessage(new TextMessage("[" + userId + "] : " + message.getPayload()));
-                }
+        if (payload.startsWith("@")) {
+            int index = payload.indexOf(':');
+            if (index != -1) {
+                String targetUserId = payload.substring(1, index);
+                String directMessage = payload.substring(index + 1);
+
+                log.info("direct call from {}: {}", targetUserId, directMessage);
+                sendMessageToUser(targetUserId, "[" + userId + " (call)] : " + directMessage);
+                return;
             }
         }
+
+        /** 사용 중인 앱 정보 공유 */
+        if (payload.startsWith("APP_INFO")) {
+            log.info("Broadcasting app info from userId: {}: {}", userId, payload);
+            broadcastMessage(studyroomId, userId, payload);
+            return;
+        }
+
+        // 일반 메시지 브로드캐스트
+        broadcastMessage(studyroomId, userId, "[" + userId + "] : " + payload);
     }
 
     @Override
@@ -68,6 +83,8 @@ public class SignalingHandler extends TextWebSocketHandler {
             }
         }
         userSessions.remove(userId);
+
+        broadcastMessage(studyroomId, userId, "User " + userId + " has left the room.");
     }
 
     /**
@@ -121,6 +138,32 @@ public class SignalingHandler extends TextWebSocketHandler {
 
           throw new IllegalArgumentException("userId not found in query string");
       }
+    /**
+     * 특정 사용자에게 메시지 전송
+     */
+    public void sendMessageToUser(String userId, String message) throws Exception {
+        WebSocketSession session = userSessions.get(userId);
+        if (session != null && session.isOpen()) {
+            session.sendMessage(new TextMessage(message));
+        } else {
+            log.warn("No active session found for userId: {}", userId);
+        }
+    }
+
+    private void broadcastMessage(String studyroomId, String userId, String message) {
+        Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
+        if (sessions != null) {
+            for (WebSocketSession s : sessions) {
+                if (!s.getId().equals(userId)) {
+                    try {
+                        s.sendMessage(new TextMessage(message));
+                    } catch (Exception e) {
+                        log.error("Failed to send message to session {}", s.getId(), e);
+                    }
+                }
+            }
+        }
+    }
 
 }
 
