@@ -13,13 +13,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+/** 소켓 핸들러 */
 @Component
 @Slf4j
 public class SignalingHandler extends TextWebSocketHandler {
 
+    /** 각사용자의 세션을 스터디룸 아이디 기반으로 그룹화 시킴! */
     private final Map<String, Set<WebSocketSession>> studyroomSessions = new ConcurrentHashMap<>();
     private final Map<String, WebSocketSession> userSessions = new ConcurrentHashMap<>();
 
+
+    /** 웹 소켓 연결하면 호출되는 함수로 각 유저의 고유한 세션을 생성
+     * 유저개별 세션을 유저 아이디 기반으로 관리하기위해 매핑
+     * 유저의 개별 세션을 스터디룸이라는 하나의 그룹으로 묶기위해 Set<WebSocketSession>> 을 이용해서 복수의 세션을 묶음
+     * */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
@@ -150,6 +158,7 @@ public class SignalingHandler extends TextWebSocketHandler {
         }
     }
 
+    /** 반복문 돌면서 자신의 세션을 제외한 각세션에게 메세지를 뿌림! */
     private void broadcastMessage(String studyroomId, String userId, String message) {
         Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
         if (sessions != null) {
