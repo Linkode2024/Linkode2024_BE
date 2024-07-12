@@ -18,13 +18,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SignalingHandler extends TextWebSocketHandler {
 
     private final Map<String, Set<WebSocketSession>> studyroomSessions = new ConcurrentHashMap<>();
+    private final Map<String, WebSocketSession> userSessions = new ConcurrentHashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
             String studyroomId = getStudyroomId(session);
-            log.info("WebSocket connection established for studyroomId: {}", studyroomId);
+            String userId = getUserId(session);
+            log.info("WebSocket connection established for studyroomId: {}, userId: {}", studyroomId, userId);
+
             studyroomSessions.computeIfAbsent(studyroomId, k -> ConcurrentHashMap.newKeySet()).add(session);
+            userSessions.put(userId, session);
 
             session.sendMessage(new TextMessage("Connection Success! for studyroomId : " + studyroomId));
         } catch (Exception e) {
@@ -36,25 +40,25 @@ public class SignalingHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String studyroomId = getStudyroomId(session);
-        log.info("Received message for studyroomId: {}: {}", studyroomId, message.getPayload());
+        String userId = getUserId(session);
+        log.info("Received message for studyroomId: {}, userId: {}: {}", studyroomId, userId, message.getPayload());
 
-        // 수신한 메시지를 동일한 스터디룸의 모든 세션에 브로드캐스트
+        /** 수신한 메시지를 동일한 스터디룸의 모든 세션에 브로드캐스트 */
         Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
         if (sessions != null) {
             for (WebSocketSession s : sessions) {
                 if (!s.getId().equals(session.getId())) {
-                    s.sendMessage(message);
+                    s.sendMessage(new TextMessage("[" + userId + "] : " + message.getPayload()));
                 }
             }
         }
-
-        session.sendMessage(new TextMessage("My Socket Message : " + message.getPayload()));
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         String studyroomId = getStudyroomId(session);
-        log.info("WebSocket connection closed for studyroomId: {}", studyroomId);
+        String userId = getUserId(session);
+        log.info("WebSocket connection closed for studyroomId: {}, userId: {}", studyroomId, userId);
         Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
 
         if (sessions != null) {
@@ -63,11 +67,12 @@ public class SignalingHandler extends TextWebSocketHandler {
                 studyroomSessions.remove(studyroomId);
             }
         }
+        userSessions.remove(userId);
     }
 
     /**
      * 소켓 세션의 URI에서 스터디룸 ID 추출
-     * URI 형식: ws://localhost:8080/ws?studyroomId=1
+     * URI 형식: ws://localhost:8080/ws?studyroomId=1&userId=1
      */
     private String getStudyroomId(WebSocketSession session) throws URISyntaxException {
         URI uri = session.getUri();
@@ -90,4 +95,32 @@ public class SignalingHandler extends TextWebSocketHandler {
 
         throw new IllegalArgumentException("studyroomId not found in query string");
     }
+
+    /**
+     * 소켓 세션의 URI에서 유저 ID 추출
+     * URI 형식: ws://localhost:8080/ws?studyroomId=1&userId=1
+     */
+    private String getUserId(WebSocketSession session) throws URISyntaxException {
+          URI uri = session.getUri();
+          if (uri == null) {
+              throw new IllegalArgumentException("Session URI is null");
+          }
+
+          String query = uri.getQuery();
+          if (query == null) {
+              throw new IllegalArgumentException("Query string is null");
+          }
+
+          String[] queryParams = query.split("&");
+          for (String param : queryParams) {
+              String[] keyValue = param.split("=");
+              if (keyValue.length == 2 && "userId".equals(keyValue[0])) {
+                  return keyValue[1];
+              }
+          }
+
+          throw new IllegalArgumentException("userId not found in query string");
+      }
+
 }
+
