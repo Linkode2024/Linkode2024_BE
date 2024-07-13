@@ -3,6 +3,7 @@ package com.linkode.api_server.repository;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
+import com.linkode.api_server.dto.studyroom.DetailStudyroomResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,4 +35,13 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     @Modifying
     @Query("UPDATE MemberStudyroom ms SET ms.status = :status WHERE ms IN :memberStudyrooms")
     void updateMemberStudyroomStatus(@Param("memberStudyrooms") List<MemberStudyroom> memberStudyrooms, @Param("status") BaseStatus status);
+
+    @Query("SELECT ms FROM MemberStudyroom ms " +
+            "JOIN FETCH ms.member JOIN FETCH ms.studyroom s " +
+            "JOIN FETCH s.memberStudyroomList msl " +
+            "JOIN FETCH msl.member " +
+            "WHERE ms.studyroom.studyroomId = :studyroomId " +
+            "AND ms.member.memberId = :memberId " +
+            "AND ms.status = :status")
+    Optional<MemberStudyroom> getStudyroomDetail(long studyroomId,long memberId, BaseStatus status);
 }
