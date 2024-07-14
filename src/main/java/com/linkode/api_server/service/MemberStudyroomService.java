@@ -91,6 +91,9 @@ public class MemberStudyroomService {
 
     /**
      * 스터디룸 탈퇴
+     *
+     * memberStudyroom에 대한 유효성 검증을 한후 적절하지 못한 맴버 스터디룸이면 예외를 던집니다.
+     * 방장이면 탈퇴할 수 없도록 조건문을 통해 방장인지 파악한 뒤 예외를 강제로 던집니다!
      * */
     public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
         try {
@@ -98,10 +101,16 @@ public class MemberStudyroomService {
                     .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
                     .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
             if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new MemberStudyroomException(CANNOT_LEAVE_STUDYROOM);
-        }catch (Exception e){
             memberstudyroomRepository.updateMemberstudyroomStatus(memberId,studyroomId,BaseStatus.DELETE);
+            return BaseExceptionResponseStatus.SUCCESS;
         }
-        return BaseExceptionResponseStatus.SUCCESS;
+        catch (MemberStudyroomException e) {
+            log.error("MemberStudyroomException! -> ", e);
+            return CANNOT_LEAVE_STUDYROOM;
+        }
+        catch (Exception e){
+            return FAILURE;
+        }
     }
 
 }
