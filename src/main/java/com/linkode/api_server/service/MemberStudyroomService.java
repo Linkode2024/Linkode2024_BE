@@ -105,7 +105,8 @@ public class MemberStudyroomService {
                     .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
             if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new
                     LeaveStudyroomExeption(CANNOT_LEAVE_STUDYROOM);
-            memberstudyroomRepository.updateMemberstudyroomStatus(memberId,studyroomId,BaseStatus.DELETE);
+            memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE);
+            memberstudyroomRepository.save(memberStudyroom);
             return BaseExceptionResponseStatus.SUCCESS;
         }
         catch (LeaveStudyroomExeption e) {

@@ -45,8 +45,4 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
             "AND ms.status = :status")
     Optional<MemberStudyroom> getStudyroomDetail(long studyroomId,long memberId, BaseStatus status);
 
-    @Modifying
-    @Query("UPDATE MemberStudyroom ms SET ms.status = :status WHERE ms.studyroom.studyroomId = :studyroomId AND ms.member.memberId = :memberId")
-    void updateMemberstudyroomStatus(long memberId, long studyroomId, BaseStatus status);
-
 }

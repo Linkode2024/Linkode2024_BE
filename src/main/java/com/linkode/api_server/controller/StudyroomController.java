@@ -27,6 +27,9 @@ public class StudyroomController {
     @Autowired
     JwtProvider jwtProvider;
 
+    /**
+     * 스터디룸 삭제
+     */
     @PatchMapping("/removal")
     public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
 
