@@ -94,6 +94,7 @@ public class MemberStudyroomService {
      *
      * memberStudyroom에 대한 유효성 검증을 한후 적절하지 못한 맴버 스터디룸이면 예외를 던집니다.
      * 방장이면 탈퇴할 수 없도록 조건문을 통해 방장인지 파악한 뒤 예외를 강제로 던집니다!
+     *
      * */
     public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
         try {
