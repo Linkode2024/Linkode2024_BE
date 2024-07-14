@@ -49,7 +49,7 @@ public class StudyroomController {
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId,memberId);
         log.info("Run leaveStudyroom API ");
-        return new BaseResponse<>(responseStatus);
+        return new BaseResponse<>(responseStatus,null);
     }
 
     @PostMapping("/generation")

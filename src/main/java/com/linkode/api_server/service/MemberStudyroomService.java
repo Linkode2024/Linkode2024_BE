@@ -1,5 +1,6 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.LeaveStudyroomExeption;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
@@ -96,18 +97,24 @@ public class MemberStudyroomService {
      * 방장이면 탈퇴할 수 없도록 조건문을 통해 방장인지 파악한 뒤 예외를 강제로 던집니다!
      *
      * */
+    @Transactional
     public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
         try {
             MemberStudyroom memberStudyroom = memberstudyroomRepository
                     .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
                     .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
-            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new MemberStudyroomException(CANNOT_LEAVE_STUDYROOM);
+            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new
+                    LeaveStudyroomExeption(CANNOT_LEAVE_STUDYROOM);
             memberstudyroomRepository.updateMemberstudyroomStatus(memberId,studyroomId,BaseStatus.DELETE);
             return BaseExceptionResponseStatus.SUCCESS;
         }
-        catch (MemberStudyroomException e) {
+        catch (LeaveStudyroomExeption e) {
             log.error("MemberStudyroomException! -> ", e);
             return CANNOT_LEAVE_STUDYROOM;
+        }
+        catch (MemberStudyroomException e) {
+            log.error("MemberStudyroomException! -> ", e);
+            return NOT_FOUND_MEMBER_STUDYROOM;
         }
         catch (Exception e){
             return FAILURE;
