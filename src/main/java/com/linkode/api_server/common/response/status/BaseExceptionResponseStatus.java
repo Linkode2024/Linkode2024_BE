@@ -31,6 +31,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      */
     NOT_FOUND_MEMBER_STUDYROOM(6000, HttpStatus.OK.value(), "조건에 맞는 멤버_스터디룸을 찾을 수 없습니다."),
     NOT_FOUND_CREW(6001, HttpStatus.OK.value(), "해당 스터디룸의 CREW 를 찾을 수 없습니다."),
+    CANNOT_LEAVE_STUDYROOM(6002, HttpStatus.OK.value(), "해당 스터디룸의 CREW 를 찾을 수 없습니다."),
+
 
     /**
      * color 관련 code : 7000대

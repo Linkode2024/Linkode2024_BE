@@ -1,6 +1,8 @@
 package com.linkode.api_server.service;
 
 import com.linkode.api_server.common.exception.MemberStudyroomException;
+import com.linkode.api_server.common.response.BaseResponse;
+import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
@@ -18,8 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_CREW;
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -86,6 +87,21 @@ public class MemberStudyroomService {
         DetailStudyroomResponse response = new DetailStudyroomResponse(memberStudyroom.getMemberStudyroomId()
                 ,memberStudyroom.getRole(),members);
         return response;
+    }
+
+    /**
+     * 스터디룸 탈퇴
+     * */
+    public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
+        try {
+            MemberStudyroom memberStudyroom = memberstudyroomRepository
+                    .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
+                    .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new MemberStudyroomException(CANNOT_LEAVE_STUDYROOM);
+        }catch (Exception e){
+            memberstudyroomRepository.updateMemberstudyroomStatus(memberId,studyroomId,BaseStatus.DELETE);
+        }
+        return BaseExceptionResponseStatus.SUCCESS;
     }
 
 }
