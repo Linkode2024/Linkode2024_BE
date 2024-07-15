@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -54,21 +55,29 @@ public class InviteService {
     }
 
     /**
-     * 초대 코드 검증
+     * 초대 코드로 스터디룸 아이디 찾기
      */
-    public boolean validateInviteCode(Long roomId, String code) {
-        String key = "invite:" + roomId;
-        String value = redisTemplate.opsForValue().get(key);
-        if (value == null) {
-            return false;
+    public Long findRoomIdByInviteCode(String code) {
+        String keyPattern = "invite:*";
+        Set<String> keys = redisTemplate.keys(keyPattern);
+
+        if (keys == null || keys.isEmpty()) {
+            return null;
         }
-        String[] values = value.split(",");
-        String storedCode = values[0];
-        LocalDateTime expiryDate = LocalDateTime.parse(values[1], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        if (!storedCode.equals(code) || LocalDateTime.now().isAfter(expiryDate)) {
-            return false;
+
+        for (String key : keys) {
+            String value = redisTemplate.opsForValue().get(key);
+            if (value != null) {
+                String[] values = value.split(",");
+                String storedCode = values[0];
+                if (storedCode.equals(code)) {
+                    // key 형식이 "invite:{roomId}"이므로, roomId를 추출하여 반환
+                    return Long.parseLong(key.split(":")[1]);
+                }
+            }
         }
-        return true;
+
+        return null;
     }
 
     /**

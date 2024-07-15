@@ -92,18 +92,18 @@ public class StudyroomService {
     }
 
     /** 초대 코드로 가입 */
-    public BaseExceptionResponseStatus joinStudyroomByCode(JoinStudyroomByCodeRequest request){
-        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(request.getStudyroomId(),
-                request.getMemberId(), request.getMemberRole());
-        try {
-            if(!inviteService.validateInviteCode(request.getStudyroomId(), request.getInviteCode()))
-                throw new StudyroomException(INVALID_INVITE_CODE);
-            joinStudyroom(joinStudyroomRequest);
-        }catch (StudyroomException e){
-            return INVALID_INVITE_CODE;
-        }
+    public JoinStudyroomByCodeResponse joinStudyroomByCode(JoinStudyroomByCodeRequest request){
 
-        return SUCCESS;
+            long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode());
+
+            Studyroom studyroom = studyroomRepository
+                    .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
+
+            JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId,
+                    request.getMemberId(), request.getMemberRole());
+            joinStudyroom(joinStudyroomRequest);
+
+            return new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile());
     }
 
 
