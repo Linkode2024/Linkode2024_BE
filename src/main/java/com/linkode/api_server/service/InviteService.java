@@ -54,6 +54,24 @@ public class InviteService {
     }
 
     /**
+     * 초대 코드 검증
+     */
+    public boolean validateInviteCode(Long roomId, String code) {
+        String key = "invite:" + roomId;
+        String value = redisTemplate.opsForValue().get(key);
+        if (value == null) {
+            return false;
+        }
+        String[] values = value.split(",");
+        String storedCode = values[0];
+        LocalDateTime expiryDate = LocalDateTime.parse(values[1], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        if (!storedCode.equals(code) || LocalDateTime.now().isAfter(expiryDate)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 그냥 갱신하는 방법
      */
 //    public String generateInviteCode(Long roomId) {

@@ -95,8 +95,14 @@ public class StudyroomService {
     public BaseExceptionResponseStatus joinStudyroomByCode(JoinStudyroomByCodeRequest request){
         JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(request.getStudyroomId(),
                 request.getMemberId(), request.getMemberRole());
+        try {
+            if(!inviteService.validateInviteCode(request.getStudyroomId(), request.getInviteCode()))
+                throw new StudyroomException(INVALID_INVITE_CODE);
+            joinStudyroom(joinStudyroomRequest);
+        }catch (StudyroomException e){
+            return INVALID_INVITE_CODE;
+        }
 
-        joinStudyroom(joinStudyroomRequest);
         return SUCCESS;
     }
 
