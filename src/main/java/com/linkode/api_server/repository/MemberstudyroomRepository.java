@@ -44,4 +44,13 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
             "AND ms.member.memberId = :memberId " +
             "AND ms.status = :status")
     Optional<MemberStudyroom> getStudyroomDetail(long studyroomId,long memberId, BaseStatus status);
+
+
+    /**
+     * findByMember_MemberIdAndStatus와 동일하나 N+1 문제 해결버전
+     * */
+    @Query("SELECT ms FROM MemberStudyroom ms JOIN FETCH ms.studyroom WHERE ms.member.memberId = :memberId AND ms.status = :status")
+    Optional<List<MemberStudyroom>> findByMemberIdAndStatus(Long memberId, BaseStatus status);
+
+
 }

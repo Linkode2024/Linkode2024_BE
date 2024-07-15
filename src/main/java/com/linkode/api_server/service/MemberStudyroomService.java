@@ -1,11 +1,15 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.LeaveStudyroomExeption;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
+import com.linkode.api_server.common.response.BaseResponse;
+import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.DetailStudyroomResponse;
+import com.linkode.api_server.dto.studyroom.MemberStudyroomListResponse;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_CREW;
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -86,6 +89,57 @@ public class MemberStudyroomService {
         DetailStudyroomResponse response = new DetailStudyroomResponse(memberStudyroom.getMemberStudyroomId()
                 ,memberStudyroom.getRole(),members);
         return response;
+    }
+
+    /**
+     * 스터디룸 탈퇴
+     *
+     * memberStudyroom에 대한 유효성 검증을 한후 적절하지 못한 맴버 스터디룸이면 예외를 던집니다.
+     * 방장이면 탈퇴할 수 없도록 조건문을 통해 방장인지 파악한 뒤 예외를 강제로 던집니다!
+     *
+     * */
+    @Transactional
+    public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
+        try {
+            MemberStudyroom memberStudyroom = memberstudyroomRepository
+                    .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
+                    .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new
+                    LeaveStudyroomExeption(CANNOT_LEAVE_STUDYROOM);
+            memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE);
+            memberstudyroomRepository.save(memberStudyroom);
+            return BaseExceptionResponseStatus.SUCCESS;
+        }
+        catch (LeaveStudyroomExeption e) {
+            log.error("MemberStudyroomException! -> ", e);
+            return CANNOT_LEAVE_STUDYROOM;
+        }
+        catch (MemberStudyroomException e) {
+            log.error("MemberStudyroomException! -> ", e);
+            return NOT_FOUND_MEMBER_STUDYROOM;
+        }
+        catch (Exception e){
+            return FAILURE;
+        }
+    }
+
+    /**
+     * 유저의 스터디룸 리스트 조회
+     *
+     * 스트림 문법으로 매핑
+     * */
+    public MemberStudyroomListResponse getMemberStudyroomList(long memberId){
+
+        List<MemberStudyroomListResponse.Studyroom> studyroomList =
+                memberstudyroomRepository.findByMemberIdAndStatus(memberId,BaseStatus.ACTIVE)
+                        .orElseThrow(()->new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM))
+                        .stream()
+                        .map(ms -> new MemberStudyroomListResponse.Studyroom(
+                                ms.getStudyroom().getStudyroomId(),
+                                ms.getStudyroom().getStudyroomProfile()
+                        )).collect(Collectors.toList());
+
+        return new MemberStudyroomListResponse(studyroomList);
     }
 
 }

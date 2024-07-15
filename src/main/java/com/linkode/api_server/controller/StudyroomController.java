@@ -24,6 +24,9 @@ public class StudyroomController {
     @Autowired
     JwtProvider jwtProvider;
 
+    /**
+     * 스터디룸 삭제
+     */
     @PatchMapping("/removal")
     public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
 
@@ -34,7 +37,21 @@ public class StudyroomController {
             return new BaseResponse<>(responseStatus);
         } else {
             return new BaseResponse<>(responseStatus, responseStatus);
-        }    }
+        }
+    }
+
+    /**
+     * 스터디룸 탈퇴
+     * */
+    @PatchMapping("/leave")
+    public BaseResponse<MemberStudyroomListResponse> leaveStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
+
+        long memberId = jwtProvider.extractIdFromHeader(authorization);
+        BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId,memberId);
+        MemberStudyroomListResponse latestStudyroomList = memberStudyroomService.getMemberStudyroomList(memberId);
+        log.info("Run leaveStudyroom API ");
+        return new BaseResponse<>(responseStatus,latestStudyroomList);
+    }
 
     @PostMapping("/generation")
     public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,  @RequestBody CreateStudyroomRequest request){

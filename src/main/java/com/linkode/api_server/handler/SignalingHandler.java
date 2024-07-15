@@ -36,7 +36,7 @@ public class SignalingHandler extends TextWebSocketHandler {
             log.info("WebSocket connection established for studyroomId: {}, userId: {}", studyroomId, userId);
 
             studyroomSessions.computeIfAbsent(studyroomId, k -> ConcurrentHashMap.newKeySet()).add(session);
-            userSessions.put(userId, session);
+            userSessions.put(userId + "_" + studyroomId, session); // 유저 ID와 스터디룸 ID를 키로 사용
 
             session.sendMessage(new TextMessage("Connection Success! for studyroomId : " + studyroomId));
             broadcastMessage(studyroomId, userId, "User " + userId + " has joined the room.");
@@ -61,7 +61,7 @@ public class SignalingHandler extends TextWebSocketHandler {
                 String directMessage = payload.substring(index + 1);
 
                 log.info("direct call from {}: {}", targetUserId, directMessage);
-                sendMessageToUser(targetUserId, "[" + userId + " (call)] : " + directMessage);
+                sendMessageToUser(targetUserId + "_" + studyroomId, "[" + userId + " (call)] : " + directMessage);
                 return;
             }
         }
@@ -90,7 +90,7 @@ public class SignalingHandler extends TextWebSocketHandler {
                 studyroomSessions.remove(studyroomId);
             }
         }
-        userSessions.remove(userId);
+        userSessions.remove(userId + "_" + studyroomId);
 
         broadcastMessage(studyroomId, userId, "User " + userId + " has left the room.");
     }
