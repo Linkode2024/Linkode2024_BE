@@ -43,4 +43,9 @@ jwt:
   access-token-expiration: 3600000  # 1 hour in milliseconds
   refresh-token-expiration: 86400000  # 1 day in milliseconds
 
-
+invite:
+  code:
+    characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    length: 6
+    validity:
+      minutes: 10
