@@ -1,7 +1,9 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
+import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
@@ -92,18 +94,28 @@ public class StudyroomService {
     }
 
     /** 초대 코드로 가입 */
-    public JoinStudyroomByCodeResponse joinStudyroomByCode(JoinStudyroomByCodeRequest request){
+    @Transactional
+    public BaseResponse<JoinStudyroomByCodeResponse> joinStudyroomByCode(JoinStudyroomByCodeRequest request, long memberId){
 
-            long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode());
+            try {
+                long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode());
+                Studyroom studyroom = studyroomRepository
+                        .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
 
-            Studyroom studyroom = studyroomRepository
-                    .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
-
-            JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId,
-                    request.getMemberId(), request.getMemberRole());
-            joinStudyroom(joinStudyroomRequest);
-
-            return new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile());
+               if(memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
+                   throw new MemberStudyroomException(JOINED_STUDYROOM);
+               }
+               JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId,
+                        memberId, request.getMemberRole());
+                joinStudyroom(joinStudyroomRequest);
+                return new BaseResponse<>(new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile()));
+            }catch (NullPointerException e){
+                return new BaseResponse<>(INVALID_INVITE_CODE,null);
+            }catch (StudyroomException e){
+                return new BaseResponse<>(INVALID_INVITE_CODE,null);
+            }catch (MemberException m){
+                return new BaseResponse<>(JOINED_STUDYROOM,null);
+            }
     }
 
 

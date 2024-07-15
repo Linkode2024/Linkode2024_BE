@@ -10,7 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JoinStudyroomByCodeRequest {
-    private long memberId;
     private MemberRole memberRole;
     private String inviteCode;
 }

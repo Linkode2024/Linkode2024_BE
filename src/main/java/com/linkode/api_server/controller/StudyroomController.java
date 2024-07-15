@@ -45,7 +45,7 @@ public class StudyroomController {
      * */
     @PatchMapping("/leave")
     public BaseResponse<MemberStudyroomListResponse> leaveStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
-
+        log.info("[StudyroomController.leaveStudyroom]");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId,memberId);
         MemberStudyroomListResponse latestStudyroomList = memberStudyroomService.getMemberStudyroomList(memberId);
@@ -82,11 +82,20 @@ public class StudyroomController {
     }
 
     /**
+     * 스터디룸 입장 (최초)
+     * */
+    @PostMapping("/entrance")
+    public BaseResponse<JoinStudyroomByCodeResponse> joinStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody JoinStudyroomByCodeRequest request){
+        log.info("[StudyroomController.joinStudyroom]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        return studyroomService.joinStudyroomByCode(request,memberId);
+    }
+
+    /**
      * 초대코드 생성
      */
     @PostMapping("/invite-code")
-    public BaseResponse<PostInviteCodeResponse> createStudyroomCode(@RequestHeader("Authorization") String authorization,
-                                                                    @RequestParam Long studyroomId){
+    public BaseResponse<PostInviteCodeResponse> createStudyroomCode(@RequestHeader("Authorization") String authorization, @RequestParam Long studyroomId){
         log.info("[StudyroomController.createStudyroomCode]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return new BaseResponse<>(studyroomService.createStudyroomCode(memberId,studyroomId));
