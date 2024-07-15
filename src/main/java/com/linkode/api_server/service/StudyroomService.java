@@ -1,10 +1,11 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
-import com.linkode.api_server.dto.studyroom.PatchStudyroomRequest;
+import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,6 @@ import java.util.Optional;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
-import com.linkode.api_server.dto.studyroom.CreateStudyroomRequest;
-import com.linkode.api_server.dto.studyroom.CreateStudyroomResponse;
-import com.linkode.api_server.dto.studyroom.JoinStudyroomRequest;
 import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +33,8 @@ public class StudyroomService {
     private final MemberstudyroomRepository memberstudyroomRepository;
     @Autowired
     private final MemberRepository memberRepository;
+    @Autowired
+    private final InviteService inviteService;
 
     @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
@@ -136,5 +136,20 @@ public class StudyroomService {
         }else{
             throw new StudyroomException(INVALID_ROLE);
         }
+    }
+
+    /**
+     * 초대코드 생성
+     */
+    @Transactional
+    public PostInviteCodeResponse createStudyroomCode(Long memberId, Long studyroomId){
+        log.info("[StudyroomService.createStudyroomCode]");
+
+        // 요청으로 스터디룸에 요청을 보낸 멤버 id 를 가진 멤버가 있는지 확인
+        MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
+                .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+
+        String inviteCode = inviteService.generateInviteCode(studyroomId);
+        return new PostInviteCodeResponse(inviteCode);
     }
 }
