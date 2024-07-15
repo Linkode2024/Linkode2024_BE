@@ -150,11 +150,6 @@ public class StudyroomService {
                 .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
         String inviteCode = inviteService.generateInviteCode(studyroomId);
-        if(inviteCode == null){
-            // 10분 이내에 다시 초대코드를 요청하면 이미 생성된 코드를 사용할 수 있도록 예외 발생시킴
-            throw new StudyroomException(ALREADY_CREATE_CODE);
-        }else{
-            return new PostInviteCodeResponse(inviteCode);
-        }
+        return new PostInviteCodeResponse(inviteCode);
     }
 }

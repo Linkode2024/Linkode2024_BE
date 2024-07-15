@@ -37,7 +37,10 @@ public class InviteService {
         String key = "invite:" + roomId;
         boolean check = redisTemplate.hasKey(key);
         if(check){
-            return  null;
+            String value = redisTemplate.opsForValue().get(key);
+            String[] values = value.split(",");
+            // 앞의 code 만 반환
+            return values[0];
         }else{
             String code = generateRandomCode();
             LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(validityMinutes);
