@@ -2,10 +2,7 @@ package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
-import com.linkode.api_server.dto.studyroom.CreateStudyroomRequest;
-import com.linkode.api_server.dto.studyroom.CreateStudyroomResponse;
-import com.linkode.api_server.dto.studyroom.DetailStudyroomResponse;
-import com.linkode.api_server.dto.studyroom.PatchStudyroomRequest;
+import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.service.MemberStudyroomService;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
@@ -65,6 +62,17 @@ public class StudyroomController {
         log.info("[StudyroomController.getStudyroomDetail]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return memberStudyroomService.getStudyroomDetail(studyroomId,memberId);
+    }
+
+    /**
+     * 초대코드 생성
+     */
+    @PostMapping("/invite-code")
+    public BaseResponse<PostInviteCodeResponse> createStudyroomCode(@RequestHeader("Authorization") String authorization,
+                                                                    @RequestParam Long studyroomId){
+        log.info("[StudyroomController.createStudyroomCode]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        return new BaseResponse<>(studyroomService.createStudyroomCode(memberId,studyroomId));
     }
 
 }
