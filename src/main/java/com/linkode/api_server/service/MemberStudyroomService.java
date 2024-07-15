@@ -9,6 +9,7 @@ import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.DetailStudyroomResponse;
+import com.linkode.api_server.dto.studyroom.MemberStudyroomListResponse;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +121,25 @@ public class MemberStudyroomService {
         catch (Exception e){
             return FAILURE;
         }
+    }
+
+    /**
+     * 유저의 스터디룸 리스트 조회
+     *
+     * 스트림 문법으로 매핑
+     * */
+    public MemberStudyroomListResponse getMemberStudyroomList(long memberId){
+
+        List<MemberStudyroomListResponse.Studyroom> studyroomList =
+                memberstudyroomRepository.findByMemberIdAndStatus(memberId,BaseStatus.ACTIVE)
+                        .orElseThrow(()->new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM))
+                        .stream()
+                        .map(ms -> new MemberStudyroomListResponse.Studyroom(
+                                ms.getStudyroom().getStudyroomId(),
+                                ms.getStudyroom().getStudyroomProfile()
+                        )).collect(Collectors.toList());
+
+        return new MemberStudyroomListResponse(studyroomList);
     }
 
 }
