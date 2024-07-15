@@ -92,4 +92,13 @@ public class StudyroomController {
         return new BaseResponse<>(studyroomService.createStudyroomCode(memberId,studyroomId));
     }
 
+    /**
+     * 스터디룸 리스트 조회
+     */
+    @GetMapping("")
+    public BaseResponse<MemberStudyroomListResponse> getStudyroomList(@RequestHeader("Authorization") String authorization){
+        log.info("[StudyroomController.getStudyroomList]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        return new BaseResponse<>(memberStudyroomService.getStudyroomList(memberId));
+    }
 }
