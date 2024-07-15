@@ -39,7 +39,6 @@ public class StudyroomService {
     @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
 
-
         if(!studyroomRepository.findById(studyroomId).isPresent()){
             log.info("StudyRoom Id is Invalid");
             return BaseExceptionResponseStatus.FAILURE;
@@ -91,6 +90,16 @@ public class StudyroomService {
                 studyroom.getStudyroomName(),
                 studyroom.getStudyroomProfile());
     }
+
+    /** 초대 코드로 가입 */
+    public BaseExceptionResponseStatus joinStudyroomByCode(JoinStudyroomByCodeRequest request){
+        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(request.getStudyroomId(),
+                request.getMemberId(), request.getMemberRole());
+
+        joinStudyroom(joinStudyroomRequest);
+        return SUCCESS;
+    }
+
 
     /** 초대 코드가 필요없음 */
     @Transactional
