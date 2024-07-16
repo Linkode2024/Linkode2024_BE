@@ -142,4 +142,13 @@ public class MemberStudyroomService {
         return new MemberStudyroomListResponse(studyroomList);
     }
 
+
+    /**
+     * 스터디룸 리스트 조회
+     */
+    public MemberStudyroomListResponse getStudyroomList(Long memberId){
+        log.info("[StudyroomService.getStudyroomList]");
+        MemberStudyroomListResponse latestStudyroomList = getMemberStudyroomList(memberId);
+        return latestStudyroomList;
+    }
 }
