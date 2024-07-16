@@ -106,7 +106,7 @@ public class StudyroomService {
                    throw new MemberStudyroomException(JOINED_STUDYROOM);
                }
                JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId,
-                        memberId, request.getMemberRole());
+                        memberId, MemberRole.CREW);
                 joinStudyroom(joinStudyroomRequest);
                 return new BaseResponse<>(new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile()));
             }catch (NullPointerException e){

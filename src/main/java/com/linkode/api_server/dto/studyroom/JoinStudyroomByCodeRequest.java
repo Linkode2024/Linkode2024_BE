@@ -10,6 +10,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JoinStudyroomByCodeRequest {
-    private MemberRole memberRole;
     private String inviteCode;
 }
