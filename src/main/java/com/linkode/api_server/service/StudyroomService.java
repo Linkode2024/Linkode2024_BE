@@ -95,33 +95,26 @@ public class StudyroomService {
 
     /** 초대 코드로 가입 */
     @Transactional
-    public BaseResponse<JoinStudyroomByCodeResponse> joinStudyroomByCode(JoinStudyroomByCodeRequest request, long memberId){
-
-            try {
+    public JoinStudyroomByCodeResponse joinStudyroomByCode(JoinStudyroomByCodeRequest request, long memberId){
+        log.info("[StudyroomService.joinStudyroomByCode]");
                 long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode());
                 Studyroom studyroom = studyroomRepository
                         .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
+                if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
+                    throw new MemberException(JOINED_STUDYROOM);
+                }
 
-               if(memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
-                   throw new MemberStudyroomException(JOINED_STUDYROOM);
-               }
                JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId,
                         memberId, MemberRole.CREW);
-                joinStudyroom(joinStudyroomRequest);
-                return new BaseResponse<>(new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile()));
-            }catch (NullPointerException e){
-                return new BaseResponse<>(INVALID_INVITE_CODE,null);
-            }catch (StudyroomException e){
-                return new BaseResponse<>(INVALID_INVITE_CODE,null);
-            }catch (MemberException m){
-                return new BaseResponse<>(JOINED_STUDYROOM,null);
-            }
+               joinStudyroom(joinStudyroomRequest);
+        return new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile());
     }
 
 
     /** 초대 코드가 필요없음 */
     @Transactional
     public void joinStudyroom(JoinStudyroomRequest request){
+        log.info("[StudyroomService.joinStudyroom]");
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(()->new IllegalArgumentException("Error because of Invalid Member Id"));
         Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
@@ -133,9 +126,8 @@ public class StudyroomService {
                 request.getMemberRole(),
                 member,
                 studyroom);
-
         memberstudyroomRepository.save(memberStudyroom);
-
+        log.info("Success save memberStudyroom");
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.linkode.api_server.controller;
 
+import com.linkode.api_server.common.exception.MemberException;
+import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.*;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @RestController
 @Slf4j
@@ -88,7 +91,18 @@ public class StudyroomController {
     public BaseResponse<JoinStudyroomByCodeResponse> joinStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody JoinStudyroomByCodeRequest request){
         log.info("[StudyroomController.joinStudyroom]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return studyroomService.joinStudyroomByCode(request,memberId);
+        try {
+            JoinStudyroomByCodeResponse response = studyroomService.joinStudyroomByCode(request,memberId);
+            return new BaseResponse<>(SUCCESS,response);
+        }catch (NullPointerException e){
+            return new BaseResponse<>(INVALID_INVITE_CODE,null);
+        }catch (
+                StudyroomException e){
+            return new BaseResponse<>(INVALID_INVITE_CODE,null);
+        }catch (
+                MemberException m){
+            return new BaseResponse<>(JOINED_STUDYROOM,null);
+        }
     }
 
     /**
