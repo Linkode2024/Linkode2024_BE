@@ -2,8 +2,7 @@ package com.linkode.api_server.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import javax.swing.*;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -16,6 +15,7 @@ public class LoginResponse {
     private String accessToken;
     private String refreshToken;
     private Profile profile;
+    private List<Studyroom> studyroomList;
 
     @Getter
     @AllArgsConstructor
@@ -23,5 +23,12 @@ public class LoginResponse {
         private String nickname;
         private Long avatarId;
         private Long colorId;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class Studyroom{
+        private Long studyroomId;
+        private String studyroomProfile;
     }
 }
