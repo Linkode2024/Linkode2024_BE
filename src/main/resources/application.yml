@@ -2,6 +2,11 @@ spring:
   profiles:
     active: ${PROFILE}
 
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    region: ${AWS_REGION}
 
 ---
 
@@ -49,3 +54,7 @@ invite:
     length: 6
     validity:
       minutes: 10
+
+
+---
+

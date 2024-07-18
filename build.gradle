@@ -48,6 +48,9 @@ dependencies {
 
 	// Jakarta Servlet API
 	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.228')
+	implementation 'com.amazonaws:aws-java-sdk-s3'
 }
 
 tasks.named('test') {
