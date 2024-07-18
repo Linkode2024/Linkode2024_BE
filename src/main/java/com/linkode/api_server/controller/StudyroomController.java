@@ -1,5 +1,9 @@
 package com.linkode.api_server.controller;
 
+import com.linkode.api_server.common.exception.DataException;
+import com.linkode.api_server.common.exception.MemberException;
+import com.linkode.api_server.common.exception.StudyroomException;
+import com.linkode.api_server.common.response.BaseErrorResponse;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.*;
@@ -11,10 +15,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @RestController
 @Slf4j
@@ -113,13 +121,25 @@ public class StudyroomController {
      * 파일 업로드
      * */
     @PostMapping("/upload")
-    public ResponseEntity<UploadDataResponse> uploadData(@RequestParam("studyroomId") long studyroomId,
-                                                         @RequestParam("memberId") long memberId,
-                                                         @RequestParam("datatype") String datatype,
-                                                         @RequestParam("file") MultipartFile file) throws IOException {
-        UploadDataRequest request = new UploadDataRequest(studyroomId, memberId, datatype, file);
-        UploadDataResponse response = dataService.uploadData(request);
-        return ResponseEntity.ok(response);
+    public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
+                                                                          @RequestParam("studyroomId") long studyroomId,
+                                                                          @RequestParam("datatype") String datatype,
+                                                                          @RequestParam("file") MultipartFile file) throws IOException {
+        try {
+            log.info("[StudyroomController.uploadData]");
+            Long memberId = jwtProvider.extractIdFromHeader(authorization);
+            UploadDataRequest request = new UploadDataRequest(studyroomId, datatype, file);
+            UploadDataResponse response = dataService.uploadData(request, memberId).join();
+
+            return new BaseResponse<>(SUCCESS,response);
+        }catch (MemberException e){
+            return new BaseResponse<>(NOT_FOUND_MEMBER,null);
+        }catch (StudyroomException e){
+            return new BaseResponse<>(NOT_FOUND_STUDYROOM,null);
+        }catch (DataException e){
+            return new BaseResponse<>(FAILED_UPLOAD_FILE,null);
+        }
+
     }
 
 }
