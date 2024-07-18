@@ -3,13 +3,18 @@ package com.linkode.api_server.controller;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.*;
+import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.MemberStudyroomService;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @Slf4j
@@ -21,6 +26,8 @@ public class StudyroomController {
     StudyroomService studyroomService;
     @Autowired
     MemberStudyroomService memberStudyroomService;
+    @Autowired
+    DataService dataService;
     @Autowired
     JwtProvider jwtProvider;
 
@@ -101,4 +108,18 @@ public class StudyroomController {
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return new BaseResponse<>(memberStudyroomService.getStudyroomList(memberId));
     }
+
+    /***
+     * 파일 업로드
+     * */
+    @PostMapping("/upload")
+    public ResponseEntity<UploadDataResponse> uploadData(@RequestParam("studyroomId") long studyroomId,
+                                                         @RequestParam("memberId") long memberId,
+                                                         @RequestParam("datatype") String datatype,
+                                                         @RequestParam("file") MultipartFile file) throws IOException {
+        UploadDataRequest request = new UploadDataRequest(studyroomId, memberId, datatype, file);
+        UploadDataResponse response = dataService.uploadData(request);
+        return ResponseEntity.ok(response);
+    }
+
 }
