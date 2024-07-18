@@ -119,6 +119,8 @@ public class StudyroomController {
 
     /***
      * 파일 업로드
+     * @RequestParam으로 쓴이유는 파일 업로드는 multipart/form-data 로 일반적 json이 아니기때문입니다.
+     * @RequestParam의 해당 값들이 URI에 노출되지않습니다.
      * */
     @PostMapping("/upload")
     public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
