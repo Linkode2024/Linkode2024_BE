@@ -37,8 +37,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.json:json:20210307'
 	implementation group: 'org.kohsuke', name: 'github-api', version: '1.125'
+
+	// JAXB dependencies for AWS SDK
 	implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
 	implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+	implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+	implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
+	implementation 'javax.xml.bind:jaxb-api:2.3.0'
+	implementation 'javax.activation:javax.activation-api:1.2.0'
+
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 처리용 추가 라이브러리
@@ -49,8 +56,11 @@ dependencies {
 	// Jakarta Servlet API
 	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 
+	// AWS SDK
 	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.228')
 	implementation 'com.amazonaws:aws-java-sdk-s3'
+
+
 }
 
 tasks.named('test') {
