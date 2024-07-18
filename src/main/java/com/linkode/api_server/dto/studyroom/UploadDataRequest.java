@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadDataRequest {
 
     private long studyroomId;
-    private long memberId;
     private String datatype;
     private MultipartFile file;
 
