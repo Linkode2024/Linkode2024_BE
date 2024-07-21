@@ -2,6 +2,7 @@ package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberException;
+import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseErrorResponse;
 import com.linkode.api_server.common.response.BaseResponse;
@@ -122,7 +123,7 @@ public class StudyroomController {
      * @RequestParam으로 쓴이유는 파일 업로드는 multipart/form-data 로 일반적 json이 아니기때문입니다.
      * @RequestParam의 해당 값들이 URI에 노출되지않습니다.
      * */
-    @PostMapping("/upload")
+    @PostMapping("/data/upload")
     public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
                                                                           @RequestParam("studyroomId") long studyroomId,
                                                                           @RequestParam("datatype") String datatype,
@@ -134,10 +135,8 @@ public class StudyroomController {
             UploadDataResponse response = dataService.uploadData(request, memberId).join();
 
             return new BaseResponse<>(SUCCESS,response);
-        }catch (MemberException e){
-            return new BaseResponse<>(NOT_FOUND_MEMBER,null);
-        }catch (StudyroomException e){
-            return new BaseResponse<>(NOT_FOUND_STUDYROOM,null);
+        }catch (MemberStudyroomException e) {
+            return new BaseResponse<>(NOT_FOUND_MEMBER_STUDYROOM, null);
         }catch (DataException e){
             return new BaseResponse<>(FAILED_UPLOAD_FILE,null);
         }

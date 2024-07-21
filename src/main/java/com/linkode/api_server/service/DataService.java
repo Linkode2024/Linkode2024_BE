@@ -4,21 +4,25 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberException;
+import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.domain.Data;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.repository.DataRepository;
 import com.linkode.api_server.repository.MemberRepository;
+import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -31,11 +35,13 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DataService {
 
     private final AmazonS3 amazonS3;
     private final MemberRepository memberRepository;
     private final StudyroomRepository studyroomRepository;
+    private final MemberstudyroomRepository memberstudyroomRepository;
     private final DataRepository dataRepository;
 
     @Value("${spring.s3.bucket-name}")
@@ -63,6 +69,7 @@ public class DataService {
      * CompletableFuture은 비동기 작업이 완료된후 값을 가져올 수 있게합니다.
      * */
     @Async
+    @Transactional
     public CompletableFuture<Data> saveData(String fileName, String fileType, String fileUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
         Data data = new Data(fileName, fileType, fileUrl, BaseStatus.ACTIVE, member, studyroom);
@@ -75,16 +82,19 @@ public class DataService {
      * 비동기의 의가 사라지기때문에 체인을 만들어 join을 쓰지않도록하였습니다.
      * 체인 : 기다렸다한다를 명시적으로 정하지않고 자동으로 완료되면 실행되게 작업순서를 엮어둬서 스레드는 I/O작업중에도 블로킹되지않습니다.
      * */
+    @Transactional
     public CompletableFuture<UploadDataResponse> uploadData(UploadDataRequest request, long memberId) throws IOException {
         log.info("[DataService.uploadData]");
-        Member member = memberRepository.findByMemberIdAndStatus(memberId, BaseStatus.ACTIVE).orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
-        Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId()).orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
+//        Member member = memberRepository.findByMemberIdAndStatus(memberId, BaseStatus.ACTIVE).orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+//        Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId()).orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
+        MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
+                .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
         return uploadFileToS3(request.getFile())
                 .thenCompose(fileUrl -> {
                     String fileName = request.getFile().getOriginalFilename();
                     String fileType = request.getDatatype();
-                    return saveData(fileName, fileType, fileUrl, member, studyroom);
+                    return saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
                 })
                 .thenApply(savedData -> new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl()))
                 .exceptionally(ex -> {
