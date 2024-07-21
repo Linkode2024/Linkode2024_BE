@@ -3,13 +3,12 @@ package com.linkode.api_server.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.linkode.api_server.common.exception.DataException;
-import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
-import com.linkode.api_server.common.exception.StudyroomException;
-import com.linkode.api_server.domain.Data;
+import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
@@ -70,7 +69,7 @@ public class DataService {
      * */
     @Async
     @Transactional
-    public CompletableFuture<Data> saveData(String fileName, String fileType, String fileUrl, Member member, Studyroom studyroom) {
+    public CompletableFuture<Data> saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
         Data data = new Data(fileName, fileType, fileUrl, BaseStatus.ACTIVE, member, studyroom);
         Data savedData = dataRepository.save(data);
@@ -93,7 +92,7 @@ public class DataService {
         return uploadFileToS3(request.getFile())
                 .thenCompose(fileUrl -> {
                     String fileName = request.getFile().getOriginalFilename();
-                    String fileType = request.getDatatype();
+                    DataType fileType = request.getDatatype();
                     return saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
                 })
                 .thenApply(savedData -> new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl()))

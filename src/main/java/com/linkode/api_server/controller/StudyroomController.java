@@ -7,6 +7,7 @@ import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseErrorResponse;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.MemberStudyroomService;
@@ -126,7 +127,7 @@ public class StudyroomController {
     @PostMapping("/data/upload")
     public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
                                                                           @RequestParam("studyroomId") long studyroomId,
-                                                                          @RequestParam("datatype") String datatype,
+                                                                          @RequestParam("datatype") DataType datatype,
                                                                           @RequestParam("file") MultipartFile file) throws IOException {
         try {
             log.info("[StudyroomController.uploadData]");

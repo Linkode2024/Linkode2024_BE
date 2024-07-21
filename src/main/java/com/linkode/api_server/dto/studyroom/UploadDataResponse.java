@@ -1,5 +1,6 @@
 package com.linkode.api_server.dto.studyroom;
 
+import com.linkode.api_server.domain.data.DataType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,6 @@ public class UploadDataResponse {
 
     private Long dataId;
     private String dataName;
-    private String dataType;
+    private DataType dataType;
     private String dataUrl;
 }

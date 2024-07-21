@@ -1,6 +1,8 @@
-package com.linkode.api_server.domain;
+package com.linkode.api_server.domain.data;
 
 
+import com.linkode.api_server.domain.Member;
+import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
 import jakarta.persistence.*;
@@ -25,8 +27,9 @@ public class Data extends BaseTime {
     @Column(nullable = false)
     private String dataName;
 
-    @Column(nullable = false)
-    private String dataType;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
+    private DataType dataType;
 
     @Column(nullable = false)
     private String dataUrl;
@@ -47,7 +50,7 @@ public class Data extends BaseTime {
     private Studyroom studyroom;
 
 
-    public Data(String dataName, String dataType, String dataUrl, BaseStatus status, Member member, Studyroom studyroom) {
+    public Data(String dataName, DataType dataType, String dataUrl, BaseStatus status, Member member, Studyroom studyroom) {
         this.dataName = dataName;
         this.dataType = dataType;
         this.dataUrl = dataUrl;
