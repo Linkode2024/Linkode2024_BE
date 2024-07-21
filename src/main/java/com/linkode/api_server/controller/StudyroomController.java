@@ -118,7 +118,8 @@ public class StudyroomController {
                                                       @RequestParam long studyroomId, @RequestParam DataType type) {
         log.info("[StudyroomController.getDataList]");
         try {
-            DataListResponse response = dataService.getDataList(studyroomId, type);
+            Long memberId = jwtProvider.extractIdFromHeader(authorization);
+            DataListResponse response = dataService.getDataList(memberId,studyroomId,type);
             return new BaseResponse<>(SUCCESS, response);
         } catch (DataException e) {
             return new BaseResponse<>(NOT_FOUND_DATA, null);

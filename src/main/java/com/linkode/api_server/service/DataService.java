@@ -7,6 +7,8 @@ import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.repository.DataRepository;
+import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
 
 @Slf4j
 @Service
@@ -24,8 +27,12 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 public class DataService {
 
     private final DataRepository dataRepository;
+    private final MemberstudyroomRepository memberstudyroomRepository;
 
-    public DataListResponse getDataList(long studyroomId, DataType type){
+    public DataListResponse getDataList(long memberId , long studyroomId, DataType type){
+        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
         List<DataListResponse.Data> dataList= dataRepository.getDataListByType(studyroomId,type, BaseStatus.ACTIVE)
                 .orElseThrow(()->new DataException(NOT_FOUND_DATA))
                 .stream().map(data -> new DataListResponse.Data(
