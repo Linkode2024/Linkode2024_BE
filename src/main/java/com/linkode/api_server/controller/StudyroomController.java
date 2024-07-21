@@ -3,6 +3,7 @@ package com.linkode.api_server.controller;
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.MemberStudyroomService;
@@ -114,7 +115,7 @@ public class StudyroomController {
      */
     @GetMapping("/data/list")
     public BaseResponse<DataListResponse> getDataList(@RequestHeader("Authorization") String authorization,
-                                                      @RequestParam long studyroomId, @RequestParam String type) {
+                                                      @RequestParam long studyroomId, @RequestParam DataType type) {
         log.info("[StudyroomController.getDataList]");
         try {
             DataListResponse response = dataService.getDataList(studyroomId, type);

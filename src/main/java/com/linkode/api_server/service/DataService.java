@@ -4,6 +4,7 @@ import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.repository.DataRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class DataService {
 
     private final DataRepository dataRepository;
 
-    public DataListResponse getDataList(long studyroomId, String type){
+    public DataListResponse getDataList(long studyroomId, DataType type){
         List<DataListResponse.Data> dataList= dataRepository.getDataListByType(studyroomId,type, BaseStatus.ACTIVE)
                 .orElseThrow(()->new DataException(NOT_FOUND_DATA))
                 .stream().map(data -> new DataListResponse.Data(

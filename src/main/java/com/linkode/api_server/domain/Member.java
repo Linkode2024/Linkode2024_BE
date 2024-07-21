@@ -1,6 +1,7 @@
 package com.linkode.api_server.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
