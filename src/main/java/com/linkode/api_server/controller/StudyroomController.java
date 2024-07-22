@@ -1,11 +1,8 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
-import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.*;
-import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.MemberStudyroomService;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
@@ -14,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
 
 @RestController
@@ -27,8 +23,6 @@ public class StudyroomController {
     StudyroomService studyroomService;
     @Autowired
     MemberStudyroomService memberStudyroomService;
-    @Autowired
-    DataService dataService;
     @Autowired
     JwtProvider jwtProvider;
 
@@ -108,21 +102,5 @@ public class StudyroomController {
         log.info("[StudyroomController.getStudyroomList]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return new BaseResponse<>(memberStudyroomService.getStudyroomList(memberId));
-    }
-
-    /**
-     * 자료실 조회
-     */
-    @GetMapping("/data/list")
-    public BaseResponse<DataListResponse> getDataList(@RequestHeader("Authorization") String authorization,
-                                                      @RequestParam long studyroomId, @RequestParam DataType type) {
-        log.info("[StudyroomController.getDataList]");
-        try {
-            Long memberId = jwtProvider.extractIdFromHeader(authorization);
-            DataListResponse response = dataService.getDataList(memberId,studyroomId,type);
-            return new BaseResponse<>(SUCCESS, response);
-        } catch (DataException e) {
-            return new BaseResponse<>(NOT_FOUND_DATA, null);
-        }
     }
 }
