@@ -1,10 +1,9 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.common.exception.DataException;
-import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
-import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseErrorResponse;
+import com.linkode.api_server.common.exception.MemberException;
+import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.data.DataType;
@@ -19,11 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @RestController
@@ -60,7 +54,7 @@ public class StudyroomController {
      * */
     @PatchMapping("/leave")
     public BaseResponse<MemberStudyroomListResponse> leaveStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
-
+        log.info("[StudyroomController.leaveStudyroom]");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId,memberId);
         MemberStudyroomListResponse latestStudyroomList = memberStudyroomService.getMemberStudyroomList(memberId);
@@ -97,11 +91,31 @@ public class StudyroomController {
     }
 
     /**
+     * 스터디룸 입장 (최초)
+     * */
+    @PostMapping("/entrance")
+    public BaseResponse<JoinStudyroomByCodeResponse> joinStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody JoinStudyroomByCodeRequest request){
+        log.info("[StudyroomController.joinStudyroom]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        try {
+            JoinStudyroomByCodeResponse response = studyroomService.joinStudyroomByCode(request,memberId);
+            return new BaseResponse<>(SUCCESS,response);
+        }catch (NullPointerException e){
+            return new BaseResponse<>(INVALID_INVITE_CODE,null);
+        }catch (
+                StudyroomException e){
+            return new BaseResponse<>(INVALID_INVITE_CODE,null);
+        }catch (
+                MemberException m){
+            return new BaseResponse<>(JOINED_STUDYROOM,null);
+        }
+    }
+
+    /**
      * 초대코드 생성
      */
     @PostMapping("/invite-code")
-    public BaseResponse<PostInviteCodeResponse> createStudyroomCode(@RequestHeader("Authorization") String authorization,
-                                                                    @RequestParam Long studyroomId){
+    public BaseResponse<PostInviteCodeResponse> createStudyroomCode(@RequestHeader("Authorization") String authorization, @RequestParam Long studyroomId){
         log.info("[StudyroomController.createStudyroomCode]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return new BaseResponse<>(studyroomService.createStudyroomCode(memberId,studyroomId));
