@@ -34,6 +34,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     NOT_FOUND_MEMBER_STUDYROOM(6000, HttpStatus.OK.value(), "조건에 맞는 멤버_스터디룸을 찾을 수 없습니다."),
     NOT_FOUND_CREW(6001, HttpStatus.OK.value(), "해당 스터디룸의 CREW 를 찾을 수 없습니다."),
     CANNOT_LEAVE_STUDYROOM(6002, HttpStatus.OK.value(), "방장은 탈퇴할 수 없습니다."),
+    INVALID_INVITE_CODE(6003,HttpStatus.BAD_REQUEST.value(), "초대코드가 유효하지 않습니다."),
+    JOINED_STUDYROOM(6004,HttpStatus.BAD_REQUEST.value(), "이미 가입된 스터디룸입니다."),
+
 
 
     /**
