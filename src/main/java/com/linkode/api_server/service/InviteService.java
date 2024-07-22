@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -51,6 +52,32 @@ public class InviteService {
             return code;
         }
 
+    }
+
+    /**
+     * 초대 코드로 스터디룸 아이디 찾기
+     */
+    public Long findRoomIdByInviteCode(String code) {
+        String keyPattern = "invite:*";
+        Set<String> keys = redisTemplate.keys(keyPattern);
+
+        if (keys == null || keys.isEmpty()) {
+            return null;
+        }
+
+        for (String key : keys) {
+            String value = redisTemplate.opsForValue().get(key);
+            if (value != null) {
+                String[] values = value.split(",");
+                String storedCode = values[0];
+                if (storedCode.equals(code)) {
+                    // key 형식이 "invite:{roomId}"이므로, roomId를 추출하여 반환
+                    return Long.parseLong(key.split(":")[1]);
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
