@@ -45,7 +45,7 @@ public class DataService {
 
     @Value("${spring.s3.bucket-name}")
     private String bucketName;
-    private static final String S3_FOLDER = "data/";
+    private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     /**
      * @Async를 메서드에 붙여서 해당 작업을 비동기적으로 수행하도록 하였습니다.
