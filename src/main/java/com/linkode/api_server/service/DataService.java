@@ -45,6 +45,7 @@ public class DataService {
 
     @Value("${spring.s3.bucket-name}")
     private String bucketName;
+    private static final String S3_FOLDER = "data/";
 
     /**
      * @Async를 메서드에 붙여서 해당 작업을 비동기적으로 수행하도록 하였습니다.
@@ -55,7 +56,7 @@ public class DataService {
     @Async
     public CompletableFuture<String> uploadFileToS3(MultipartFile file) throws IOException {
         log.info("[DataService.uploadFileToS3]");
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();/** 템플릿 코드 : 고유한 아이디를 부여하는 코드라고 합니다! */
+        String fileName = S3_FOLDER + UUID.randomUUID().toString() + "_" + file.getOriginalFilename(); /** 템플릿 코드 : 고유한 아이디를 부여하는 코드라고 합니다! */
         try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
         }
