@@ -18,6 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @RestController
@@ -63,9 +67,12 @@ public class StudyroomController {
     }
 
     @PostMapping("/generation")
-    public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,  @RequestBody CreateStudyroomRequest request){
+    public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,
+                                                   @RequestParam("studyroomName") String studyroomName,
+                                                   @RequestParam("studyroomProfile") MultipartFile studyroomFrofile) throws IOException {
         log.info("Success createStudyroom API");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
+        CreateStudyroomRequest request = new CreateStudyroomRequest(studyroomName,studyroomFrofile);
         return studyroomService.createStudyroom(request, memberId);
     }
 
