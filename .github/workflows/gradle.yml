@@ -27,6 +27,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-2
+      DEFAULT_PROFILE: ${{ secrets.DEFAULT_PROFILE }}
 
     steps:
       - name: Checkout repository
@@ -75,6 +76,7 @@ jobs:
           --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
           --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
           --build-arg AWS_REGION=ap-northeast-2 \
+          --build-arg DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
           -t linkode/linkode:latest .
           docker images
           docker push linkode/linkode:latest
@@ -105,6 +107,7 @@ jobs:
             -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
             -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
             -e AWS_REGION=ap-northeast-2 \
+            -e DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
             -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
             
             sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
