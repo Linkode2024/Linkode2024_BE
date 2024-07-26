@@ -105,17 +105,19 @@ public class StudyroomService {
 
         Studyroom studyroom = new Studyroom(request.getStudyroomName(), fileUrl, BaseStatus.ACTIVE);
         studyroomRepository.save(studyroom);
-
         log.info("Success Create Studyroom");
 
-        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroom.getStudyroomId(), memberId, MemberRole.CAPTAIN);
-
-        joinStudyroom(joinStudyroomRequest);
-        log.info("Success Join Studyroom as Captain");
-
+        joinStudyroomAsCaptain(studyroom.getStudyroomId(),memberId);
         return new CreateStudyroomResponse( studyroom.getStudyroomId(), studyroom.getStudyroomName(),
                 studyroom.getStudyroomProfile());
 
+    }
+
+    @Transactional
+    public void joinStudyroomAsCaptain(long studyroomId, long memberId){
+        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId, memberId, MemberRole.CAPTAIN);
+        joinStudyroom(joinStudyroomRequest);
+        log.info("Success Join Studyroom as Captain");
     }
 
     /** 초대 코드로 가입 */
