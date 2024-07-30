@@ -47,12 +47,13 @@ public class StudyroomService {
     @Autowired
     private final InviteService inviteService;
     private final AmazonS3 amazonS3;
-
+    @Value("${spring.cloudfront.domain-name}")
+    private String cloudFrontDomainName;
     @Value("${spring.s3.bucket-name}")
     private String bucketName;
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
-    private String DEFAULT_PROFILE; // 스터디룸 파일과 구분하기위한 폴더 지정
+    private String DEFAULT_PROFILE;
 
 
     public String uploadFileToS3(MultipartFile file) throws IOException {
@@ -64,7 +65,8 @@ public class StudyroomService {
         try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
         }
-        return amazonS3.getUrl(bucketName, fileName).toString();
+        String fileUrl = "https://" + cloudFrontDomainName + "/" + fileName;
+        return fileUrl;
     }
 
     @Transactional
