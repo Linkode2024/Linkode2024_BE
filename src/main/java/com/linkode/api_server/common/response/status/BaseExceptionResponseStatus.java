@@ -48,7 +48,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      * color 관련 code : 8000대
      */
     NOT_FOUND_AVATAR(8000, HttpStatus.OK.value(), "캐릭터를 찾을 수 없습니다."),
-
+  
     /**
      * Data 관련 code : 9000대
      * */

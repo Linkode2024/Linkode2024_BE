@@ -48,4 +48,14 @@ public class Data extends BaseTime {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "studyroom_id")
     private Studyroom studyroom;
+
+
+    public Data(String dataName, DataType dataType, String dataUrl, BaseStatus status, Member member, Studyroom studyroom) {
+        this.dataName = dataName;
+        this.dataType = dataType;
+        this.dataUrl = dataUrl;
+        this.status = status;
+        this.member = member;
+        this.studyroom = studyroom;
+    }
 }
