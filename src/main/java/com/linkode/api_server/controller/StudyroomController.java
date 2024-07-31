@@ -1,16 +1,22 @@
 package com.linkode.api_server.controller;
 
+import com.linkode.api_server.common.exception.MemberStudyroomException;
+import com.linkode.api_server.common.response.BaseErrorResponse;
 import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.*;
+import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.MemberStudyroomService;
 import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -124,4 +130,5 @@ public class StudyroomController {
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return new BaseResponse<>(memberStudyroomService.getStudyroomList(memberId));
     }
+
 }
