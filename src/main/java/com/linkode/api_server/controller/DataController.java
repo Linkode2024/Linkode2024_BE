@@ -41,7 +41,7 @@ public class DataController {
                                                        @RequestParam("datatype") DataType datatype,
                                                        @RequestParam("file") MultipartFile file) throws IOException {
         try {
-            log.info("[StudyroomController.uploadData]");
+            log.info("[DataController.uploadData]");
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
             UploadDataRequest request = new UploadDataRequest(studyroomId, datatype, file);
             UploadDataResponse response = dataService.uploadData(request, memberId).join();
