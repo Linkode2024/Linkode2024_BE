@@ -18,6 +18,10 @@ spring:
   cloudfront:
     domain-name: ${AWS_CLOUDFRONT_DOMAIN}
 
+  cloudfront:
+    domain-name: ${AWS_CLOUDFRONT_DOMAIN}
+
+
 ---
 
 spring:
