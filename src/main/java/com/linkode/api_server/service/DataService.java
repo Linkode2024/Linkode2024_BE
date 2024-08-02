@@ -45,8 +45,6 @@ public class DataService {
 
     @Value("${spring.s3.bucket-name}")
     private String bucketName;
-    @Value("${spring.cloudfront.domain-name}")
-    private String cloudFrontDomainName;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     /**
@@ -62,8 +60,7 @@ public class DataService {
         try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
         }
-        String fileUrl = "https://" + cloudFrontDomainName + "/" + fileName;
-        return CompletableFuture.completedFuture(fileUrl);
+        return CompletableFuture.completedFuture(amazonS3.getUrl(bucketName, fileName).toString());
     }
 
     /**
