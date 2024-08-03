@@ -25,6 +25,7 @@ import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -79,27 +80,29 @@ public class StudyroomService {
     @Transactional
     public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) throws IOException {
         log.info("Start createStudyroom method of StudyroomService Class");
-        String fileUrl = null;
+        String fileUrl = getProfileUrl(request.getStudyroomProfile());
+        Studyroom studyroom = new Studyroom(request.getStudyroomName(), fileUrl, BaseStatus.ACTIVE);
+        studyroomRepository.save(studyroom);
+        log.info("Success Create Studyroom");
+        joinStudyroomAsCaptain(studyroom.getStudyroomId(),memberId);
+        return new CreateStudyroomResponse( studyroom.getStudyroomId(), studyroom.getStudyroomName(),
+                studyroom.getStudyroomProfile());
 
-        if(request.getStudyroomProfile().isEmpty() || request.getStudyroomProfile()==null){
-            fileUrl=DEFAULT_PROFILE;
+    }
+
+    /** 이미지 URL 얻는 메소드 분리 */
+    private String getProfileUrl(MultipartFile file) throws IOException {
+        if(file.isEmpty() || file==null){
+            return DEFAULT_PROFILE;
         }else{
-            CompletableFuture<String> fileUrlFuture = s3Uploader.uploadFileToS3(request.getStudyroomProfile(), S3_FOLDER);
+            CompletableFuture<String> fileUrlFuture = s3Uploader.uploadFileToS3(file, S3_FOLDER);
             try {
-                fileUrl = fileUrlFuture.get();
+                return fileUrlFuture.get();
             } catch (InterruptedException | ExecutionException e) {
                 log.error("Failed to upload file to S3", e);
                 throw new IOException("Failed to upload file to S3", e);
             }
         }
-        Studyroom studyroom = new Studyroom(request.getStudyroomName(), fileUrl, BaseStatus.ACTIVE);
-        studyroomRepository.save(studyroom);
-        log.info("Success Create Studyroom");
-
-        joinStudyroomAsCaptain(studyroom.getStudyroomId(),memberId);
-        return new CreateStudyroomResponse( studyroom.getStudyroomId(), studyroom.getStudyroomName(),
-                studyroom.getStudyroomProfile());
-
     }
 
     /** 방장으로 가입 */
