@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -63,7 +64,7 @@ public class StudyroomController {
     @PostMapping("/generation")
     public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,
                                                    @RequestParam("studyroomName") String studyroomName,
-                                                   @RequestParam("studyroomProfile") MultipartFile studyroomFrofile) throws IOException {
+                                                   @RequestParam("studyroomProfile") MultipartFile studyroomFrofile) throws IOException{
         log.info("Success createStudyroom API");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         CreateStudyroomRequest request = new CreateStudyroomRequest(studyroomName,studyroomFrofile);

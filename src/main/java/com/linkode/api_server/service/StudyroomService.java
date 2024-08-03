@@ -1,34 +1,30 @@
 package com.linkode.api_server.service;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
-import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
+import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -38,36 +34,16 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @Transactional(readOnly = true)
 public class StudyroomService {
 
-    @Autowired
     private final StudyroomRepository studyroomRepository;
-    @Autowired
     private final MemberstudyroomRepository memberstudyroomRepository;
-    @Autowired
     private final MemberRepository memberRepository;
-    @Autowired
     private final InviteService inviteService;
-    private final AmazonS3 amazonS3;
-    @Value("${spring.cloudfront.domain-name}")
-    private String cloudFrontDomainName;
-    @Value("${spring.s3.bucket-name}")
-    private String bucketName;
+    private final S3Uploader s3Uploader;
+
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
     private String DEFAULT_PROFILE;
 
-
-    public String uploadFileToS3(MultipartFile file) throws IOException {
-        log.info("[StudyroomService.uploadFileToS3]");
-        if(file.isEmpty() || file==null){
-            return DEFAULT_PROFILE;
-        }
-        String fileName = S3_FOLDER + UUID.randomUUID().toString() + "_" + file.getOriginalFilename(); /** 템플릿 코드 : 고유한 아이디를 부여하는 코드라고 합니다! */
-        try (InputStream inputStream = file.getInputStream()) {
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
-        }
-        String fileUrl = "https://" + cloudFrontDomainName + "/" + fileName;
-        return fileUrl;
-    }
 
     @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
@@ -99,12 +75,24 @@ public class StudyroomService {
 
     }
 
+    /** 스터디룸 생성
+     * 사진 업로드 안할 시 기본 이미지 */
     @Transactional
     public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) throws IOException {
         log.info("Start createStudyroom method of StudyroomService Class");
+        String fileUrl = null;
 
-        String fileUrl = uploadFileToS3(request.getStudyroomProfile());
-
+        if(request.getStudyroomProfile().isEmpty() || request.getStudyroomProfile()==null){
+            fileUrl=DEFAULT_PROFILE;
+        }else{
+            CompletableFuture<String> fileUrlFuture = s3Uploader.uploadFileToS3(request.getStudyroomProfile(), S3_FOLDER);
+            try {
+                fileUrl = fileUrlFuture.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Failed to upload file to S3", e);
+                throw new IOException("Failed to upload file to S3", e);
+            }
+        }
         Studyroom studyroom = new Studyroom(request.getStudyroomName(), fileUrl, BaseStatus.ACTIVE);
         studyroomRepository.save(studyroom);
         log.info("Success Create Studyroom");
@@ -115,6 +103,7 @@ public class StudyroomService {
 
     }
 
+    /** 방장으로 가입 */
     @Transactional
     public void joinStudyroomAsCaptain(long studyroomId, long memberId){
         JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId, memberId, MemberRole.CAPTAIN);

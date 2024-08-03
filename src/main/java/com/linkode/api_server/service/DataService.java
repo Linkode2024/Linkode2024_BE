@@ -1,7 +1,5 @@
 package com.linkode.api_server.service;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.domain.data.Data;
@@ -13,20 +11,15 @@ import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.repository.DataRepository;
-import com.linkode.api_server.repository.MemberRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
-import com.linkode.api_server.repository.StudyroomRepository;
+import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
@@ -37,31 +30,10 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @Transactional(readOnly = true)
 public class DataService {
 
-    private final AmazonS3 amazonS3;
-    private final MemberRepository memberRepository;
-    private final StudyroomRepository studyroomRepository;
     private final MemberstudyroomRepository memberstudyroomRepository;
     private final DataRepository dataRepository;
-
-    @Value("${spring.s3.bucket-name}")
-    private String bucketName;
+    private final S3Uploader s3Uploader;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
-
-    /**
-     * @Async를 메서드에 붙여서 해당 작업을 비동기적으로 수행하도록 하였습니다.
-     * 별도의 스레드에서 작업이 진행됩니다.
-     * CompletableFuture은 비동기 작업이 완료된후 값을 가져올 수 있게합니다.
-     * InputStream으로 입출력을 처리합니다.
-     * */
-    @Async
-    public CompletableFuture<String> uploadFileToS3(MultipartFile file) throws IOException {
-        log.info("[DataService.uploadFileToS3]");
-        String fileName = S3_FOLDER + UUID.randomUUID().toString() + "_" + file.getOriginalFilename(); /** 템플릿 코드 : 고유한 아이디를 부여하는 코드라고 합니다! */
-        try (InputStream inputStream = file.getInputStream()) {
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
-        }
-        return CompletableFuture.completedFuture(amazonS3.getUrl(bucketName, fileName).toString());
-    }
 
     /**
      * @Async를 메서드에 붙여서 해당 작업을 비동기적으로 수행하도록 하였습니다.
@@ -85,12 +57,10 @@ public class DataService {
     @Transactional
     public CompletableFuture<UploadDataResponse> uploadData(UploadDataRequest request, long memberId) throws IOException {
         log.info("[DataService.uploadData]");
-//        Member member = memberRepository.findByMemberIdAndStatus(memberId, BaseStatus.ACTIVE).orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
-//        Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId()).orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
-        return uploadFileToS3(request.getFile())
+        return s3Uploader.uploadFileToS3(request.getFile(),S3_FOLDER)
                 .thenCompose(fileUrl -> {
                     String fileName = request.getFile().getOriginalFilename();
                     DataType fileType = request.getDatatype();
