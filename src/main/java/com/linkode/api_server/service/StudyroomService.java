@@ -44,7 +44,6 @@ public class StudyroomService {
     @Value("${spring.s3.default-profile}")
     private String DEFAULT_PROFILE;
 
-
     @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
 
@@ -129,7 +128,7 @@ public class StudyroomService {
     }
 
 
-    /** 초대 코드가 필요없음 */
+    /** 초대 코드가 필요없는 가입 */
     @Transactional
     public void joinStudyroom(JoinStudyroomRequest request){
         log.info("[StudyroomService.joinStudyroom]");
