@@ -37,13 +37,10 @@ public class DataController {
      * */
     @PostMapping("/data/upload")
     public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
-                                                       @RequestParam("studyroomId") long studyroomId,
-                                                       @RequestParam("datatype") DataType datatype,
-                                                       @RequestParam("file") MultipartFile file) throws IOException {
+                                                       @ModelAttribute UploadDataRequest request) throws IOException {
         try {
             log.info("[StudyroomController.uploadData]");
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
-            UploadDataRequest request = new UploadDataRequest(studyroomId, datatype, file);
             UploadDataResponse response = dataService.uploadData(request, memberId).join();
 
             return new BaseResponse<>(SUCCESS,response);
