@@ -50,29 +50,4 @@ public class DataController {
             return new BaseResponse<>(NOT_FOUND_DATA, null);
         }
     }
-
-    /***
-     * 파일 업로드
-     * @RequestParam으로 쓴이유는 파일 업로드는 multipart/form-data 로 일반적 json이 아니기때문입니다.
-     * @RequestParam의 해당 값들이 URI에 노출되지않습니다.
-     * */
-    @PostMapping("/data/upload")
-    public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
-                                                       @RequestParam("studyroomId") long studyroomId,
-                                                       @RequestParam("datatype") DataType datatype,
-                                                       @RequestParam("file") MultipartFile file) throws IOException {
-        try {
-            log.info("[DataController.uploadData]");
-            Long memberId = jwtProvider.extractIdFromHeader(authorization);
-            UploadDataRequest request = new UploadDataRequest(studyroomId, datatype, file);
-            UploadDataResponse response = dataService.uploadData(request, memberId).join();
-
-            return new BaseResponse<>(SUCCESS,response);
-        }catch (MemberStudyroomException e) {
-            return new BaseResponse<>(NOT_FOUND_MEMBER_STUDYROOM, null);
-        }catch (DataException e){
-            return new BaseResponse<>(FAILED_UPLOAD_FILE,null);
-        }
-
-    }
 }
