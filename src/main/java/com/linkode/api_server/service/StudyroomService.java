@@ -92,7 +92,7 @@ public class StudyroomService {
 
     /** 이미지 URL 얻는 메소드 분리 */
     private String getProfileUrl(MultipartFile file) throws IOException {
-        if(file.isEmpty() || file==null){
+        if(file==null || file.isEmpty()){
             return DEFAULT_PROFILE;
         }else{
             CompletableFuture<String> fileUrlFuture = s3Uploader.uploadFileToS3(file, S3_FOLDER);

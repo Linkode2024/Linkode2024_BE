@@ -1,6 +1,7 @@
 package com.linkode.api_server.util;
 
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.linkode.api_server.common.exception.DataException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.FAILED_UPLOAD_FILE;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NONE_FILE;
+
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -34,12 +39,22 @@ public class S3Uploader {
     @Async
     public CompletableFuture<String> uploadFileToS3(MultipartFile file, String folder) throws IOException {
         log.info("[S3Uploader.uploadFileToS3]");
-        String fileName = folder + UUID.randomUUID().toString() + "_" + file.getOriginalFilename(); /** 템플릿 코드 : 고유한 아이디를 부여하는 코드라고 합니다! */
-        try (InputStream inputStream = file.getInputStream()) {
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
+        if(file.isEmpty()){
+            throw new DataException(NONE_FILE);
         }
-        String fileUrl = "https://" + cloudFrontDomainName + "/" + fileName;
-        return CompletableFuture.completedFuture(fileUrl);
+        try (InputStream inputStream = file.getInputStream()) {
+            String fileName = folder + UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
+            String fileUrl = "https://" + cloudFrontDomainName + "/" + fileName;
+            return CompletableFuture.completedFuture(fileUrl);
+        }catch (NullPointerException e) {
+            log.error("File Is NULL !!", e);
+            throw new DataException(NONE_FILE);
+        } catch (IOException e) {
+            log.error("Failed to upload file to S3", e);
+            throw new DataException(FAILED_UPLOAD_FILE);
+        }
+
     }
 
 }

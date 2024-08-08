@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.CompletionException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -31,9 +32,9 @@ public class DataController {
     JwtProvider jwtProvider;
 
     /***
-     * 파일 업로드
-     * @RequestParam으로 쓴이유는 파일 업로드는 multipart/form-data 로 일반적 json이 아니기때문입니다.
-     * @RequestParam의 해당 값들이 URI에 노출되지않습니다.
+     * CompletionException 라는 비동기 객체의 예외를 먼저 잡고
+     * 그 예외가 DataException 라면 그거에 맞는 상태를 반환해 클라이언트가 오류를 잡을 수있도록
+     * 예외 처리 강화
      * */
     @PostMapping("/data/upload")
     public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
@@ -46,8 +47,13 @@ public class DataController {
             return new BaseResponse<>(SUCCESS,response);
         }catch (MemberStudyroomException e) {
             return new BaseResponse<>(NOT_FOUND_MEMBER_STUDYROOM, null);
-        }catch (DataException e){
-            return new BaseResponse<>(FAILED_UPLOAD_FILE,null);
+        }catch (CompletionException e){
+            Throwable cause = e.getCause();
+            if (cause instanceof DataException) {
+                DataException de = (DataException) cause;
+                return new BaseResponse<>(de.getExceptionStatus(), null);
+            }
+            return new BaseResponse<>(FAILED_UPLOAD_FILE, null);
         }
 
     }
