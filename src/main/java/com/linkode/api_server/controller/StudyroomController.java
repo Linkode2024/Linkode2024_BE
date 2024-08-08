@@ -62,11 +62,11 @@ public class StudyroomController {
     }
 
     @PostMapping("/generation")
-    public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,
+    public BaseResponse<CreateStudyroomResponse> createStudyroom(@RequestHeader("Authorization") String authorization,
                                                    @ModelAttribute CreateStudyroomRequest request) throws IOException{
         log.info("Success createStudyroom API");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return studyroomService.createStudyroom(request, memberId);
+        return new BaseResponse<>(SUCCESS, studyroomService.createStudyroom(request, memberId));
     }
 
     /**
