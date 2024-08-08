@@ -1,5 +1,7 @@
 package com.linkode.api_server.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
@@ -13,13 +15,20 @@ import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
+import java.util.UUID;
+
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -37,6 +46,28 @@ public class StudyroomService {
     private final MemberRepository memberRepository;
     @Autowired
     private final InviteService inviteService;
+    private final AmazonS3 amazonS3;
+    @Value("${spring.cloudfront.domain-name}")
+    private String cloudFrontDomainName;
+    @Value("${spring.s3.bucket-name}")
+    private String bucketName;
+    private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
+    @Value("${spring.s3.default-profile}")
+    private String DEFAULT_PROFILE;
+
+
+    public String uploadFileToS3(MultipartFile file) throws IOException {
+        log.info("[StudyroomService.uploadFileToS3]");
+        if(file.isEmpty() || file==null){
+            return DEFAULT_PROFILE;
+        }
+        String fileName = S3_FOLDER + UUID.randomUUID().toString() + "_" + file.getOriginalFilename(); /** 템플릿 코드 : 고유한 아이디를 부여하는 코드라고 합니다! */
+        try (InputStream inputStream = file.getInputStream()) {
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, inputStream, null));
+        }
+        String fileUrl = "https://" + cloudFrontDomainName + "/" + fileName;
+        return fileUrl;
+    }
 
     @Transactional
     public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
@@ -69,28 +100,26 @@ public class StudyroomService {
     }
 
     @Transactional
-    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) {
+    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) throws IOException {
         log.info("Start createStudyroom method of StudyroomService Class");
-        Studyroom studyroom = new Studyroom(
-                request.getStudyroomName(),
-                request.getStudyroomProfile(),
-                BaseStatus.ACTIVE);
 
+        String fileUrl = uploadFileToS3(request.getStudyroomProfile());
+
+        Studyroom studyroom = new Studyroom(request.getStudyroomName(), fileUrl, BaseStatus.ACTIVE);
         studyroomRepository.save(studyroom);
         log.info("Success Create Studyroom");
 
-        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroom.getStudyroomId()
-                ,memberId
-                ,MemberRole.CAPTAIN);
+        joinStudyroomAsCaptain(studyroom.getStudyroomId(),memberId);
+        return new CreateStudyroomResponse( studyroom.getStudyroomId(), studyroom.getStudyroomName(),
+                studyroom.getStudyroomProfile());
 
+    }
 
+    @Transactional
+    public void joinStudyroomAsCaptain(long studyroomId, long memberId){
+        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId, memberId, MemberRole.CAPTAIN);
         joinStudyroom(joinStudyroomRequest);
         log.info("Success Join Studyroom as Captain");
-
-        return new CreateStudyroomResponse(
-                studyroom.getStudyroomId(),
-                studyroom.getStudyroomName(),
-                studyroom.getStudyroomProfile());
     }
 
     /** 초대 코드로 가입 */

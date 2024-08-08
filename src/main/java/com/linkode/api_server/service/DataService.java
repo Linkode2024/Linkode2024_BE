@@ -54,8 +54,6 @@ public class DataService {
                         data.getDataName(),
                         data.getDataUrl()
                 )).collect(Collectors.toList());
-
-
         return new DataListResponse(dataList);
     }
 }

@@ -13,6 +13,7 @@ spring:
     access-key: ${AWS_ACCESS_KEY_ID}
     secret-key: ${AWS_SECRET_ACCESS_KEY}
     region: ${AWS_REGION}
+    default-profile: ${DEFAULT_PROFILE}
 
   cloudfront:
     domain-name: ${AWS_CLOUDFRONT_DOMAIN}
