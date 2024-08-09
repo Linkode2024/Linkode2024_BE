@@ -37,7 +37,6 @@ public class DataService {
     private final S3Uploader s3Uploader;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
-    @Async
     @Transactional
     public Data saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
