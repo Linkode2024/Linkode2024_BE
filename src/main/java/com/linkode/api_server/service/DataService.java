@@ -16,6 +16,8 @@ import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,11 +44,13 @@ public class DataService {
      * */
     @Async
     @Transactional
-    public CompletableFuture<Data> saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
+    public Data saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        SecurityContextHolder.setContext(securityContext);
         Data data = new Data(fileName, fileType, fileUrl, BaseStatus.ACTIVE, member, studyroom);
         Data savedData = dataRepository.save(data);
-        return CompletableFuture.completedFuture(savedData);
+        return savedData;
     }
 
     /**
@@ -55,21 +59,19 @@ public class DataService {
      * 체인 : 기다렸다한다를 명시적으로 정하지않고 자동으로 완료되면 실행되게 작업순서를 엮어둬서 스레드는 I/O작업중에도 블로킹되지않습니다.
      * */
     @Transactional
-    public CompletableFuture<UploadDataResponse> uploadData(UploadDataRequest request, long memberId) throws IOException {
+    public UploadDataResponse uploadData(UploadDataRequest request, long memberId){
         log.info("[DataService.uploadData]");
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+        try {
+            String fileName = request.getFile().getOriginalFilename();
+            DataType fileType = request.getDatatype();
+            String fileUrl = s3Uploader.uploadFileToS3(request.getFile(),S3_FOLDER);
+            Data savedData = saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
+            return new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl());
+        }catch (NullPointerException e){
+            throw new DataException(NONE_FILE);
+        }
 
-        return s3Uploader.uploadFileToS3(request.getFile(),S3_FOLDER)
-                .thenCompose(fileUrl -> {
-                    String fileName = request.getFile().getOriginalFilename();
-                    DataType fileType = request.getDatatype();
-                    return saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
-                })
-                .thenApply(savedData -> new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl()))
-                .exceptionally(ex -> {
-                    log.error("Error during upload process!!", ex);
-                    throw new DataException(FAILED_UPLOAD_FILE);
-                });
     }
 }

@@ -91,17 +91,11 @@ public class StudyroomService {
     }
 
     /** 이미지 URL 얻는 메소드 분리 */
-    private String getProfileUrl(MultipartFile file) throws IOException {
+    private String getProfileUrl(MultipartFile file){
         if(file==null || file.isEmpty()){
             return DEFAULT_PROFILE;
         }else{
-            CompletableFuture<String> fileUrlFuture = s3Uploader.uploadFileToS3(file, S3_FOLDER);
-            try {
-                return fileUrlFuture.get();
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Failed to upload file to S3", e);
-                throw new IOException("Failed to upload file to S3", e);
-            }
+            return s3Uploader.uploadFileToS3(file, S3_FOLDER);
         }
     }
 

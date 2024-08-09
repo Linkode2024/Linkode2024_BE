@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
@@ -37,24 +38,20 @@ public class DataController {
      * 예외 처리 강화
      * */
     @PostMapping("/data/upload")
-    public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
-                                                       @ModelAttribute UploadDataRequest request) throws IOException {
+    public BaseResponse<UploadDataResponse> uploadData(
+            @RequestHeader("Authorization") String authorization,
+            @ModelAttribute UploadDataRequest request) {
+
+        log.info("[StudyroomController.uploadData]");
         try {
-            log.info("[StudyroomController.uploadData]");
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
-            UploadDataResponse response = dataService.uploadData(request, memberId).join();
-
-            return new BaseResponse<>(SUCCESS,response);
-        }catch (MemberStudyroomException e) {
-            return new BaseResponse<>(NOT_FOUND_MEMBER_STUDYROOM, null);
-        }catch (CompletionException e){
-            Throwable cause = e.getCause();
-            if (cause instanceof DataException) {
-                DataException de = (DataException) cause;
-                return new BaseResponse<>(de.getExceptionStatus(), null);
-            }
-            return new BaseResponse<>(FAILED_UPLOAD_FILE, null);
+            UploadDataResponse response = dataService.uploadData(request, memberId);
+            return new BaseResponse<>(SUCCESS, response);
+        }catch (DataException de){
+            return new BaseResponse<>(de.getExceptionStatus(), null);
+        }catch (MemberStudyroomException me){
+            return new BaseResponse<>(me.getExceptionStatus(), null);
         }
-
     }
+
 }
