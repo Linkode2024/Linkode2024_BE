@@ -30,12 +30,6 @@ public class S3Uploader {
     @Value("${spring.cloudfront.domain-name}")
     private String cloudFrontDomainName;
 
-    /**
-     * @Async를 메서드에 붙여서 해당 작업을 비동기적으로 수행하도록 하였습니다.
-     * 별도의 스레드에서 작업이 진행됩니다.
-     * CompletableFuture은 비동기 작업이 완료된후 값을 가져올 수 있게합니다.
-     * InputStream으로 입출력을 처리합니다.
-     * */
     public String uploadFileToS3(MultipartFile file, String folder){
         log.info("[S3Uploader.uploadFileToS3]");
         if(file.isEmpty()){

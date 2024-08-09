@@ -32,11 +32,6 @@ public class DataController {
     @Autowired
     JwtProvider jwtProvider;
 
-    /***
-     * CompletionException 라는 비동기 객체의 예외를 먼저 잡고
-     * 그 예외가 DataException 라면 그거에 맞는 상태를 반환해 클라이언트가 오류를 잡을 수있도록
-     * 예외 처리 강화
-     * */
     @PostMapping("/data/upload")
     public BaseResponse<UploadDataResponse> uploadData(
             @RequestHeader("Authorization") String authorization,
