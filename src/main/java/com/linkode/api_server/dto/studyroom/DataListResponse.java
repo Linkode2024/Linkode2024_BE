@@ -14,7 +14,7 @@ public class DataListResponse {
 
     private List<DataListResponse.Data> DataList;
 
-    @Getter @Setter
+    @Getter
     @AllArgsConstructor
     public static class Data{
         private long dataId;
