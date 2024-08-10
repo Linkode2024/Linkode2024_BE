@@ -73,28 +73,20 @@ public class MemberStudyroomService {
         List<Object[]> results = memberstudyroomRepository.getStudyroomDetail(studyroomId, memberId, BaseStatus.ACTIVE);
 
         if (results.isEmpty()) {
-            throw new NotFoundException("Studyroom not found");
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
         }
+        Object[] firstRow = results.get(0);
+        MemberRole role = (MemberRole) firstRow[0];
 
-        DetailStudyroomResponse response = null;
-        List<DetailStudyroomResponse.Member> members = new ArrayList<>();
+        List<DetailStudyroomResponse.Member> members = results.stream()
+                .map(row -> new DetailStudyroomResponse.Member(
+                        (Long) row[1],   /** memberId */
+                        (String) row[2], /** nickname */
+                        (Long) row[3]    /** avatarId */
+                ))
+                .collect(Collectors.toList());
 
-        for (Object[] row : results) {
-            Long retrievedStudyroomId = (Long) row[0];
-            MemberRole role = (MemberRole) row[1];
-            Long memberIdFromResult = (Long) row[2];
-            String nickname = (String) row[3];
-            Long avatarId = (Long) row[4];
-
-            if (response == null) {
-                response = new DetailStudyroomResponse(retrievedStudyroomId, role, members);
-            }
-
-            DetailStudyroomResponse.Member member = new DetailStudyroomResponse.Member(memberIdFromResult, nickname, avatarId);
-            members.add(member);
-        }
-
-        return response;
+        return new DetailStudyroomResponse(studyroomId,role,members);
     }
 
     /**
