@@ -40,11 +40,16 @@ public class DataService {
     @Transactional
     public Data saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        SecurityContextHolder.setContext(securityContext);
-        Data data = new Data(fileName, fileType, fileUrl, BaseStatus.ACTIVE, member, studyroom);
-        Data savedData = dataRepository.save(data);
-        return savedData;
+
+        Data data = Data.builder()
+                .dataName(fileName)
+                .dataType(fileType)
+                .status(BaseStatus.ACTIVE)
+                .studyroom(studyroom)
+                .dataUrl(fileUrl)
+                .member(member)
+                .build();
+        return dataRepository.save(data);
     }
 
     @Transactional
