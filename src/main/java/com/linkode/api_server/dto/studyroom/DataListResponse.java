@@ -1,18 +1,25 @@
 package com.linkode.api_server.dto.studyroom;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
-@Getter @Setter
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
 public class DataListResponse {
 
     private List<DataListResponse.Data> DataList;
+
+    @Builder
+    public DataListResponse(List<DataListResponse.Data> DataList){
+        this.DataList=DataList;
+    }
+
+    public static DataListResponse of (DataListResponse response){
+        return DataListResponse.builder()
+                .DataList(response.getDataList())
+                .build();
+    }
 
     @Getter
     @AllArgsConstructor
