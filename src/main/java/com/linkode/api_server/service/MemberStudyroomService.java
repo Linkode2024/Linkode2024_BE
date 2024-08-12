@@ -79,14 +79,19 @@ public class MemberStudyroomService {
         MemberRole role = (MemberRole) firstRow[0];
 
         List<DetailStudyroomResponse.Member> members = results.stream()
-                .map(row -> new DetailStudyroomResponse.Member(
-                        (Long) row[1],   /** memberId */
-                        (String) row[2], /** nickname */
-                        (Long) row[3]    /** avatarId */
-                ))
+                .map(row -> DetailStudyroomResponse.Member.builder()
+                        .memberId((Long) row[1])
+                        .nickname((String) row[2])
+                        .avatarId((Long) row[3])
+                        .colorId((Long) row[4])
+                        .build())
                 .collect(Collectors.toList());
 
-        return new DetailStudyroomResponse(studyroomId,role,members);
+        return DetailStudyroomResponse.builder()
+                .role(role)
+                .studyroomId(studyroomId)
+                .members(members)
+                .build();
     }
 
     /**
