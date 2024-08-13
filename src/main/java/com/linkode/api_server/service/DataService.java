@@ -2,34 +2,17 @@ package com.linkode.api_server.service;
 
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
-import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.repository.DataRepository;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.linkode.api_server.common.exception.DataException;
-import com.linkode.api_server.common.exception.MemberStudyroomException;
-import com.linkode.api_server.domain.data.Data;
-import com.linkode.api_server.domain.Member;
-import com.linkode.api_server.domain.Studyroom;
-import com.linkode.api_server.domain.base.BaseStatus;
-import com.linkode.api_server.domain.data.DataType;
-import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
-import com.linkode.api_server.dto.studyroom.UploadDataRequest;
-import com.linkode.api_server.dto.studyroom.UploadDataResponse;
-import com.linkode.api_server.repository.DataRepository;
-import com.linkode.api_server.repository.MemberRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
-import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
