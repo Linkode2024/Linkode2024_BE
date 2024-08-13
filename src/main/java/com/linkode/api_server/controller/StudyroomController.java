@@ -85,10 +85,10 @@ public class StudyroomController {
      * 스터디룸 입장 (재입장)
      */
     @GetMapping("/detail")
-    public DetailStudyroomResponse getStudyroomDetail(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
+    public BaseResponse<DetailStudyroomResponse> getStudyroomDetail(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
         log.info("[StudyroomController.getStudyroomDetail]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return memberStudyroomService.getStudyroomDetail(studyroomId,memberId);
+        return new BaseResponse<>(memberStudyroomService.getStudyroomDetail(studyroomId,memberId));
     }
 
     /**
