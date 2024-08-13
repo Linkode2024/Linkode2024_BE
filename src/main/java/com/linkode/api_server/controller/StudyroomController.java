@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
+
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
 
 @RestController
 @Slf4j
@@ -31,12 +34,12 @@ public class StudyroomController {
      * 스터디룸 삭제
      */
     @PatchMapping("/removal")
-    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
+    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId) {
 
         long memberId = jwtProvider.extractIdFromHeader(authorization);
-        BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId,memberId);
+        BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId, memberId);
         log.info("Run Delete Studyroom API ");
-        if (responseStatus == BaseExceptionResponseStatus.SUCCESS) {
+        if (responseStatus == SUCCESS) {
             return new BaseResponse<>(responseStatus);
         } else {
             return new BaseResponse<>(responseStatus, responseStatus);
@@ -45,35 +48,33 @@ public class StudyroomController {
 
     /**
      * 스터디룸 탈퇴
-     * */
+     */
     @PatchMapping("/leave")
     public BaseResponse<MemberStudyroomListResponse> leaveStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
         log.info("[StudyroomController.leaveStudyroom]");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
-        BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId,memberId);
+        BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId, memberId);
         MemberStudyroomListResponse latestStudyroomList = memberStudyroomService.getMemberStudyroomList(memberId);
         log.info("Run leaveStudyroom API ");
-        return new BaseResponse<>(responseStatus,latestStudyroomList);
+        return new BaseResponse<>(responseStatus, latestStudyroomList);
     }
 
     @PostMapping("/generation")
-    public CreateStudyroomResponse createStudyroom(@RequestHeader("Authorization") String authorization,
-                                                   @RequestParam("studyroomName") String studyroomName,
-                                                   @RequestParam("studyroomProfile") MultipartFile studyroomFrofile) throws IOException {
+    public BaseResponse<CreateStudyroomResponse> createStudyroom(@RequestHeader("Authorization") String authorization,
+                                                   @ModelAttribute CreateStudyroomRequest request) throws IOException{
         log.info("Success createStudyroom API");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
-        CreateStudyroomRequest request = new CreateStudyroomRequest(studyroomName,studyroomFrofile);
-        return studyroomService.createStudyroom(request, memberId);
+        return new BaseResponse<>(SUCCESS, studyroomService.createStudyroom(request, memberId));
     }
 
     /**
      * 스터디룸 수정
      */
     @PatchMapping("")
-    public BaseResponse<Void> modifyStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody PatchStudyroomRequest patchStudyroomRequest){
+    public BaseResponse<Void> modifyStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody PatchStudyroomRequest patchStudyroomRequest) {
         log.info("[StudyroomController.modifyStudyroom]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        studyroomService.modifyStudyroom(memberId,patchStudyroomRequest);
+        studyroomService.modifyStudyroom(memberId, patchStudyroomRequest);
         return new BaseResponse<>(null);
     }
 
@@ -115,14 +116,14 @@ public class StudyroomController {
     public BaseResponse<PostInviteCodeResponse> createStudyroomCode(@RequestHeader("Authorization") String authorization, @RequestParam Long studyroomId){
         log.info("[StudyroomController.createStudyroomCode]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return new BaseResponse<>(studyroomService.createStudyroomCode(memberId,studyroomId));
+        return new BaseResponse<>(studyroomService.createStudyroomCode(memberId, studyroomId));
     }
 
     /**
      * 스터디룸 리스트 조회
      */
     @GetMapping("")
-    public BaseResponse<MemberStudyroomListResponse> getStudyroomList(@RequestHeader("Authorization") String authorization){
+    public BaseResponse<MemberStudyroomListResponse> getStudyroomList(@RequestHeader("Authorization") String authorization) {
         log.info("[StudyroomController.getStudyroomList]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         return new BaseResponse<>(memberStudyroomService.getStudyroomList(memberId));

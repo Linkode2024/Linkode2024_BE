@@ -4,54 +4,55 @@ import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.domain.data.DataType;
+import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.service.DataService;
-import com.linkode.api_server.service.MemberStudyroomService;
-import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/studyroom")
+@RequestMapping("/studyroom/data")
 public class DataController {
-    @Autowired
-    DataService dataService;
-    @Autowired
-    JwtProvider jwtProvider;
+    private final DataService dataService;
+    private final JwtProvider jwtProvider;
 
-    /***
-     * 파일 업로드
-     * @RequestParam으로 쓴이유는 파일 업로드는 multipart/form-data 로 일반적 json이 아니기때문입니다.
-     * @RequestParam의 해당 값들이 URI에 노출되지않습니다.
-     * */
-    @PostMapping("/data/upload")
-    public BaseResponse<UploadDataResponse> uploadData(@RequestHeader("Authorization") String authorization,
-                                                       @RequestParam("studyroomId") long studyroomId,
-                                                       @RequestParam("datatype") DataType datatype,
-                                                       @RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping("/upload")
+    public BaseResponse<UploadDataResponse> uploadData(
+            @RequestHeader("Authorization") String authorization,
+            @ModelAttribute UploadDataRequest request) {
+
+        log.info("[StudyroomController.uploadData]");
         try {
-            log.info("[StudyroomController.uploadData]");
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
-            UploadDataRequest request = new UploadDataRequest(studyroomId, datatype, file);
-            UploadDataResponse response = dataService.uploadData(request, memberId).join();
-
-            return new BaseResponse<>(SUCCESS,response);
-        }catch (MemberStudyroomException e) {
-            return new BaseResponse<>(NOT_FOUND_MEMBER_STUDYROOM, null);
-        }catch (DataException e){
-            return new BaseResponse<>(FAILED_UPLOAD_FILE,null);
+            UploadDataResponse response = dataService.uploadData(request, memberId);
+            return new BaseResponse<>(SUCCESS, response);
+        } catch (DataException de) {
+            return new BaseResponse<>(de.getExceptionStatus(), null);
+        } catch (MemberStudyroomException me) {
+            return new BaseResponse<>(me.getExceptionStatus(), null);
         }
-
     }
+    /**
+     * 자료실 조회
+     */
+    @GetMapping("/list")
+    public BaseResponse<DataListResponse> getDataList(@RequestHeader("Authorization") String authorization,
+                                                      @RequestParam long studyroomId, @RequestParam DataType type) {
+        log.info("[StudyroomController.getDataList]");
+        try {
+            Long memberId = jwtProvider.extractIdFromHeader(authorization);
+            DataListResponse response = dataService.getDataList(memberId,studyroomId,type);
+            return new BaseResponse<>(SUCCESS, response);
+        } catch (DataException e) {
+            return new BaseResponse<>(NOT_FOUND_DATA, null);
+        }
+    }
+
 }
