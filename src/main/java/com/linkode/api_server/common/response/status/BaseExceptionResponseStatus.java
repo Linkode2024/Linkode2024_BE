@@ -48,11 +48,15 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      * color 관련 code : 8000대
      */
     NOT_FOUND_AVATAR(8000, HttpStatus.OK.value(), "캐릭터를 찾을 수 없습니다."),
-
+  
     /**
      * Data 관련 code : 9000대
      * */
-    FAILED_UPLOAD_FILE(9000,HttpStatus.BAD_REQUEST.value(), "파일 업로드 실패");
+    FAILED_UPLOAD_FILE(9000,HttpStatus.BAD_REQUEST.value(), "파일 업로드 실패"),
+
+
+    NOT_FOUND_DATA(9000,HttpStatus.BAD_REQUEST.value(), "조건에 맞는자료실을 불러올 수 없습니다.");
+
 
     private final int code;
     private final int status;

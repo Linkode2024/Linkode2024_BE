@@ -7,6 +7,7 @@ import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -49,7 +50,7 @@ public class Data extends BaseTime {
     @JoinColumn(name = "studyroom_id")
     private Studyroom studyroom;
 
-
+    @Builder
     public Data(String dataName, DataType dataType, String dataUrl, BaseStatus status, Member member, Studyroom studyroom) {
         this.dataName = dataName;
         this.dataType = dataType;
