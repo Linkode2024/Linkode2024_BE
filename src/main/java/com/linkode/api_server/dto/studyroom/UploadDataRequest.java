@@ -1,6 +1,7 @@
 package com.linkode.api_server.dto.studyroom;
 
 import com.linkode.api_server.domain.data.DataType;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
