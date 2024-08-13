@@ -20,8 +20,8 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @RequiredArgsConstructor
 @RequestMapping("/studyroom/data")
 public class DataController {
-    DataService dataService;
-    JwtProvider jwtProvider;
+    private final DataService dataService;
+    private final JwtProvider jwtProvider;
 
     @PostMapping("/upload")
     public BaseResponse<UploadDataResponse> uploadData(
