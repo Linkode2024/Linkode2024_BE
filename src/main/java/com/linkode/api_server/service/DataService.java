@@ -15,14 +15,9 @@ import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
