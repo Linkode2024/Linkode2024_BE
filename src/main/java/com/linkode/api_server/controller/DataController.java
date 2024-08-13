@@ -17,12 +17,12 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/studyroom")
+@RequestMapping("/studyroom/data")
 public class DataController {
     DataService dataService;
     JwtProvider jwtProvider;
 
-    @PostMapping("/data/upload")
+    @PostMapping("/upload")
     public BaseResponse<UploadDataResponse> uploadData(
             @RequestHeader("Authorization") String authorization,
             @ModelAttribute UploadDataRequest request) {
