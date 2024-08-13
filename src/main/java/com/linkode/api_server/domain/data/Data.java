@@ -50,7 +50,6 @@ public class Data extends BaseTime {
     @JoinColumn(name = "studyroom_id")
     private Studyroom studyroom;
 
-
     @Builder
     public Data(String dataName, DataType dataType, String dataUrl, BaseStatus status, Member member, Studyroom studyroom) {
         this.dataName = dataName;
