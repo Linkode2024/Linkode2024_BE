@@ -2,9 +2,15 @@ package com.linkode.api_server.service;
 
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
+import com.linkode.api_server.domain.Member;
+import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
+import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.data.DataType;
+import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
+import com.linkode.api_server.dto.studyroom.UploadDataRequest;
+import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.repository.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.util.S3Uploader;
@@ -14,8 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -44,20 +49,20 @@ public class DataService {
     }
 
     @Transactional
-    public UploadDataResponse uploadData(UploadDataRequest request, long memberId){
+    public UploadDataResponse uploadData(UploadDataRequest request, long memberId) {
         log.info("[DataService.uploadData]");
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
         try {
             String fileName = request.getFile().getOriginalFilename();
             DataType fileType = request.getDatatype();
-            String fileUrl = s3Uploader.uploadFileToS3(request.getFile(),S3_FOLDER);
+            String fileUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
             Data savedData = saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
             return new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl());
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new DataException(NONE_FILE);
         }
-
+    }
 
     public DataListResponse getDataList(long memberId , long studyroomId, DataType type){
         if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){

@@ -1,15 +1,17 @@
 package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.exception.DataException;
+import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
+import com.linkode.api_server.dto.studyroom.UploadDataRequest;
+import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
 
@@ -31,10 +33,12 @@ public class DataController {
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
             UploadDataResponse response = dataService.uploadData(request, memberId);
             return new BaseResponse<>(SUCCESS, response);
-        }catch (DataException de){
+        } catch (DataException de) {
             return new BaseResponse<>(de.getExceptionStatus(), null);
-        }catch (MemberStudyroomException me){
+        } catch (MemberStudyroomException me) {
             return new BaseResponse<>(me.getExceptionStatus(), null);
+        }
+    }
     /**
      * 자료실 조회
      */
