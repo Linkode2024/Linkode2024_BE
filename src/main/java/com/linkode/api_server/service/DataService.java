@@ -65,6 +65,7 @@ public class DataService {
     }
 
     public DataListResponse getDataList(long memberId , long studyroomId, DataType type){
+        log.info("[DataService.getDataList]");
         if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
             throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
         }

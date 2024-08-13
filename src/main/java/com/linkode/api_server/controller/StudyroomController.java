@@ -10,7 +10,6 @@ import com.linkode.api_server.service.StudyroomService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,12 +26,9 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @RequestMapping("/studyroom")
 public class StudyroomController {
 
-    @Autowired
-    StudyroomService studyroomService;
-    @Autowired
-    MemberStudyroomService memberStudyroomService;
-    @Autowired
-    JwtProvider jwtProvider;
+    private final StudyroomService studyroomService;
+    private final MemberStudyroomService memberStudyroomService;
+    private final JwtProvider jwtProvider;
 
     /**
      * 스터디룸 삭제
@@ -86,10 +82,10 @@ public class StudyroomController {
      * 스터디룸 입장 (재입장)
      */
     @GetMapping("/detail")
-    public DetailStudyroomResponse getStudyroomDetail(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId) {
+    public BaseResponse<DetailStudyroomResponse> getStudyroomDetail(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
         log.info("[StudyroomController.getStudyroomDetail]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return memberStudyroomService.getStudyroomDetail(studyroomId, memberId);
+        return new BaseResponse<>(memberStudyroomService.getStudyroomDetail(studyroomId,memberId));
     }
 
     /**

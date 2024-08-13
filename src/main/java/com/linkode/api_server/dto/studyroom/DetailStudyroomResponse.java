@@ -1,15 +1,12 @@
 package com.linkode.api_server.dto.studyroom;
 
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.kohsuke.github.GHEventPayload;
 
 import java.util.List;
 
-@Getter @Setter
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
 public class DetailStudyroomResponse {
 
@@ -17,12 +14,26 @@ public class DetailStudyroomResponse {
     private MemberRole role;
     private List<Member> members;
 
-    @Getter @Setter
-    @AllArgsConstructor
+    @Builder
+    public DetailStudyroomResponse(Long studyroomId,MemberRole role,List<Member> members){
+        this.studyroomId=studyroomId;
+        this.role=role;
+        this.members=members;
+    }
+
+    @Getter
     public static class Member{
         Long memberId;
         String nickname;
         Long avatarId;
+        Long colorId;
+        @Builder
+        public Member(Long memberId, String nickname, Long avatarId, Long colorId) {
+            this.memberId = memberId;
+            this.nickname = nickname;
+            this.avatarId = avatarId;
+            this.colorId= colorId;
+        }
     }
 
 }

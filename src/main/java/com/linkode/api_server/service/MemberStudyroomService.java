@@ -1,5 +1,6 @@
 package com.linkode.api_server.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.linkode.api_server.common.exception.LeaveStudyroomExeption;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
@@ -16,10 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
@@ -71,24 +69,30 @@ public class MemberStudyroomService {
     /**
      * 스터디룸 입장 (기존 회원)
      * */
-    public DetailStudyroomResponse getStudyroomDetail(long studyroomId, long memberId){
-        MemberStudyroom memberStudyroom = memberstudyroomRepository.getStudyroomDetail(studyroomId,memberId,BaseStatus.ACTIVE)
-                .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+    public DetailStudyroomResponse getStudyroomDetail(long studyroomId, long memberId) {
+        log.info("[MemberStudyroomService.getStudyroomDetail]");
+        List<Object[]> results = memberstudyroomRepository.getStudyroomDetail(studyroomId, memberId, BaseStatus.ACTIVE);
 
-        /** DTO의 맴버에 맴버엔티티 매핑 */
-        List<DetailStudyroomResponse.Member> members = memberStudyroom.getStudyroom().getMemberStudyroomList()
-                .stream()
-                .map(ms -> new DetailStudyroomResponse.Member(
-                        ms.getMember().getMemberId(),
-                        ms.getMember().getNickname(),
-                        ms.getMember().getAvatar().getAvatarId()
-                ))
+        if (results.isEmpty()) {
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
+        Object[] firstRow = results.get(0);
+        MemberRole role = (MemberRole) firstRow[0];
+
+        List<DetailStudyroomResponse.Member> members = results.stream()
+                .map(row -> DetailStudyroomResponse.Member.builder()
+                        .memberId((Long) row[1])
+                        .nickname((String) row[2])
+                        .avatarId((Long) row[3])
+                        .colorId((Long) row[4])
+                        .build())
                 .collect(Collectors.toList());
 
-        /** DTO 객체 생성*/
-        DetailStudyroomResponse response = new DetailStudyroomResponse(memberStudyroom.getMemberStudyroomId()
-                ,memberStudyroom.getRole(),members);
-        return response;
+        return DetailStudyroomResponse.builder()
+                .role(role)
+                .studyroomId(studyroomId)
+                .members(members)
+                .build();
     }
 
     /**
@@ -100,6 +104,7 @@ public class MemberStudyroomService {
      * */
     @Transactional
     public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
+        log.info("[MemberStudyroomService.leaveStudyroom]");
         try {
             MemberStudyroom memberStudyroom = memberstudyroomRepository
                     .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
@@ -129,7 +134,7 @@ public class MemberStudyroomService {
      * 스트림 문법으로 매핑
      * */
     public MemberStudyroomListResponse getMemberStudyroomList(long memberId){
-
+        log.info("[MemberStudyroomService.getMemberStudyroomList]");
         List<MemberStudyroomListResponse.Studyroom> studyroomList =
                 memberstudyroomRepository.findByMemberIdAndStatus(memberId,BaseStatus.ACTIVE)
                         .orElseThrow(()->new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM))
