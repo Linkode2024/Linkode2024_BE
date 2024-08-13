@@ -13,7 +13,6 @@ public class UploadDataRequest {
 
     private long studyroomId;
     private DataType datatype;
-    @Nullable
     private MultipartFile file;
 
 }
