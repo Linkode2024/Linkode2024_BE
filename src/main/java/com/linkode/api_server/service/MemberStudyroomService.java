@@ -70,6 +70,7 @@ public class MemberStudyroomService {
      * 스터디룸 입장 (기존 회원)
      * */
     public DetailStudyroomResponse getStudyroomDetail(long studyroomId, long memberId) {
+        log.info("[MemberStudyroomService.getStudyroomDetail]");
         List<Object[]> results = memberstudyroomRepository.getStudyroomDetail(studyroomId, memberId, BaseStatus.ACTIVE);
 
         if (results.isEmpty()) {
@@ -103,6 +104,7 @@ public class MemberStudyroomService {
      * */
     @Transactional
     public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
+        log.info("[MemberStudyroomService.leaveStudyroom]");
         try {
             MemberStudyroom memberStudyroom = memberstudyroomRepository
                     .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
@@ -132,7 +134,7 @@ public class MemberStudyroomService {
      * 스트림 문법으로 매핑
      * */
     public MemberStudyroomListResponse getMemberStudyroomList(long memberId){
-
+        log.info("[MemberStudyroomService.getMemberStudyroomList]");
         List<MemberStudyroomListResponse.Studyroom> studyroomList =
                 memberstudyroomRepository.findByMemberIdAndStatus(memberId,BaseStatus.ACTIVE)
                         .orElseThrow(()->new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM))
