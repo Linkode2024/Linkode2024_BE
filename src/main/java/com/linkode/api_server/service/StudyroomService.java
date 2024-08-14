@@ -1,25 +1,23 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
+import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
@@ -40,6 +38,7 @@ public class StudyroomService {
     private final MemberRepository memberRepository;
     private final InviteService inviteService;
     private final S3Uploader s3Uploader;
+    private final FileValidater fileValidater;
 
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
@@ -78,23 +77,30 @@ public class StudyroomService {
     /** 스터디룸 생성
      * 사진 업로드 안할 시 기본 이미지 */
     @Transactional
-    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId) throws IOException {
+    public CreateStudyroomResponse createStudyroom(CreateStudyroomRequest request, long memberId){
         log.info("Start createStudyroom method of StudyroomService Class");
         String fileUrl = getProfileUrl(request.getStudyroomProfile());
         Studyroom studyroom = new Studyroom(request.getStudyroomName(), fileUrl, BaseStatus.ACTIVE);
         studyroomRepository.save(studyroom);
         log.info("Success Create Studyroom");
         joinStudyroomAsCaptain(studyroom.getStudyroomId(),memberId);
-        return new CreateStudyroomResponse( studyroom.getStudyroomId(), studyroom.getStudyroomName(),
-                studyroom.getStudyroomProfile());
-
+        return CreateStudyroomResponse.builder()
+                .studyroomId(studyroom.getStudyroomId())
+                .studyroomName(studyroom.getStudyroomName())
+                .studyroomProfile(studyroom.getStudyroomProfile())
+                .build();
     }
 
     /** 이미지 URL 얻는 메소드 분리 */
     private String getProfileUrl(MultipartFile file){
+        log.info("StudyroomService.getProfileUrl");
+
         if(file==null || file.isEmpty()){
             return DEFAULT_PROFILE;
         }else{
+            if(!fileValidater.validateFile(file.getOriginalFilename(), DataType.IMG)) {
+                throw new DataException(INVALID_EXTENSION);
+            }
             return s3Uploader.uploadFileToS3(file, S3_FOLDER);
         }
     }
@@ -102,7 +108,11 @@ public class StudyroomService {
     /** 방장으로 가입 */
     @Transactional
     public void joinStudyroomAsCaptain(long studyroomId, long memberId){
-        JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId, memberId, MemberRole.CAPTAIN);
+        JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
+                        .studyroomId(studyroomId)
+                        .memberId(memberId)
+                        .memberRole(MemberRole.CAPTAIN)
+                        .build();
         joinStudyroom(joinStudyroomRequest);
         log.info("Success Join Studyroom as Captain");
     }

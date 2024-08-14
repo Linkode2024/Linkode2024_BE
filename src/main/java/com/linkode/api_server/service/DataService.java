@@ -13,6 +13,7 @@ import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.repository.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class DataService {
     private final MemberstudyroomRepository memberstudyroomRepository;
     private final DataRepository dataRepository;
     private final S3Uploader s3Uploader;
+    private final FileValidater fileValidater;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
@@ -54,11 +56,30 @@ public class DataService {
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
         try {
-            String fileName = request.getFile().getOriginalFilename();
+            String fileName="";
             DataType fileType = request.getDatatype();
-            String fileUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
+            String fileUrl="";
+            if(fileType.equals(DataType.LINK) && request.getLink() != null){
+                fileName = request.getLink();
+                fileUrl = request.getLink();
+            }else if (request.getFile() != null) {
+                fileName = request.getFile().getOriginalFilename();
+                fileUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
+            }
+            else {
+                throw new DataException(NONE_FILE);
+            }
+            if(!fileValidater.validateFile(fileName,fileType)){
+                throw new DataException(INVALID_EXTENSION);
+            }
             Data savedData = saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
-            return new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl());
+            return UploadDataResponse.builder()
+                    .dataId(savedData.getDataId())
+                    .dataUrl(savedData.getDataUrl())
+                    .dataType(savedData.getDataType())
+                    .dataName(savedData.getDataName())
+                    .build();
+
         } catch (NullPointerException e) {
             throw new DataException(NONE_FILE);
         }

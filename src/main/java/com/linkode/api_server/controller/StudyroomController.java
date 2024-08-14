@@ -1,5 +1,6 @@
 package com.linkode.api_server.controller;
 
+import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
@@ -62,9 +63,14 @@ public class StudyroomController {
     @PostMapping("/generation")
     public BaseResponse<CreateStudyroomResponse> createStudyroom(@RequestHeader("Authorization") String authorization,
                                                    @ModelAttribute CreateStudyroomRequest request) throws IOException{
-        log.info("Success createStudyroom API");
-        long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return new BaseResponse<>(SUCCESS, studyroomService.createStudyroom(request, memberId));
+        try {
+            log.info("Success createStudyroom API");
+            long memberId = jwtProvider.extractIdFromHeader(authorization);
+            return new BaseResponse<>(SUCCESS, studyroomService.createStudyroom(request, memberId));
+        }catch (DataException de){
+            return new BaseResponse<>(de.getExceptionStatus(),null);
+        }
+
     }
 
     /**
