@@ -146,13 +146,14 @@ public class StudyroomService {
      * 스터디룸 수정
      */
     @Transactional
-    public void modifyStudyroom(Long memberId, PatchStudyroomRequest patchStudyroomRequest){
+    public CreateStudyroomResponse modifyStudyroom(Long memberId, PatchStudyroomRequest patchStudyroomRequest){
         log.info("[StudyroomService.modifyStudyroom]");
         Long studyroomId = patchStudyroomRequest.getStudyroomId();
         MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId, studyroomId,BaseStatus.ACTIVE)
-                .orElseThrow(()->new StudyroomException(NOT_FOUND_MEMBERROLE));
+                .orElseThrow(()->new StudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
         if(memberStudyroom.getRole().equals(MemberRole.CAPTAIN)){
+            log.info("[StudyroomService.modifyStudyroom -- MEMBERROLE : CAPTAIN]");
             Studyroom studyroom = studyroomRepository.findById(studyroomId)
                     .orElseThrow(()-> new StudyroomException(NOT_FOUND_STUDYROOM));
 
@@ -169,6 +170,7 @@ public class StudyroomService {
 
             studyroom.updateStudyroomInfo(studyroomName,studyroomImg);
             studyroomRepository.save(studyroom);
+            return new CreateStudyroomResponse(studyroomId,studyroomName,studyroomImg);
         }else{
             throw new StudyroomException(INVALID_ROLE);
         }
