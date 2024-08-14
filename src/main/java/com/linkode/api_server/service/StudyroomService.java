@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
@@ -153,17 +151,22 @@ public class StudyroomService {
         Long studyroomId = patchStudyroomRequest.getStudyroomId();
         MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId, studyroomId,BaseStatus.ACTIVE)
                 .orElseThrow(()->new StudyroomException(NOT_FOUND_MEMBERROLE));
+
         if(memberStudyroom.getRole().equals(MemberRole.CAPTAIN)){
             Studyroom studyroom = studyroomRepository.findById(studyroomId)
                     .orElseThrow(()-> new StudyroomException(NOT_FOUND_STUDYROOM));
+
             String studyroomName = studyroom.getStudyroomName();
             String studyroomImg = studyroom.getStudyroomProfile();
+
             if(patchStudyroomRequest.getStudyroomName() != null){
                 studyroomName = patchStudyroomRequest.getStudyroomName();
             }
+
             if(patchStudyroomRequest.getStudyroomImg() != null){
-                studyroomImg = patchStudyroomRequest.getStudyroomImg();
+                studyroomImg = getProfileUrl(patchStudyroomRequest.getStudyroomImg());
             }
+
             studyroom.updateStudyroomInfo(studyroomName,studyroomImg);
             studyroomRepository.save(studyroom);
         }else{
