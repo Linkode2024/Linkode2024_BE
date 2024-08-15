@@ -41,9 +41,9 @@ public class StudyroomController {
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId, memberId);
         log.info("Run Delete Studyroom API ");
         if (responseStatus == SUCCESS) {
-            return new BaseResponse<>(responseStatus);
+            return new BaseResponse<>(responseStatus,null);
         } else {
-            return new BaseResponse<>(responseStatus, responseStatus);
+            return new BaseResponse<>(responseStatus,null);
         }
     }
 
