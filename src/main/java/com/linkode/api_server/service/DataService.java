@@ -36,15 +36,15 @@ public class DataService {
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
-    public Data saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
+    public Data saveData(String dataName, DataType dataType, String dataUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
 
         Data data = Data.builder()
-                .dataName(fileName)
-                .dataType(fileType)
+                .dataName(dataName)
+                .dataType(dataType)
                 .status(BaseStatus.ACTIVE)
                 .studyroom(studyroom)
-                .dataUrl(fileUrl)
+                .dataUrl(dataUrl)
                 .member(member)
                 .build();
         return dataRepository.save(data);
@@ -56,23 +56,11 @@ public class DataService {
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
         try {
-            String fileName="";
-            DataType fileType = request.getDatatype();
-            String fileUrl="";
-            if(fileType.equals(DataType.LINK) && request.getLink() != null){
-                fileName = request.getLink();
-                fileUrl = request.getLink();
-            }else if (request.getFile() != null) {
-                fileName = request.getFile().getOriginalFilename();
-                fileUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
-            }
-            else {
-                throw new DataException(NONE_FILE);
-            }
-            if(!fileValidater.validateFile(fileName,fileType)){
-                throw new DataException(INVALID_EXTENSION);
-            }
-            Data savedData = saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
+            String[] dataInfo = extractDataNameAndUrl(request);
+            String dataName=dataInfo[0];
+            DataType dataType = request.getDataType();
+            String dataUrl=dataInfo[1];
+            Data savedData = saveData(dataName, dataType, dataUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
             return UploadDataResponse.builder()
                     .dataId(savedData.getDataId())
                     .dataUrl(savedData.getDataUrl())
@@ -93,5 +81,33 @@ public class DataService {
         List<DataListResponse.Data> dataList= dataRepository.getDataListByType(studyroomId,type, BaseStatus.ACTIVE)
                 .orElseThrow(()->new DataException(NOT_FOUND_DATA));
         return new DataListResponse(dataList);
+    }
+
+    /** 이름과 URL 추출 */
+    private String[] extractDataNameAndUrl(UploadDataRequest request){
+        log.info("[DataService.extractDataNameAndUrl]");
+        DataType dataType = request.getDataType();
+        if(dataType.equals(DataType.LINK) && request.getLink() != null){
+            String dataName = request.getLink();
+            validateData(dataName,dataType);
+            String dataUrl = request.getLink();
+            return new String[]{dataName,dataUrl};
+        }else if (request.getFile() != null) {
+            String dataName = request.getFile().getOriginalFilename();
+            validateData(dataName,dataType);
+            String dataUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
+            return new String[]{dataName,dataUrl};
+        }
+        else {
+            throw new DataException(NONE_FILE);
+        }
+    }
+
+    /** 이름과 타입으로 확장자 검사 */
+    private void validateData(String dataName, DataType dataType){
+        log.info("[DataService.validateData]");
+        if(!fileValidater.validateFile(dataName,dataType)){
+            throw new DataException(INVALID_EXTENSION);
+        }
     }
 }

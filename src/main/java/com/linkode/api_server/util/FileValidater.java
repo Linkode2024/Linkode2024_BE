@@ -11,6 +11,7 @@ import java.util.Set;
 @Component
 @Slf4j
 public class FileValidater {
+    /** 집합으로 정의 */
     private static final Set<String> IMAGE_EXTENSIONS = new HashSet<>();
     private static final Set<String> FILE_EXTENSIONS = new HashSet<>();
     static {
@@ -64,6 +65,7 @@ public class FileValidater {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
+    /** URL은 별도로 검증 */
     public boolean validateUrl(String url) {
         log.info("FileValidater.validateUrl");
         String urlRegex = "^(https|http)://[^\\s/$.?#].[^\\s]*$";

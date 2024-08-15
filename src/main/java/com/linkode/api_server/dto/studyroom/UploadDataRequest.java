@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadDataRequest {
 
     private long studyroomId;
-    private DataType datatype;
+    private DataType dataType;
     @Nullable
     private MultipartFile file;
     @Nullable
