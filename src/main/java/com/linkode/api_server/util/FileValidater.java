@@ -56,6 +56,7 @@ public class FileValidater {
         }
     }
 
+    /** 파일 확장자 추가 */
     public String getFileExtension(String fileName){
         log.info("FileValidater.getFileExtension");
         log.info("fileExtension : "+fileName.substring(fileName.lastIndexOf(".") + 1));
