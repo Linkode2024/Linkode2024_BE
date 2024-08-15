@@ -36,7 +36,7 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     @Query("UPDATE MemberStudyroom ms SET ms.status = :status WHERE ms IN :memberStudyrooms")
     void updateMemberStudyroomStatus(@Param("memberStudyrooms") List<MemberStudyroom> memberStudyrooms, @Param("status") BaseStatus status);
 
-    @Query("SELECT ms.role, m.memberId, m.nickname, m.avatar.id, m.color.id " +
+    @Query("SELECT ms.role, s.studyroomName, m.memberId, m.nickname, m.avatar.id, m.color.id " +
             "FROM MemberStudyroom ms " +
             "JOIN ms.studyroom s " +
             "JOIN s.memberStudyroomList msl " +
