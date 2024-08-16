@@ -73,4 +73,10 @@ public class DataService {
                 .orElseThrow(()->new DataException(NOT_FOUND_DATA));
         return new DataListResponse(dataList);
     }
+
+    public void validateMember(long memberId , long studyroomId){
+        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
+    }
 }
