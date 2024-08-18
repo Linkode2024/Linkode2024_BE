@@ -43,12 +43,11 @@ public class FileValidater {
     }
 
     public boolean validateFile(String filename, DataType dataType){
-        String extension = getFileExtension(filename);
         switch (dataType) {
             case IMG:
-                return IMAGE_EXTENSIONS.contains(extension.toLowerCase());
+                return IMAGE_EXTENSIONS.contains(getFileExtension(filename).toLowerCase());
             case FILE:
-                return FILE_EXTENSIONS.contains(extension.toLowerCase());
+                return FILE_EXTENSIONS.contains(getFileExtension(filename).toLowerCase());
             case LINK:
                 return validateUrl(filename);
             default:
