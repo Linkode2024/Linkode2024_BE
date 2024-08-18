@@ -122,8 +122,8 @@ public class SignalingHandler extends TextWebSocketHandler {
     }
 
     /**
-     * 소켓 세션의 URI에서 유저 ID 추출
-     * URI 형식: ws://localhost:8080/ws?studyroomId=1&userId=1
+     * 소켓 세션의 URI에서 유저 ID 추출하는 방식이아니라 세션에 저장된 아이디 이용
+     * URI 형식: ws://localhost:8080/ws?studyroomId=1
      */
     private String getUserId(WebSocketSession session) {
         return (String) session.getAttributes().get("memberId");  // 세션 속성에서 ID 추출
