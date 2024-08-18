@@ -126,7 +126,7 @@ public class SignalingHandler extends TextWebSocketHandler {
      * URI 형식: ws://localhost:8080/ws?studyroomId=1&userId=1
      */
     private String getUserId(WebSocketSession session) {
-        return (String) session.getAttributes().get("githubId");  // 세션 속성에서 ID 추출
+        return (String) session.getAttributes().get("memberId");  // 세션 속성에서 ID 추출
     }
     /**
      * 특정 사용자에게 메시지 전송

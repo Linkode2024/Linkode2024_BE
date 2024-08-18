@@ -37,11 +37,10 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 String studyroomId = extractStudyroomIdFromUri(uri);
                 if (tokenService.checkTokenExists(githubId)) {
                     dataService.validateStudyroomMember(memberId,Long.valueOf(studyroomId));
-                    attributes.put("githubId", githubId);
+                    attributes.put("memberId", String.valueOf(memberId));
                     return true;
                 }
             } catch (Exception e) {
-                // 인증 실패, 연결 거부
                 response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
                 return false;
             }
