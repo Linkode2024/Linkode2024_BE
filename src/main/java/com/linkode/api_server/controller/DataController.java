@@ -24,8 +24,9 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 public class DataController {
     private final DataService dataService;
     private final JwtProvider jwtProvider;
-    private final SignalingHandler signalingHandler;
-
+    /**
+     * 자료 업로드
+     */
     @PostMapping("/upload")
     public BaseResponse<UploadDataResponse> uploadData(
             @RequestHeader("Authorization") String authorization,
@@ -35,7 +36,7 @@ public class DataController {
         try {
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
             UploadDataResponse response = dataService.uploadData(request, memberId);
-            signalingHandler.broadcastMessage(String.valueOf(request.getStudyroomId()), String.valueOf(memberId), dataService.extractJsonResponse(response));
+            dataService.broadCastUploadDataResponse(request.getStudyroomId(),memberId,response);
             return new BaseResponse<>(SUCCESS, response);
         } catch (DataException de) {
             return new BaseResponse<>(de.getExceptionStatus(), null);
