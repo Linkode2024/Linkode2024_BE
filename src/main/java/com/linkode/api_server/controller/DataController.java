@@ -1,5 +1,7 @@
 package com.linkode.api_server.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
@@ -7,13 +9,12 @@ import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
+import com.linkode.api_server.handler.SignalingHandler;
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.util.JwtProvider;
-import com.linkode.api_server.util.SseEmitters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_DATA;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
@@ -25,7 +26,7 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 public class DataController {
     private final DataService dataService;
     private final JwtProvider jwtProvider;
-    private final SseEmitters sseEmitters;
+    private final SignalingHandler signalingHandler;
 
     @PostMapping("/upload")
     public BaseResponse<UploadDataResponse> uploadData(
@@ -36,13 +37,8 @@ public class DataController {
         try {
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
             UploadDataResponse response = dataService.uploadData(request, memberId);
-            for (SseEmitter emitter : sseEmitters.getEmitters(request.getStudyroomId())) {
-                try {
-                    emitter.send(response);
-                } catch (Exception e) {
-                    emitter.completeWithError(e);
-                }
-            }
+            String jsonResponse = "DATA_UPLOAD: " +extractJsonResponse(response);
+            signalingHandler.broadcastMessage(String.valueOf(request.getStudyroomId()), String.valueOf(memberId), jsonResponse);
             return new BaseResponse<>(SUCCESS, response);
         } catch (DataException de) {
             return new BaseResponse<>(de.getExceptionStatus(), null);
@@ -65,23 +61,15 @@ public class DataController {
             return new BaseResponse<>(NOT_FOUND_DATA, null);
         }
     }
-    @GetMapping("/list/sse")
-    public SseEmitter subscribeDataList(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId) {
-        log.info("[DataController.subscribeDataList]");
-        long memberId = jwtProvider.extractIdFromHeader(authorization);
-        dataService.validateMember(memberId,studyroomId);
-        SseEmitter emitter = new SseEmitter(60000L);/** 커넥션 시간 두시간으로 설정  */
-        sseEmitters.add(studyroomId,emitter);
-        try {
-            /** 처음에 SSE 응답을 할 때 아무런 이벤트도 보내지 않으면 재연결 요청을 보낼때나, 아니면 연결 요청 자체에서 오류가 발생하기때문에 최초 연결 메세지 전달  */
-            emitter.send(SseEmitter.event().name("INIT").data("Connection established"));
-        }catch (MemberStudyroomException mse){
-            emitter.completeWithError(mse);
-        } catch (Exception e) {
-            emitter.completeWithError(e);
-        }
 
-        return emitter;
+    private String extractJsonResponse(UploadDataResponse response){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(response);
+        } catch (JsonProcessingException e) {
+            log.error("JSON 직렬화 중 오류 발생: ", e);
+            return "{ error }";
+        }
     }
 
 }

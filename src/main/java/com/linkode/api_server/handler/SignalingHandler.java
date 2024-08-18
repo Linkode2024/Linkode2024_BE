@@ -159,7 +159,7 @@ public class SignalingHandler extends TextWebSocketHandler {
     }
 
     /** 반복문 돌면서 자신의 세션을 제외한 각세션에게 메세지를 뿌림! */
-    private void broadcastMessage(String studyroomId, String userId, String message) {
+    public void broadcastMessage(String studyroomId, String userId, String message) {
         Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
         if (sessions != null) {
             for (WebSocketSession s : sessions) {
