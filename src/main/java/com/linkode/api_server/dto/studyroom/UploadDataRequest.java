@@ -7,12 +7,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-@Getter @Setter
+@Getter
 @AllArgsConstructor
 public class UploadDataRequest {
 
     private long studyroomId;
-    private DataType datatype;
+    private DataType dataType;
+    @Nullable
     private MultipartFile file;
-
+    @Nullable
+    private String link;
 }

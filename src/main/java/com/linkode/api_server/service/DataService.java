@@ -13,6 +13,7 @@ import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.repository.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,18 +32,19 @@ public class DataService {
     private final MemberstudyroomRepository memberstudyroomRepository;
     private final DataRepository dataRepository;
     private final S3Uploader s3Uploader;
+    private final FileValidater fileValidater;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
-    public Data saveData(String fileName, DataType fileType, String fileUrl, Member member, Studyroom studyroom) {
+    public Data saveData(String dataName, DataType dataType, String dataUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
 
         Data data = Data.builder()
-                .dataName(fileName)
-                .dataType(fileType)
+                .dataName(dataName)
+                .dataType(dataType)
                 .status(BaseStatus.ACTIVE)
                 .studyroom(studyroom)
-                .dataUrl(fileUrl)
+                .dataUrl(dataUrl)
                 .member(member)
                 .build();
         return dataRepository.save(data);
@@ -54,11 +56,18 @@ public class DataService {
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
         try {
-            String fileName = request.getFile().getOriginalFilename();
-            DataType fileType = request.getDatatype();
-            String fileUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
-            Data savedData = saveData(fileName, fileType, fileUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
-            return new UploadDataResponse(savedData.getDataId(), savedData.getDataName(), savedData.getDataType(), savedData.getDataUrl());
+            String[] dataInfo = extractDataNameAndUrl(request);
+            String dataName=dataInfo[0];
+            DataType dataType = request.getDataType();
+            String dataUrl=dataInfo[1];
+            Data savedData = saveData(dataName, dataType, dataUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
+            return UploadDataResponse.builder()
+                    .dataId(savedData.getDataId())
+                    .dataUrl(savedData.getDataUrl())
+                    .dataType(savedData.getDataType())
+                    .dataName(savedData.getDataName())
+                    .build();
+
         } catch (NullPointerException e) {
             throw new DataException(NONE_FILE);
         }
@@ -74,9 +83,31 @@ public class DataService {
         return new DataListResponse(dataList);
     }
 
-    public void validateMember(long memberId , long studyroomId){
-        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
-            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+    /** 이름과 URL 추출 */
+    private String[] extractDataNameAndUrl(UploadDataRequest request){
+        log.info("[DataService.extractDataNameAndUrl]");
+        DataType dataType = request.getDataType();
+        if(dataType.equals(DataType.LINK) && request.getLink() != null){
+            String dataName = request.getLink();
+            validateData(dataName,dataType);
+            String dataUrl = request.getLink();
+            return new String[]{dataName,dataUrl};
+        }else if (request.getFile() != null) {
+            String dataName = request.getFile().getOriginalFilename();
+            validateData(dataName,dataType);
+            String dataUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
+            return new String[]{dataName,dataUrl};
+        }
+        else {
+            throw new DataException(NONE_FILE);
+        }
+    }
+
+    /** 이름과 타입으로 확장자 검사 */
+    private void validateData(String dataName, DataType dataType){
+        log.info("[DataService.validateData]");
+        if(!fileValidater.validateFile(dataName,dataType)){
+            throw new DataException(INVALID_EXTENSION);
         }
     }
 }
