@@ -3,6 +3,7 @@ package com.linkode.api_server.util;
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -14,6 +15,7 @@ import java.net.URI;
 import java.util.Map;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
@@ -23,8 +25,9 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-                                   Map<String, Object> attributes) throws Exception {
+                                   Map<String, Object> attributes){
 
+        log.info("[JwtHandshakeInterceptor.beforeHandshake]");
         HttpHeaders headers = request.getHeaders();
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION);
         long memberId = jwtProvider.extractIdFromHeader(token);
@@ -38,6 +41,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 if (tokenService.checkTokenExists(githubId)) {
                     dataService.validateStudyroomMember(memberId,Long.valueOf(studyroomId));
                     attributes.put("memberId", String.valueOf(memberId));
+                    log.info("Socket Auth Success!");
                     return true;
                 }
             } catch (Exception e) {
@@ -47,7 +51,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         }
 
         response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
-        return false; // JWT 토큰이 없거나 유효하지 않으면 연결 거부
+        return false; /** JWT 토큰이 없거나 유효하지 않으면 연결 거부 */
     }
     private String extractStudyroomIdFromUri(URI uri) {
         String query = uri.getQuery();
