@@ -125,27 +125,9 @@ public class SignalingHandler extends TextWebSocketHandler {
      * 소켓 세션의 URI에서 유저 ID 추출
      * URI 형식: ws://localhost:8080/ws?studyroomId=1&userId=1
      */
-    private String getUserId(WebSocketSession session) throws URISyntaxException {
-          URI uri = session.getUri();
-          if (uri == null) {
-              throw new IllegalArgumentException("Session URI is null");
-          }
-
-          String query = uri.getQuery();
-          if (query == null) {
-              throw new IllegalArgumentException("Query string is null");
-          }
-
-          String[] queryParams = query.split("&");
-          for (String param : queryParams) {
-              String[] keyValue = param.split("=");
-              if (keyValue.length == 2 && "userId".equals(keyValue[0])) {
-                  return keyValue[1];
-              }
-          }
-
-          throw new IllegalArgumentException("userId not found in query string");
-      }
+    private String getUserId(WebSocketSession session) {
+        return (String) session.getAttributes().get("githubId");  // 세션 속성에서 ID 추출
+    }
     /**
      * 특정 사용자에게 메시지 전송
      */

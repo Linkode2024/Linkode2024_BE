@@ -122,4 +122,10 @@ public class DataService {
             return "{ error }";
         }
     }
+
+    public void validateStudyroomMember(long memberId, long studyroomId){
+        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
+    }
 }
