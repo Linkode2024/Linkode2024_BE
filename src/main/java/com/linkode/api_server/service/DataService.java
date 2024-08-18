@@ -1,5 +1,7 @@
 package com.linkode.api_server.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.domain.Member;
@@ -108,6 +110,16 @@ public class DataService {
         log.info("[DataService.validateData]");
         if(!fileValidater.validateFile(dataName,dataType)){
             throw new DataException(INVALID_EXTENSION);
+        }
+    }
+
+    public String extractJsonResponse(UploadDataResponse response){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return "DATA_UPLOAD: " + objectMapper.writeValueAsString(response);
+        } catch (JsonProcessingException e) {
+            log.error("JSON 직렬화 중 오류 발생: ", e);
+            return "{ error }";
         }
     }
 }

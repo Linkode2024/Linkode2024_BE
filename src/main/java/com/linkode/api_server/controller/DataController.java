@@ -1,7 +1,5 @@
 package com.linkode.api_server.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
@@ -37,8 +35,7 @@ public class DataController {
         try {
             Long memberId = jwtProvider.extractIdFromHeader(authorization);
             UploadDataResponse response = dataService.uploadData(request, memberId);
-            String jsonResponse = "DATA_UPLOAD: " +extractJsonResponse(response);
-            signalingHandler.broadcastMessage(String.valueOf(request.getStudyroomId()), String.valueOf(memberId), jsonResponse);
+            signalingHandler.broadcastMessage(String.valueOf(request.getStudyroomId()), String.valueOf(memberId), dataService.extractJsonResponse(response));
             return new BaseResponse<>(SUCCESS, response);
         } catch (DataException de) {
             return new BaseResponse<>(de.getExceptionStatus(), null);
@@ -61,15 +58,4 @@ public class DataController {
             return new BaseResponse<>(NOT_FOUND_DATA, null);
         }
     }
-
-    private String extractJsonResponse(UploadDataResponse response){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(response);
-        } catch (JsonProcessingException e) {
-            log.error("JSON 직렬화 중 오류 발생: ", e);
-            return "{ error }";
-        }
-    }
-
 }
