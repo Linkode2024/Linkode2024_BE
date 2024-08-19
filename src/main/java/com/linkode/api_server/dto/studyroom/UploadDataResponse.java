@@ -14,6 +14,11 @@ public class UploadDataResponse {
     private String dataName;
     private DataType dataType;
     private String dataUrl;
+    private String ogTitle;
+    private String ogDescription;
+    private String ogImage;
+    private String ogUrl;
+    private String ogType;
 
     @Builder
     public UploadDataResponse(Long dataId, String dataName, DataType dataType, String dataUrl, String ogTitle, String ogDescription, String ogImage, String ogUrl, String ogType) {

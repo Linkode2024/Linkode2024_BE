@@ -156,7 +156,7 @@ public class DataService {
         signalingHandler.broadcastMessage(String.valueOf(studyroomId), String.valueOf(memberId), extractJsonResponse(response));
         log.info("BroadcastMessage of UploadData Success!");
     }
-}
+
     /** 이름과 타입으로 확장자 검사 */
     private void validateType(UploadDataRequest request){
         log.info("[DataService.validateType]");
