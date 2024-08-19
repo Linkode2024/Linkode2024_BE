@@ -18,3 +18,4 @@ public class UploadDataRequest {
     @Nullable
     private String link;
 }
+

@@ -18,6 +18,7 @@ public class FileValidater {
         IMAGE_EXTENSIONS.add("png");
         IMAGE_EXTENSIONS.add("jpg");
         IMAGE_EXTENSIONS.add("jpeg");
+        IMAGE_EXTENSIONS.add("jpng");
         IMAGE_EXTENSIONS.add("svg");
         IMAGE_EXTENSIONS.add("gif");
         IMAGE_EXTENSIONS.add("TIFF");

@@ -26,10 +26,4 @@ public class LoginController {
         return new BaseResponse<>(loginService.githubLogin(code));
     }
 
-    @GetMapping("/test")
-    public String test(@RequestHeader("authorization") String authorization){
-
-        return "success!";
-    }
-
 }

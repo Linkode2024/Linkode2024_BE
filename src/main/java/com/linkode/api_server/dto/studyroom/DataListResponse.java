@@ -27,6 +27,11 @@ public class DataListResponse {
         private long dataId;
         private String dataName;
         private String dataUrl;
+        private String ogTitle;
+        private String ogDescription;
+        private String ogImage;
+        private String ogUrl;
+        private String ogType;
     }
 
 
