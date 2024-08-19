@@ -32,7 +32,7 @@ public class S3Uploader {
 
     public String uploadFileToS3(MultipartFile file, String folder){
         log.info("[S3Uploader.uploadFileToS3]");
-        if(file.isEmpty()){
+        if(file.isEmpty()|file==null){
             throw new DataException(NONE_FILE);
         }
         try (InputStream inputStream = file.getInputStream()) {

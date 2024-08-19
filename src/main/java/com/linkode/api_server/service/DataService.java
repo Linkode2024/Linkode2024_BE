@@ -106,7 +106,8 @@ public class DataService {
             validateData(dataName,dataType);
             String dataUrl = request.getLink();
             return new String[]{dataName,dataUrl};
-        }else if (request.getFile() != null) {
+        }else if (dataType.equals(DataType.FILE)||dataType.equals(DataType.IMG)) {
+            validateType(request);
             String dataName = request.getFile().getOriginalFilename();
             validateData(dataName,dataType);
             String dataUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
@@ -120,9 +121,17 @@ public class DataService {
     /** 이름과 타입으로 확장자 검사 */
     private void validateData(String dataName, DataType dataType){
         log.info("[DataService.validateData]");
-        if(!fileValidater.validateFile(dataName,dataType)){
+        if (dataType.equals(DataType.LINK)&&!fileValidater.validateFile(dataName,dataType)){
+            throw new DataException(INVALID_URL);
+        } else if(!fileValidater.validateFile(dataName,dataType)){
             throw new DataException(INVALID_EXTENSION);
         }
+    }
+
+    /** 이름과 타입으로 확장자 검사 */
+    private void validateType(UploadDataRequest request){
+        log.info("[DataService.validateType]");
+        if(request.getLink()!=null){ throw new DataException(INVALID_TYPE);}
     }
 
     /** OpenGraph 데이터 추출 */
