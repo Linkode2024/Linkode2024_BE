@@ -11,12 +11,14 @@ import java.util.List;
 public class DetailStudyroomResponse {
 
     private Long studyroomId;
+    private String studyroomName;
     private MemberRole role;
     private List<Member> members;
 
     @Builder
-    public DetailStudyroomResponse(Long studyroomId,MemberRole role,List<Member> members){
+    public DetailStudyroomResponse(Long studyroomId,String studyroomName,MemberRole role,List<Member> members){
         this.studyroomId=studyroomId;
+        this.studyroomName=studyroomName;
         this.role=role;
         this.members=members;
     }
