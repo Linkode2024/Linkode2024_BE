@@ -53,8 +53,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      * Data 관련 code : 9000대
      * */
     FAILED_UPLOAD_FILE(9000,HttpStatus.BAD_REQUEST.value(), "파일 업로드 실패"),
-    NONE_FILE(9001,HttpStatus.BAD_REQUEST.value(), "파일 업로드을 업로드하지 않았습니다"),
-    NOT_FOUND_DATA(9002,HttpStatus.BAD_REQUEST.value(), "조건에 맞는자료실을 불러올 수 없습니다.");
+    NONE_FILE(9001,HttpStatus.BAD_REQUEST.value(), "자료를 업로드하지 않았습니다"),
+    NOT_FOUND_DATA(9002,HttpStatus.BAD_REQUEST.value(), "조건에 맞는자료실을 불러올 수 없습니다."),
+    INVALID_EXTENSION(9003,HttpStatus.BAD_REQUEST.value(), "파일 확장자를 확인해주세요."),
+    INVALID_URL(9004,HttpStatus.BAD_REQUEST.value(), "URL 형식을 확인해주세요."),
+    INVALID_TYPE(9005,HttpStatus.BAD_REQUEST.value(), "데이터 타입을 확인해주세요");
+
 
 
     private final int code;

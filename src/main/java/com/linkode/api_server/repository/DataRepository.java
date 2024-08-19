@@ -14,8 +14,9 @@ import java.util.Optional;
 @Repository
 public interface DataRepository extends JpaRepository<Data, Long> {
 
-    @Query("SELECT new com.linkode.api_server.dto.studyroom.DataListResponse$Data(d.dataId, d.dataName, d.dataUrl) " +
-            "FROM Data d WHERE d.studyroom.studyroomId = :studyroomId AND d.dataType = :type AND d.status = :status")
+    @Query("SELECT new com.linkode.api_server.dto.studyroom.DataListResponse$Data(d.dataId, d.dataName, d.dataUrl, d.ogTitle, d.ogDescription, d.ogImage, d.ogUrl, d.ogType) " +
+            "FROM Data d WHERE d.studyroom.studyroomId = :studyroomId AND d.dataType = :type AND d.status = :status " +
+            "ORDER BY d.dataId DESC")
     Optional<List<DataListResponse.Data>> getDataListByType(Long studyroomId, DataType type , BaseStatus status);
 
 }
