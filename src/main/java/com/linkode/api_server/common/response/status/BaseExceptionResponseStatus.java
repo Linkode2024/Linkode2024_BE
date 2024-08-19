@@ -60,7 +60,6 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     INVALID_TYPE(9005,HttpStatus.BAD_REQUEST.value(), "데이터 타입을 확인해주세요");
 
 
-
     private final int code;
     private final int status;
     private final String message;
