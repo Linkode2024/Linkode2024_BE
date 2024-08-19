@@ -39,6 +39,21 @@ public class Data extends BaseTime {
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
+    /** OpenGraph 메타데이터 필드들 */
+    @Column(nullable = true)
+    private String ogTitle;
+
+    @Column(nullable = true)
+    private String ogDescription;
+
+    @Column(nullable = true)
+    private String ogImage;
+
+    @Column(nullable = true)
+    private String ogUrl;
+
+    @Column(nullable = true)
+    private String ogType;
 
     /** 맴버와의 연관관계의 주인 */
     @ManyToOne(fetch = LAZY)
@@ -51,10 +66,16 @@ public class Data extends BaseTime {
     private Studyroom studyroom;
 
     @Builder
-    public Data(String dataName, DataType dataType, String dataUrl, BaseStatus status, Member member, Studyroom studyroom) {
+    public Data(String dataName, DataType dataType, String dataUrl, String ogTitle, String ogDescription,
+                String ogImage, String ogUrl, String ogType, BaseStatus status, Member member, Studyroom studyroom) {
         this.dataName = dataName;
         this.dataType = dataType;
         this.dataUrl = dataUrl;
+        this.ogTitle = ogTitle;
+        this.ogDescription = ogDescription;
+        this.ogImage = ogImage;
+        this.ogUrl = ogUrl;
+        this.ogType = ogType;
         this.status = status;
         this.member = member;
         this.studyroom = studyroom;
