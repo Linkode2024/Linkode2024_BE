@@ -170,7 +170,11 @@ public class StudyroomService {
 
             studyroom.updateStudyroomInfo(studyroomName,studyroomImg);
             studyroomRepository.save(studyroom);
-            return new CreateStudyroomResponse(studyroomId,studyroomName,studyroomImg);
+            return CreateStudyroomResponse.builder()
+                    .studyroomId(studyroomId)
+                    .studyroomName(studyroomName)
+                    .studyroomProfile(studyroomImg)
+                    .build();
         }else{
             throw new StudyroomException(INVALID_ROLE);
         }
