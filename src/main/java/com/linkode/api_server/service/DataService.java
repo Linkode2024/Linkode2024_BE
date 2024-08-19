@@ -127,6 +127,7 @@ public class DataService {
 
     /** OpenGraph 데이터 추출 */
     private OpenGraphData extractOpenGraphData(String url) {
+        log.info("[DataService.extractOpenGraphData]");
         try {
             Document doc = Jsoup.connect(url).get();
             String ogTitle = getMetaContent(doc, "og:title");
@@ -143,6 +144,7 @@ public class DataService {
 
     /** meta[property]에 대한 content 값을 추출 */
     private String getMetaContent(Document doc, String property) {
+        log.info("[DataService.getMetaContent]");
         Element element = doc.select("meta[property=" + property + "]").first();
         return (element != null) ? element.attr("content") : null;
     }
