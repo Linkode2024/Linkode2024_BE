@@ -11,10 +11,8 @@ import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -71,11 +69,10 @@ public class StudyroomController {
      * 스터디룸 수정
      */
     @PatchMapping("")
-    public BaseResponse<Void> modifyStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody PatchStudyroomRequest patchStudyroomRequest) {
+    public BaseResponse<CreateStudyroomResponse> modifyStudyroom(@RequestHeader("Authorization") String authorization, @ModelAttribute PatchStudyroomRequest patchStudyroomRequest) {
         log.info("[StudyroomController.modifyStudyroom]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        studyroomService.modifyStudyroom(memberId, patchStudyroomRequest);
-        return new BaseResponse<>(null);
+        return new BaseResponse<>(studyroomService.modifyStudyroom(memberId, patchStudyroomRequest));
     }
 
     /**
