@@ -84,11 +84,7 @@ public class StudyroomService {
         studyroomRepository.save(studyroom);
         log.info("Success Create Studyroom");
         joinStudyroomAsCaptain(studyroom.getStudyroomId(),memberId);
-        return CreateStudyroomResponse.builder()
-                .studyroomId(studyroom.getStudyroomId())
-                .studyroomName(studyroom.getStudyroomName())
-                .studyroomProfile(studyroom.getStudyroomProfile())
-                .build();
+        return CreateStudyroomResponse.from(studyroom);
     }
 
     /** 이미지 URL 얻는 메소드 분리 */
@@ -127,11 +123,14 @@ public class StudyroomService {
                 if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
                     throw new MemberException(JOINED_STUDYROOM);
                 }
+        JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
+                .studyroomId(studyroomId)
+                .memberId(memberId)
+                .memberRole(MemberRole.CREW)
+                .build();
 
-               JoinStudyroomRequest joinStudyroomRequest = new JoinStudyroomRequest(studyroomId,
-                        memberId, MemberRole.CREW);
                joinStudyroom(joinStudyroomRequest);
-        return new JoinStudyroomByCodeResponse(studyroomId,studyroom.getStudyroomName(),studyroom.getStudyroomProfile());
+        return JoinStudyroomByCodeResponse.from(studyroom);
     }
 
 
