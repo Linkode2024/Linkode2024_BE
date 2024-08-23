@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(signalingHandler, "/ws")
                 .addInterceptors(jwtHandshakeInterceptor)
-                .setAllowedOrigins("*"); // 모든 출처에서의 요청을 허용합니다.
+                .setAllowedOrigins("http://localhost:3000");
     }
 }
 
