@@ -145,7 +145,7 @@ public class SignalingHandler extends TextWebSocketHandler {
         Set<WebSocketSession> sessions = studyroomSessions.get(studyroomId);
         if (sessions != null) {
             for (WebSocketSession s : sessions) {
-                if (!s.getId().equals(userId)) {
+                if (!userId.equals(getUserId(s))) {
                     try {
                         s.sendMessage(new TextMessage(message));
                     } catch (Exception e) {
