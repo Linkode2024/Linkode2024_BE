@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+
+<h2>WebSocket Test</h2>
+
+<div>
+    <label for="token">JWT Token:</label>
+    <input type="text" id="token" value="" style="width: 80%;">
+</div>
+<br>
+<div>
+    <button id="connectButton">Connect to WebSocket</button>
+</div>
+<br>
+<div>
+    <textarea id="messages" rows="10" cols="80" readonly></textarea>
+</div>
+
+<script>
+    document.getElementById('connectButton').addEventListener('click', function() {
+        const token = document.getElementById('token').value;
+        document.cookie = "token=" + token + "; path=/;";
+
+        const socket = new WebSocket('ws://localhost:8080/ws?studyroomId=2');
+
+        socket.onopen = function() {
+            logMessage('WebSocket connection established');
+        };
+
+        socket.onmessage = function(event) {
+            logMessage('Message from server: ' + event.data);
+        };
+
+        socket.onclose = function() {
+            logMessage('WebSocket connection closed');
+        };
+
+        socket.onerror = function(error) {
+            logMessage('WebSocket error: ' + error);
+        };
+
+        function logMessage(message) {
+            const messages = document.getElementById('messages');
+            messages.value += message + "\n";
+        }
+    });
+</script>
+
+</body>
+</html>
