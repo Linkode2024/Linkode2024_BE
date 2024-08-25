@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 적용
                 .csrf(CsrfConfigurer::disable)  // CSRF 비활성화
                 .authorizeRequests(auth -> auth
-                        .requestMatchers("/login", "/oauth2/redirect","/user/avatar","/linkode","/user/avatar/all").permitAll()  // 이 URL은 모두에게 허용
+                        .requestMatchers("/login", "/oauth2/redirect","/user/avatar","/linkode","/user/avatar/all","/ws/**").permitAll()  // 이 URL은 모두에게 허용
                         .anyRequest().authenticated()  // 그 외의 모든 요청은 인증 필요
                 )
                 .sessionManagement(session -> session
