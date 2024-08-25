@@ -1,15 +1,12 @@
 package com.linkode.api_server.util;
 
-
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.service.TokenService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -28,59 +25,33 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-                                   Map<String, Object> attributes) {
+                                   Map<String, Object> attributes){
 
         log.info("[JwtHandshakeInterceptor.beforeHandshake]");
+        HttpHeaders headers = request.getHeaders();
+        String token = headers.getFirst("Sec-WebSocket-Protocol");
+        long memberId = jwtProvider.extractIdFromHeader("Bearer "+token);
 
-        if (request instanceof ServletServerHttpRequest) {
-            HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-            Cookie[] cookies = servletRequest.getCookies();
-
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    log.info("Found cookie : {} = {}", cookie.getName(), cookie.getValue());
-
-                    if ("token".equals(cookie.getName())) {
-                        String token = cookie.getValue();
-                        log.info("Extracted token: {}", token);
-
-                        if (token != null) {
-                            try {
-                                long memberId = jwtProvider.extractIdFromHeader("Bearer " + token);/**  */
-                                String githubId = jwtProvider.extractGithubIdFromToken(token);
-                                String studyroomId = extractStudyroomIdFromUri(request.getURI());
-                                log.info("Extracted memberId: {}", memberId);
-
-                                if (tokenService.checkTokenExists(githubId)) {
-                                    dataService.validateStudyroomMember(memberId, Long.valueOf(studyroomId));
-                                    attributes.put("memberId", String.valueOf(memberId));
-                                    log.info("Socket Auth Success!");
-                                    return true;
-                                } else {
-                                    log.error("Token does not exist!");
-                                }
-                            } catch (Exception e) {
-                                log.error("Authentication failed", e);
-                                response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
-                                return false;
-                            }
-                        } else {
-                            log.error("Token is null");
-                        }
-                    } else {
-                        log.info("!! No 'token' Cookie found !!");
-                    }
+        if (token != null) {
+            try {
+                URI uri = request.getURI();
+                String githubId = jwtProvider.extractGithubIdFromToken(token);
+                String studyroomId = extractStudyroomIdFromUri(uri);
+                if (tokenService.checkTokenExists(githubId)) {
+                    dataService.validateStudyroomMember(memberId,Long.valueOf(studyroomId));
+                    attributes.put("memberId", String.valueOf(memberId));
+                    log.info("Socket Auth Success!");
+                    return true;
                 }
-            } else {
-                log.error("!! No cookies found in the request !!");
+            } catch (Exception e) {
+                response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
+                return false;
             }
         }
 
         response.setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
-        return false;
+        return false; /** JWT 토큰이 없거나 유효하지 않으면 연결 거부 */
     }
-
-
     private String extractStudyroomIdFromUri(URI uri) {
         String query = uri.getQuery();
         if (query != null) {
@@ -93,7 +64,6 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         }
         throw new IllegalArgumentException("studyroomId not found in query string");
     }
-
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                Exception exception) {
