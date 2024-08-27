@@ -28,10 +28,10 @@ public class DataController {
             @ModelAttribute UploadDataRequest request) {
 
         log.info("[StudyroomController.uploadData]");
-            Long memberId = jwtProvider.extractIdFromHeader(authorization);
-            UploadDataResponse response = dataService.uploadData(request, memberId);
-            dataService.broadCastUploadDataResponse(request.getStudyroomId(),memberId,response);
-            return new BaseResponse<>(response);
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        UploadDataResponse response = dataService.uploadData(request, memberId);
+        dataService.broadCastUploadDataResponse(request.getStudyroomId(),memberId,response);
+        return new BaseResponse<>(response);
     }
     /**
      * 자료실 조회
