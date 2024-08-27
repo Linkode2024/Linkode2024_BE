@@ -4,41 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STOMP WebSocket Test</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
-<body>
+<body class="bg-light">
 
-<h2>STOMP WebSocket Test</h2>
+<div class="container mt-5">
+    <h2 class="text-center">STOMP WebSocket Test</h2>
 
-<div>
-    <label for="token">JWT Token:</label>
-    <input type="text" id="token" placeholder="Enter your JWT token" style="width: 80%;">
-</div>
-<br>
-<div>
-    <label for="studyroomId">Studyroom ID:</label>
-    <input type="text" id="studyroomId" placeholder="Enter studyroom ID" style="width: 80%;">
-</div>
-<br>
-<div>
-    <button id="connectButton">Connect to WebSocket</button>
-    <button id="disconnectButton" disabled>Disconnect</button>
-</div>
-<br>
-<div>
-    <label for="message">Message:</label>
-    <input type="text" id="message" placeholder="Enter message" style="width: 80%;">
-    <button id="sendMessageButton" disabled>Send Message</button>
-</div>
-<br>
-<div>
-    <textarea id="messages" rows="10" cols="80" readonly></textarea>
-</div>
-<br>
-<div>
-    <h3>Upload Events:</h3>
-    <ul id="uploadList"></ul> <!-- 업로드 이벤트를 표시할 리스트 -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    WebSocket 연결
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="token" class="form-label">JWT Token:</label>
+                        <input type="text" id="token" class="form-control" placeholder="Enter your JWT token">
+                    </div>
+                    <div class="mb-3">
+                        <label for="studyroomId" class="form-label">Studyroom ID:</label>
+                        <input type="text" id="studyroomId" class="form-control" placeholder="Enter studyroom ID">
+                    </div>
+                    <div class="mb-3 text-center">
+                        <button id="connectButton" class="btn btn-success">Connect to WebSocket</button>
+                        <button id="disconnectButton" class="btn btn-danger" disabled>Disconnect</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    채팅
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message:</label>
+                        <input type="text" id="message" class="form-control" placeholder="Enter message">
+                    </div>
+                    <div class="mb-3 text-center">
+                        <button id="sendMessageButton" class="btn btn-primary" disabled>Send Message</button>
+                    </div>
+                    <textarea id="messages" class="form-control" rows="10" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    자료실
+                </div>
+                <div class="card-body">
+                    <h3>Upload Events:</h3>
+                    <ul id="uploadList" class="list-unstyled"></ul> <!-- 업로드 이벤트를 표시할 리스트 -->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -137,22 +167,36 @@
     }
 
     function addUploadToList(data) {
+        if (!data || !data.ogTitle || !data.ogImage || !data.ogDescription || !data.dataUrl) return;
+
         const uploadList = document.getElementById('uploadList');
 
-        // 미리보기 링크를 생성하여 리스트에 추가
+        // 미리보기 링크를 생성하여 리스트 최상단에 추가 (Bootstrap Card 사용)
         const listItem = document.createElement('li');
+        listItem.classList.add('mb-3');
         listItem.innerHTML = `
-            <div>
-                <h4>${data.ogTitle}</h4>
-                <p>${data.ogDescription}</p>
-                <a href="${data.dataUrl}" target="_blank">
-                    <img src="${data.ogImage}" alt="Preview Image" style="max-width: 200px;">
-                </a>
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="${data.ogImage}" class="img-fluid rounded-start" alt="Preview Image">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">${data.ogTitle}</h5>
+                            <p class="card-text">${data.ogDescription}</p>
+                            <a href="${data.dataUrl}" class="btn btn-primary" target="_blank">Go to link</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
-        uploadList.appendChild(listItem);
+
+        uploadList.insertBefore(listItem, uploadList.firstChild);
     }
 </script>
+
+<!-- Bootstrap JS (Optional) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
