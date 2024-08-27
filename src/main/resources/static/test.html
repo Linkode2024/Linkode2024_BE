@@ -56,6 +56,34 @@
         </div>
     </div>
 
+    <!-- 새로운 섹션 추가: 특정 사용자 호출 -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Call User
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="targetUserId" class="form-label">Target User ID:</label>
+                        <input type="text" id="targetUserId" class="form-control" placeholder="Enter user ID to call">
+                    </div>
+                    <div class="mb-3 text-center">
+                        <button id="callUserButton" class="btn btn-warning" disabled>Call User</button>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info" id="callAlert" style="display:none;" role="alert">
+                                You have been called by another user!
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
@@ -66,6 +94,7 @@
                     <h3>Upload Events:</h3>
                     <ul id="uploadList" class="list-unstyled"></ul> <!-- 업로드 이벤트를 표시할 리스트 -->
                 </div>
+
             </div>
         </div>
     </div>
@@ -95,6 +124,7 @@
             document.getElementById('connectButton').disabled = true;
             document.getElementById('disconnectButton').disabled = false;
             document.getElementById('sendMessageButton').disabled = false;
+            document.getElementById('callUserButton').disabled = false; // Call User 버튼 활성화
 
             // 일반 메시지 구독
             stompClient.subscribe(`/topic/studyroom/${studyroomId}`, (message) => {
@@ -117,6 +147,13 @@
                     document.getElementById('messages').value += `Received non-JSON message: ${message.body}\n`;
                 }
             });
+
+
+            // 특정 사용자 호출 메시지 구독
+            stompClient.subscribe(`/user/queue/private`, (message) => {
+                document.getElementById('callAlert').style.display = 'block';
+                document.getElementById('messages').value += 'Call received: ' + message.body + '\n';
+            });
         }, (error) => {
             console.error('Connection error: ' + error);
             document.getElementById('messages').value += 'Connection error: ' + error + '\n';
@@ -124,13 +161,20 @@
     });
 
     document.getElementById('disconnectButton').addEventListener('click', function() {
+        const studyroomId = document.getElementById('studyroomId').value;
+
         if (stompClient !== null) {
+            stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, JSON.stringify({
+                type: "leave",
+                content: "User has left the room"
+            }));
             stompClient.disconnect();
         }
         document.getElementById('messages').value += 'Disconnected from WebSocket server.\n';
         document.getElementById('connectButton').disabled = false;
         document.getElementById('disconnectButton').disabled = true;
         document.getElementById('sendMessageButton').disabled = true;
+        document.getElementById('callUserButton').disabled = true;
     });
 
     document.getElementById('sendMessageButton').addEventListener('click', function() {
@@ -138,9 +182,23 @@
         const message = document.getElementById('message').value;
 
         if (stompClient && stompClient.connected) {
-            stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, message);
+            stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, JSON.stringify({
+                type: "message",
+                content: message
+            }));
             document.getElementById('messages').value += 'Sent: ' + message + '\n';
             document.getElementById('message').value = '';
+        }
+    });
+
+    // Call User 기능 추가
+    document.getElementById('callUserButton').addEventListener('click', function() {
+        const studyroomId = document.getElementById('studyroomId').value;
+        const targetUserId = document.getElementById('targetUserId').value;
+
+        if (stompClient && stompClient.connected) {
+            stompClient.send(`/app/studyroom/${studyroomId}/callUser`, {}, targetUserId);
+            document.getElementById('messages').value += `Sent call request to user: ${targetUserId}\n`;
         }
     });
 
@@ -165,7 +223,6 @@
             console.error('Error fetching initial list:', error);
         });
     }
-
     function addUploadToList(data) {
         if (!data || !data.ogTitle || !data.ogImage || !data.ogDescription || !data.dataUrl) return;
 

@@ -144,13 +144,6 @@ public class DataService {
         }
     }
 
-    /** 맴버가 스터디룸 팀원인지 검증 */
-    public void validateStudyroomMember(long memberId, long studyroomId){
-        log.info("[DataService.validateStudyroomMember]");
-        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
-            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
-        }
-    }
 
     /** 업로드 응답을 메세지로 브로드캐스트 */
     public void broadCastUploadDataResponse(long studyroomId, long memberId, UploadDataResponse response) {
