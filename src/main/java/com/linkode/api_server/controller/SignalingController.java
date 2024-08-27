@@ -48,6 +48,7 @@ public class SignalingController {
         }
     }
 
+    /** 이상합니다.. 세션을 어떤거 기반으로 추출해야할지 혼동... */
     @MessageMapping("/studyroom/{studyroomId}/callUser")
     public void callUser(
             @DestinationVariable String studyroomId,
