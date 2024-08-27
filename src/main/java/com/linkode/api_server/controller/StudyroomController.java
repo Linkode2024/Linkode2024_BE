@@ -1,8 +1,5 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.common.exception.DataException;
-import com.linkode.api_server.common.exception.MemberException;
-import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.*;
@@ -16,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
-
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
 
 @RestController
 @Slf4j
