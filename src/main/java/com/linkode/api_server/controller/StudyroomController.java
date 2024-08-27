@@ -38,11 +38,7 @@ public class StudyroomController {
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId, memberId);
         log.info("Run Delete Studyroom API ");
-        if (responseStatus == SUCCESS) {
-            return new BaseResponse<>(responseStatus,null);
-        } else {
-            return new BaseResponse<>(responseStatus,null);
-        }
+        return new BaseResponse<>(responseStatus,null);
     }
 
     /**
@@ -100,15 +96,9 @@ public class StudyroomController {
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         try {
             JoinStudyroomByCodeResponse response = studyroomService.joinStudyroomByCode(request,memberId);
-            return new BaseResponse<>(SUCCESS,response);
+            return new BaseResponse<>(response);
         }catch (NullPointerException e){
             return new BaseResponse<>(INVALID_INVITE_CODE,null);
-        }catch (
-                StudyroomException e){
-            return new BaseResponse<>(INVALID_INVITE_CODE,null);
-        }catch (
-                MemberException m){
-            return new BaseResponse<>(JOINED_STUDYROOM,null);
         }
     }
 
