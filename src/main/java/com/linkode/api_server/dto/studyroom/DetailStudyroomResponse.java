@@ -12,13 +12,15 @@ public class DetailStudyroomResponse {
 
     private Long studyroomId;
     private String studyroomName;
+    private String studyroomProfile;
     private MemberRole role;
     private List<Member> members;
 
     @Builder
-    public DetailStudyroomResponse(Long studyroomId,String studyroomName,MemberRole role,List<Member> members){
+    public DetailStudyroomResponse(Long studyroomId,String studyroomName,String studyroomProfile,MemberRole role,List<Member> members){
         this.studyroomId=studyroomId;
         this.studyroomName=studyroomName;
+        this.studyroomProfile=studyroomProfile;
         this.role=role;
         this.members=members;
     }
