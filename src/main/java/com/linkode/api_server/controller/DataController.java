@@ -7,7 +7,6 @@ import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
-import com.linkode.api_server.handler.SignalingHandler;
 import com.linkode.api_server.service.DataService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;

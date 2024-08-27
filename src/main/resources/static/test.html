@@ -3,53 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Test</title>
+    <title>STOMP WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
 
-<h2>WebSocket Test</h2>
+<h2>STOMP WebSocket Test</h2>
 
 <div>
     <label for="token">JWT Token:</label>
-    <input type="text" id="token" value="" style="width: 80%;">
+    <input type="text" id="token" placeholder="Enter your JWT token" style="width: 80%;">
+</div>
+<br>
+<div>
+    <label for="studyroomId">Studyroom ID:</label>
+    <input type="text" id="studyroomId" placeholder="Enter studyroom ID" style="width: 80%;">
 </div>
 <br>
 <div>
     <button id="connectButton">Connect to WebSocket</button>
+    <button id="disconnectButton" disabled>Disconnect</button>
+</div>
+<br>
+<div>
+    <label for="message">Message:</label>
+    <input type="text" id="message" placeholder="Enter message" style="width: 80%;">
+    <button id="sendMessageButton" disabled>Send Message</button>
 </div>
 <br>
 <div>
     <textarea id="messages" rows="10" cols="80" readonly></textarea>
 </div>
+<br>
+<div>
+    <h3>Upload Events:</h3>
+    <ul id="uploadList"></ul> <!-- 업로드 이벤트를 표시할 리스트 -->
+</div>
 
 <script>
+    let stompClient = null;
+
     document.getElementById('connectButton').addEventListener('click', function() {
         const token = document.getElementById('token').value;
-        document.cookie = "token=" + token + "; path=/;";
+        const studyroomId = document.getElementById('studyroomId').value;
 
-        const socket = new WebSocket('ws://localhost:8080/ws?studyroomId=2');
+        // 초기 리스트 로드
+        loadInitialList(studyroomId, token);
 
-        socket.onopen = function() {
-            logMessage('WebSocket connection established');
+        const socket = new SockJS('http://localhost:8080/ws');  // WebSocket 서버 URL을 localhost로 설정
+        stompClient = Stomp.over(socket);
+
+        // 헤더에 JWT 토큰을 추가하여 서버에 연결
+        const headers = {
+            Authorization: `Bearer ${token}` // Bearer 접두사 포함
         };
 
-        socket.onmessage = function(event) {
-            logMessage('Message from server: ' + event.data);
-        };
+        stompClient.connect(headers, (frame) => {
+            console.log('Connected: ' + frame);
+            document.getElementById('messages').value += 'Connected to WebSocket server.\n';
+            document.getElementById('connectButton').disabled = true;
+            document.getElementById('disconnectButton').disabled = false;
+            document.getElementById('sendMessageButton').disabled = false;
 
-        socket.onclose = function() {
-            logMessage('WebSocket connection closed');
-        };
+            // 일반 메시지 구독
+            stompClient.subscribe(`/topic/studyroom/${studyroomId}`, (message) => {
+                document.getElementById('messages').value += 'Received: ' + message.body + '\n';
+            });
 
-        socket.onerror = function(error) {
-            logMessage('WebSocket error: ' + error);
-        };
+            // 업로드 이벤트 구독
+            stompClient.subscribe(`/topic/studyroom/${studyroomId}/upload`, (message) => {
+                try {
+                    // 메시지에서 'payload=DATA_UPLOAD: ' 부분을 제거
+                    const jsonString = message.body.substring(message.body.indexOf('{')).trim();
 
-        function logMessage(message) {
-            const messages = document.getElementById('messages');
-            messages.value += message + "\n";
+                    // JSON 문자열을 파싱
+                    const uploadData = JSON.parse(jsonString);
+
+                    // 업로드된 데이터를 리스트에 추가하는 함수 호출
+                    addUploadToList(uploadData);
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                    document.getElementById('messages').value += `Received non-JSON message: ${message.body}\n`;
+                }
+            });
+        }, (error) => {
+            console.error('Connection error: ' + error);
+            document.getElementById('messages').value += 'Connection error: ' + error + '\n';
+        });
+    });
+
+    document.getElementById('disconnectButton').addEventListener('click', function() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        document.getElementById('messages').value += 'Disconnected from WebSocket server.\n';
+        document.getElementById('connectButton').disabled = false;
+        document.getElementById('disconnectButton').disabled = true;
+        document.getElementById('sendMessageButton').disabled = true;
+    });
+
+    document.getElementById('sendMessageButton').addEventListener('click', function() {
+        const studyroomId = document.getElementById('studyroomId').value;
+        const message = document.getElementById('message').value;
+
+        if (stompClient && stompClient.connected) {
+            stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, message);
+            document.getElementById('messages').value += 'Sent: ' + message + '\n';
+            document.getElementById('message').value = '';
         }
     });
+
+    function loadInitialList(studyroomId, token) {
+        const url = `http://localhost:8080/studyroom/data/list?studyroomId=${studyroomId}&type=LINK`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 1000 && data.result && data.result.dataList) {
+                data.result.dataList.forEach(item => addUploadToList(item));
+            } else {
+                console.error('Failed to load initial list:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching initial list:', error);
+        });
+    }
+
+    function addUploadToList(data) {
+        const uploadList = document.getElementById('uploadList');
+
+        // 미리보기 링크를 생성하여 리스트에 추가
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <div>
+                <h4>${data.ogTitle}</h4>
+                <p>${data.ogDescription}</p>
+                <a href="${data.dataUrl}" target="_blank">
+                    <img src="${data.ogImage}" alt="Preview Image" style="max-width: 200px;">
+                </a>
+            </div>
+        `;
+        uploadList.appendChild(listItem);
+    }
 </script>
 
 </body>
