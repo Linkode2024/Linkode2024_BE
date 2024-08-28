@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
-
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.INVALID_TYPE;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NONE_FILE;
 
@@ -50,8 +49,10 @@ public class FileValidater {
     public boolean validateFile(String filename, DataType dataType){
         switch (dataType) {
             case IMG:
+                if(filename.equals("")) throw new DataException(NONE_FILE);
                 return IMAGE_EXTENSIONS.contains(getFileExtension(filename).toLowerCase());
             case FILE:
+                if(filename.equals("")) throw new DataException(NONE_FILE);
                 return FILE_EXTENSIONS.contains(getFileExtension(filename).toLowerCase());
             case LINK:
                 return validateUrl(filename);
