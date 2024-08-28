@@ -34,19 +34,7 @@ public class DataExceptionControllerAdvice {
     public BaseErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
         log.error("[Validation Exception]", ex);
 
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            String field = error.getField();
-            String customMessage = String.format("'%s' 필드를 확인하세요.", field);
-            errors.put(field, customMessage);
-        });
-
-        String errorMessages = errors.entrySet().stream()
-                .map(entry -> String.format("%s: %s", entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining(", "));
-
-        return new BaseErrorResponse(FAILURE, errorMessages);
+        return new BaseErrorResponse(FAILURE, "폼데이터를 확인해주세요.");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
