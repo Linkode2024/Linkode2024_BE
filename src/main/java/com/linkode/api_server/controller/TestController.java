@@ -9,7 +9,7 @@ public class TestController {
 
     @GetMapping("/linkode")
     public String linkode(){
-        return "Linkode Alive!";
+        return "수정한게 반영되었나?";
     }
 
 }

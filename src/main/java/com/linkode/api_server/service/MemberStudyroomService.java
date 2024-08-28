@@ -79,13 +79,15 @@ public class MemberStudyroomService {
         Object[] firstRow = results.get(0);
         MemberRole role = (MemberRole) firstRow[0];
         String studyroomName = (String) firstRow[1];
+        String studyroomProfile = (String) firstRow[2];
+
 
         List<DetailStudyroomResponse.Member> members = results.stream()
                 .map(row -> DetailStudyroomResponse.Member.builder()
-                        .memberId((Long) row[2])
-                        .nickname((String) row[3])
-                        .avatarId((Long) row[4])
-                        .colorId((Long) row[5])
+                        .memberId((Long) row[3])
+                        .nickname((String) row[4])
+                        .avatarId((Long) row[5])
+                        .colorId((Long) row[6])
                         .build())
                 .collect(Collectors.toList());
 
@@ -93,6 +95,7 @@ public class MemberStudyroomService {
                 .role(role)
                 .studyroomId(studyroomId)
                 .studyroomName(studyroomName)
+                .studyroomProfile(studyroomProfile)
                 .members(members)
                 .build();
     }

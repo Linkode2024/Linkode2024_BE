@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
-
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.INVALID_TYPE;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NONE_FILE;
 
 @RequiredArgsConstructor
@@ -57,7 +57,7 @@ public class FileValidater {
             case LINK:
                 return validateUrl(filename);
             default:
-                return false;
+                throw new DataException(INVALID_TYPE);
         }
     }
 

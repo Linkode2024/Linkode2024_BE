@@ -1,5 +1,6 @@
 package com.linkode.api_server.dto.studyroom;
 
+import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.data.DataType;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -31,5 +32,18 @@ public class UploadDataResponse {
         this.ogImage = ogImage;
         this.ogUrl = ogUrl;
         this.ogType = ogType;
+    }
+
+    public static UploadDataResponse from(Data data){
+        return UploadDataResponse.builder()
+                .dataId(data.getDataId())
+                .dataUrl(data.getDataUrl())
+                .dataType(data.getDataType())
+                .dataName(data.getDataName())
+                .ogTitle(data.getOgTitle())
+                .ogDescription(data.getOgDescription())
+                .ogImage(data.getOgImage())
+                .ogType(data.getOgType())
+                .build();
     }
 }

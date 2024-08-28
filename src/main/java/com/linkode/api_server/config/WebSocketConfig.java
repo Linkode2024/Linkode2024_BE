@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(signalingHandler, "/ws")
                 .addInterceptors(jwtHandshakeInterceptor)
-                .setAllowedOrigins("*");
+                .setAllowedOrigins("https://localhost:3000");
     }
 }
 
