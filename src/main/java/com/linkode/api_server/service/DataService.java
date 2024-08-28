@@ -75,16 +75,7 @@ public class DataService {
             DataType dataType = request.getDataType();
             String dataUrl=dataInfo[1];
             Data savedData = saveData(dataName, dataType, dataUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
-                return UploadDataResponse.builder()
-                        .dataId(savedData.getDataId())
-                        .dataUrl(savedData.getDataUrl())
-                        .dataType(savedData.getDataType())
-                        .dataName(savedData.getDataName())
-                        .ogTitle(savedData.getOgTitle())
-                        .ogDescription(savedData.getOgDescription())
-                        .ogImage(savedData.getOgImage())
-                        .ogType(savedData.getOgType())
-                        .build();
+            return UploadDataResponse.from(savedData);
         } catch (NullPointerException e) {
             throw new DataException(NONE_FILE);
         }

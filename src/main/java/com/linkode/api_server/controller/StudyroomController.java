@@ -1,8 +1,5 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.common.exception.DataException;
-import com.linkode.api_server.common.exception.MemberException;
-import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.BaseResponse;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.*;
@@ -16,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
-
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.SUCCESS;
 
 @RestController
 @Slf4j
@@ -38,11 +33,7 @@ public class StudyroomController {
         long memberId = jwtProvider.extractIdFromHeader(authorization);
         BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId, memberId);
         log.info("Run Delete Studyroom API ");
-        if (responseStatus == SUCCESS) {
-            return new BaseResponse<>(responseStatus,null);
-        } else {
-            return new BaseResponse<>(responseStatus,null);
-        }
+        return new BaseResponse<>(responseStatus,null);
     }
 
     /**
@@ -61,14 +52,9 @@ public class StudyroomController {
     @PostMapping("/generation")
     public BaseResponse<CreateStudyroomResponse> createStudyroom(@RequestHeader("Authorization") String authorization,
                                                    @ModelAttribute CreateStudyroomRequest request) throws IOException{
-        try {
-            log.info("Success createStudyroom API");
-            long memberId = jwtProvider.extractIdFromHeader(authorization);
-            return new BaseResponse<>(SUCCESS, studyroomService.createStudyroom(request, memberId));
-        }catch (DataException de){
-            return new BaseResponse<>(de.getExceptionStatus(),null);
-        }
-
+        log.info("Success createStudyroom API");
+        long memberId = jwtProvider.extractIdFromHeader(authorization);
+        return new BaseResponse<>(studyroomService.createStudyroom(request, memberId));
     }
 
     /**
@@ -100,15 +86,9 @@ public class StudyroomController {
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         try {
             JoinStudyroomByCodeResponse response = studyroomService.joinStudyroomByCode(request,memberId);
-            return new BaseResponse<>(SUCCESS,response);
+            return new BaseResponse<>(response);
         }catch (NullPointerException e){
             return new BaseResponse<>(INVALID_INVITE_CODE,null);
-        }catch (
-                StudyroomException e){
-            return new BaseResponse<>(INVALID_INVITE_CODE,null);
-        }catch (
-                MemberException m){
-            return new BaseResponse<>(JOINED_STUDYROOM,null);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.linkode.api_server.dto.studyroom;
 
+import com.linkode.api_server.domain.Studyroom;
 import lombok.*;
 
 @Getter
@@ -15,5 +16,13 @@ public class CreateStudyroomResponse {
         this.studyroomId = studyroomId;
         this.studyroomName = studyroomName;
         this.studyroomProfile = studyroomProfile;
+    }
+
+    public static CreateStudyroomResponse from(Studyroom studyroom){
+        return CreateStudyroomResponse.builder()
+                .studyroomId(studyroom.getStudyroomId())
+                .studyroomName(studyroom.getStudyroomName())
+                .studyroomProfile(studyroom.getStudyroomProfile())
+                .build();
     }
 }
