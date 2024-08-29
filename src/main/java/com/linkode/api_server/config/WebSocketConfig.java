@@ -2,6 +2,7 @@ package com.linkode.api_server.config;
 
 
 import com.linkode.api_server.handler.StompHandler;
+import com.linkode.api_server.handler.WebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -11,9 +12,10 @@ import org.springframework.web.socket.config.annotation.*;
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSocketConfigurer{
 
     private final StompHandler stompHandler;
+    private final WebSocketHandler webSocketHandler;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -31,6 +33,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompHandler);
+    }
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(webSocketHandler, "/ws")
+                .setAllowedOrigins("http://localhost:63342", "https://localhost:3000", "http://localhost:3000")
+                .withSockJS();
     }
 }
 
