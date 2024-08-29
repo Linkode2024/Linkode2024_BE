@@ -37,7 +37,7 @@ public class StompHandler implements ChannelInterceptor {
                 try {
                     // JWT 토큰에서 사용자 정보 추출 및 검증
                     Long memberId = jwtProvider.extractIdFromHeader(authorizationHeader);
-                    String githubId = jwtProvider.extractGithubIdFromToken(jwtProvider.extractJwtToken(jwtProvider.extractJwtToken(authorizationHeader)));
+                    String githubId = jwtProvider.extractGithubIdFromToken(jwtProvider.extractJwtToken(authorizationHeader));
 
                     log.info("JWT 검증 성공: memberId={}, githubId={}", memberId, githubId);
                     accessor.getSessionAttributes().put("memberId", memberId);
