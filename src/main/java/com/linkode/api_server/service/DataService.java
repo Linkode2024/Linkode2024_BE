@@ -14,13 +14,13 @@ import com.linkode.api_server.dto.data.OpenGraphData;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
-import com.linkode.api_server.handler.SignalingHandler;
 import com.linkode.api_server.repository.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.jsoup.Jsoup;
@@ -42,7 +42,8 @@ public class DataService {
     private final DataRepository dataRepository;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
-    private final SignalingHandler signalingHandler;
+    private final SimpMessagingTemplate messagingTemplate;
+
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
@@ -134,17 +135,11 @@ public class DataService {
         }
     }
 
-    /** 맴버가 스터디룸 팀원인지 검증 */
-    public void validateStudyroomMember(long memberId, long studyroomId){
-        log.info("[DataService.validateStudyroomMember]");
-        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
-            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
-        }
-    }
 
-    /** 업로드 응답을 소켓메세지로 브로드캐스트 */
-    public void broadCastUploadDataResponse(long studyroomId,long memberId,UploadDataResponse response){
-        signalingHandler.broadcastMessage(String.valueOf(studyroomId), String.valueOf(memberId), extractJsonResponse(response));
+    /** 업로드 응답을 메세지로 브로드캐스트 */
+    public void broadCastUploadDataResponse(long studyroomId, long memberId, UploadDataResponse response) {
+        String destination = "/topic/studyroom/" + studyroomId + "/upload";  // 목적지(topic) 설정
+        messagingTemplate.convertAndSend(destination, extractJsonResponse(response));  // 메시지 전송
         log.info("BroadcastMessage of UploadData Success!");
     }
 

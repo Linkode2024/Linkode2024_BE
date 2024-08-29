@@ -161,4 +161,12 @@ public class MemberStudyroomService {
         MemberStudyroomListResponse latestStudyroomList = getMemberStudyroomList(memberId);
         return latestStudyroomList;
     }
+
+    /** 맴버가 스터디룸 팀원인지 검증 */
+    public void validateStudyroomMember(long memberId, long studyroomId){
+        log.info("[DataService.validateStudyroomMember]");
+        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
+    }
 }
