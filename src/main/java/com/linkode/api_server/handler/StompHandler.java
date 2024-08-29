@@ -1,6 +1,7 @@
 package com.linkode.api_server.handler;
 
 import com.linkode.api_server.service.MemberStudyroomService;
+import com.linkode.api_server.service.WebSocketSessionService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 @Slf4j
 @Component
@@ -18,6 +20,7 @@ public class StompHandler implements ChannelInterceptor {
 
     private final JwtProvider jwtProvider;
     private final MemberStudyroomService memberStudyroomService;
+    private final WebSocketSessionService webSocketSessionService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -37,6 +40,9 @@ public class StompHandler implements ChannelInterceptor {
                     accessor.getSessionAttributes().put("memberId", memberId); //여기에 맴버 아이디를 넣도록함! 이건 클라이언트가 접속시 보내도록 설정이 필요할듯!
                     accessor.setUser(() -> String.valueOf(memberId));
 
+                    WebSocketSession session = (WebSocketSession) accessor.getSessionAttributes().get("session");
+                    webSocketSessionService.addSession(String.valueOf(memberId), session);
+                    log.info("[웹소켓에 세션 저장 완료! memberId = {}]", memberId);
                 } catch (Exception e) {
                     log.error("JWT 검증 실패: {}", e.getMessage());
                     throw new IllegalArgumentException("JWT 검증 실패");
