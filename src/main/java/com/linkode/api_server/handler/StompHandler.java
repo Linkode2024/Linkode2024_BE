@@ -1,7 +1,6 @@
 package com.linkode.api_server.handler;
 
 import com.linkode.api_server.service.MemberStudyroomService;
-import com.linkode.api_server.service.WebSocketSessionService;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +10,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.CloseStatus;
-
-import java.io.IOException;
 
 @Slf4j
 @Component
@@ -23,14 +18,13 @@ public class StompHandler implements ChannelInterceptor {
 
     private final JwtProvider jwtProvider;
     private final MemberStudyroomService memberStudyroomService;
-    private final WebSocketSessionService webSocketSessionService;
-    private final WebSocketHandler webSocketHandler;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (StompCommand.CONNECT == accessor.getCommand()) {
+            // STOMP CONNECT 시 Authorization 헤더에서 JWT를 추출하여 검증
             String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
 
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -40,38 +34,25 @@ public class StompHandler implements ChannelInterceptor {
                     String githubId = jwtProvider.extractGithubIdFromToken(jwtProvider.extractJwtToken(authorizationHeader));
 
                     log.info("JWT 검증 성공: memberId={}, githubId={}", memberId, githubId);
-                    accessor.getSessionAttributes().put("memberId", memberId);
+                    accessor.getSessionAttributes().put("memberId", memberId); //여기에 맴버 아이디를 넣도록함! 이건 클라이언트가 접속시 보내도록 설정이 필요할듯!
                     accessor.setUser(() -> String.valueOf(memberId));
 
-                    // WebSocketHandler에서 임시로 저장된 세션 가져오기
-                    WebSocketSession session = webSocketHandler.getSession(accessor.getSessionId());
-                    if (session != null) {
-                        // 세션을 최종 확정하여 WebSocketSessionService에 등록
-                        webSocketHandler.confirmSession(accessor.getSessionId());
-                        webSocketSessionService.addSession(String.valueOf(memberId), session);
-                        log.info("[웹소켓 세션 등록 완료: memberId = {}]", memberId);
-                    } else {
-                        log.error("Session not found for sessionId={}", accessor.getSessionId());
-                        throw new IllegalArgumentException("WebSocket session not found");
-                    }
                 } catch (Exception e) {
                     log.error("JWT 검증 실패: {}", e.getMessage());
-                    WebSocketSession session = webSocketHandler.getSession(accessor.getSessionId());
-                    if (session != null) {
-                        try {
-                            session.close(CloseStatus.NOT_ACCEPTABLE);  // JWT 검증 실패 시 세션 종료
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    }
                     throw new IllegalArgumentException("JWT 검증 실패");
                 }
+            } else if(authorizationHeader == null) {
+                log.error("Authorization 헤더가 없습니다.");
+                throw new IllegalArgumentException("Authorization 헤더가 없거나 형식이 잘못되었습니다.");
+            } else if(!authorizationHeader.startsWith("Bearer ")){
+                log.error("Authorization 헤더가 이상합니다.");
+                throw new IllegalArgumentException("Authorization 헤더 형식이 잘못되었습니다.");
             }
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
             // STOMP SUBSCRIBE 시 경로에서 studyroomId 추출 및 검증
             String destination = accessor.getDestination();
             if (destination != null && destination.startsWith("/topic/studyroom/")) {
-                String[] parts = destination.split("/"); // 예: /topic/studyroom/1 형식인지 확인
+                String[] parts = destination.split("/"); // 배열이 4이상인지 예를들어 /topic/studyroom/1 형식인지!
                 if (parts.length >= 4) {
                     String studyroomId = parts[3];
 
