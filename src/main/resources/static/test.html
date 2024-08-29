@@ -29,6 +29,10 @@
                         <label for="studyroomId" class="form-label">Studyroom ID:</label>
                         <input type="text" id="studyroomId" class="form-control" placeholder="Enter studyroom ID">
                     </div>
+                    <div class="mb-3">
+                        <label for="myUserId" class="form-label">My User ID:</label>
+                        <input type="text" id="myUserId" class="form-control" placeholder="Enter your user ID">
+                    </div>
                     <div class="mb-3 text-center">
                         <button id="connectButton" class="btn btn-success">Connect to WebSocket</button>
                         <button id="disconnectButton" class="btn btn-danger" disabled>Disconnect</button>
@@ -74,11 +78,10 @@
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <div class="alert alert-info" id="callAlert" style="display:none;" role="alert">
-                                You have been called by another user!
+                                누군가 호출했습니다!!!
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -94,162 +97,150 @@
                     <h3>Upload Events:</h3>
                     <ul id="uploadList" class="list-unstyled"></ul> <!-- 업로드 이벤트를 표시할 리스트 -->
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let stompClient = null;
+let stompClient = null;
 
-    document.getElementById('connectButton').addEventListener('click', function() {
-        const token = document.getElementById('token').value;
-        const studyroomId = document.getElementById('studyroomId').value;
+document.getElementById('connectButton').addEventListener('click', function() {
+    const token = document.getElementById('token').value;
+    const studyroomId = document.getElementById('studyroomId').value;
+    const myUserId = document.getElementById('myUserId').value;
 
-        // 초기 리스트 로드
-        loadInitialList(studyroomId, token);
+    // 초기 리스트 로드
+    loadInitialList(studyroomId, token);
 
-        const socket = new SockJS('https://linkode.site/ws');  // WebSocket 서버 URL을 localhost로 설정
-        stompClient = Stomp.over(socket);
+    const socket = new SockJS('http://localhost:8080/ws');  // WebSocket 서버 URL을 설정
+    stompClient = Stomp.over(socket);
 
-        // 헤더에 JWT 토큰을 추가하여 서버에 연결
-        const headers = {
-            Authorization: `Bearer ${token}` // Bearer 접두사 포함
-        };
+    // 헤더에 JWT 토큰을 추가하여 서버에 연결
+    const headers = {
+        Authorization: `Bearer ${token}` // Bearer 접두사 포함
+    };
 
-        stompClient.connect(headers, (frame) => {
-            console.log('Connected: ' + frame);
-            document.getElementById('messages').value += 'Connected to WebSocket server.\n';
-            document.getElementById('connectButton').disabled = true;
-            document.getElementById('disconnectButton').disabled = false;
-            document.getElementById('sendMessageButton').disabled = false;
-            document.getElementById('callUserButton').disabled = false; // Call User 버튼 활성화
+    stompClient.connect(headers, (frame) => {
+        console.log('Connected: ' + frame);
+        document.getElementById('messages').value += 'Connected to WebSocket server.\n';
+        document.getElementById('connectButton').disabled = true;
+        document.getElementById('disconnectButton').disabled = false;
+        document.getElementById('sendMessageButton').disabled = false;
+        document.getElementById('callUserButton').disabled = false;
 
-            // 일반 메시지 구독
-            stompClient.subscribe(`/topic/studyroom/${studyroomId}`, (message) => {
-                document.getElementById('messages').value += 'Received: ' + message.body + '\n';
-            });
-
-            // 업로드 이벤트 구독
-            stompClient.subscribe(`/topic/studyroom/${studyroomId}/upload`, (message) => {
-                try {
-                    // 메시지에서 'payload=DATA_UPLOAD: ' 부분을 제거
-                    const jsonString = message.body.substring(message.body.indexOf('{')).trim();
-
-                    // JSON 문자열을 파싱
-                    const uploadData = JSON.parse(jsonString);
-
-                    // 업로드된 데이터를 리스트에 추가하는 함수 호출
-                    addUploadToList(uploadData);
-                } catch (e) {
-                    console.error('Error parsing JSON:', e);
-                    document.getElementById('messages').value += `Received non-JSON message: ${message.body}\n`;
-                }
-            });
-
-
-            // 특정 사용자 호출 메시지 구독
-            stompClient.subscribe(`/user/queue/private`, (message) => {
-                document.getElementById('callAlert').style.display = 'block';
-                document.getElementById('messages').value += 'Call received: ' + message.body + '\n';
-            });
-        }, (error) => {
-            console.error('Connection error: ' + error);
-            document.getElementById('messages').value += 'Connection error: ' + error + '\n';
+        // 일반 메시지 구독
+        stompClient.subscribe(`/topic/studyroom/${studyroomId}`, (message) => {
+            document.getElementById('messages').value += 'Received: ' + message.body + '\n';
         });
-    });
 
-    document.getElementById('disconnectButton').addEventListener('click', function() {
-        const studyroomId = document.getElementById('studyroomId').value;
-
-        if (stompClient !== null) {
-            stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, JSON.stringify({
-                type: "leave",
-                content: "User has left the room"
-            }));
-            stompClient.disconnect();
-        }
-        document.getElementById('messages').value += 'Disconnected from WebSocket server.\n';
-        document.getElementById('connectButton').disabled = false;
-        document.getElementById('disconnectButton').disabled = true;
-        document.getElementById('sendMessageButton').disabled = true;
-        document.getElementById('callUserButton').disabled = true;
-    });
-
-    document.getElementById('sendMessageButton').addEventListener('click', function() {
-        const studyroomId = document.getElementById('studyroomId').value;
-        const message = document.getElementById('message').value;
-
-        if (stompClient && stompClient.connected) {
-            stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, JSON.stringify({
-                type: "message",
-                content: message
-            }));
-            document.getElementById('messages').value += 'Sent: ' + message + '\n';
-            document.getElementById('message').value = '';
-        }
-    });
-
-    // Call User 기능 추가
-    document.getElementById('callUserButton').addEventListener('click', function() {
-        const studyroomId = document.getElementById('studyroomId').value;
-        const targetUserId = document.getElementById('targetUserId').value;
-
-        if (stompClient && stompClient.connected) {
-            stompClient.send(`/app/studyroom/${studyroomId}/callUser`, {}, targetUserId);
-            document.getElementById('messages').value += `Sent call request to user: ${targetUserId}\n`;
-        }
-    });
-
-    function loadInitialList(studyroomId, token) {
-        const url = `https://linkode.site/studyroom/data/list?studyroomId=${studyroomId}&type=LINK`;
-
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.code === 1000 && data.result && data.result.dataList) {
-                data.result.dataList.forEach(item => addUploadToList(item));
-            } else {
-                console.error('Failed to load initial list:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching initial list:', error);
+        // 특정 사용자 호출 메시지 구독
+        stompClient.subscribe(`/topic/studyroom/${studyroomId}/targetUser/${myUserId}`, (message) => {
+            const messageData = JSON.parse(message.body);
+            document.getElementById('callAlert').style.display = 'block';
+            document.getElementById('messages').value += `Call received from user ${messageData.callerId} in studyroom ${messageData.studyroomId}\n`;
         });
+    }, (error) => {
+        console.error('Connection error: ' + error);
+        document.getElementById('messages').value += 'Connection error: ' + error + '\n';
+    });
+});
+
+document.getElementById('disconnectButton').addEventListener('click', function() {
+    const studyroomId = document.getElementById('studyroomId').value;
+
+    if (stompClient !== null) {
+        stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, JSON.stringify({
+            type: "leave",
+            content: "User has left the room"
+        }));
+        stompClient.disconnect();
     }
-    function addUploadToList(data) {
-        if (!data || !data.ogTitle || !data.ogImage || !data.ogDescription || !data.dataUrl) return;
+    document.getElementById('messages').value += 'Disconnected from WebSocket server.\n';
+    document.getElementById('connectButton').disabled = false;
+    document.getElementById('disconnectButton').disabled = true;
+    document.getElementById('sendMessageButton').disabled = true;
+    document.getElementById('callUserButton').disabled = true;
+});
 
-        const uploadList = document.getElementById('uploadList');
+document.getElementById('sendMessageButton').addEventListener('click', function() {
+    const studyroomId = document.getElementById('studyroomId').value;
+    const message = document.getElementById('message').value;
 
-        // 미리보기 링크를 생성하여 리스트 최상단에 추가 (Bootstrap Card 사용)
-        const listItem = document.createElement('li');
-        listItem.classList.add('mb-3');
-        listItem.innerHTML = `
-            <div class="card">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="${data.ogImage}" class="img-fluid rounded-start" alt="Preview Image">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">${data.ogTitle}</h5>
-                            <p class="card-text">${data.ogDescription}</p>
-                            <a href="${data.dataUrl}" class="btn btn-primary" target="_blank">Go to link</a>
-                        </div>
+    if (stompClient && stompClient.connected) {
+        stompClient.send(`/app/studyroom/${studyroomId}/sendMessage`, {}, JSON.stringify({
+            type: "message",
+            content: message
+        }));
+        document.getElementById('messages').value += 'Sent: ' + message + '\n';
+        document.getElementById('message').value = '';
+    }
+});
+
+document.getElementById('callUserButton').addEventListener('click', function() {
+    const studyroomId = document.getElementById('studyroomId').value;
+    const targetUserId = document.getElementById('targetUserId').value;
+    const myUserId = document.getElementById('myUserId').value;
+
+    if (stompClient && stompClient.connected && targetUserId) {
+        stompClient.send(`/app/studyroom/${studyroomId}/call/${targetUserId}`, {}, JSON.stringify({
+            type: "call",
+            studyroomId: studyroomId,
+            callerId: myUserId
+        }));
+        document.getElementById('messages').value += `Sent call request to user: ${targetUserId}\n`;
+    }
+});
+
+function loadInitialList(studyroomId, token) {
+    const url = `http://localhost:8080/studyroom/data/list?studyroomId=${studyroomId}&type=LINK`;
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 1000 && data.result && data.result.dataList) {
+            data.result.dataList.forEach(item => addUploadToList(item));
+        } else {
+            console.error('Failed to load initial list:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching initial list:', error);
+    });
+}
+
+function addUploadToList(data) {
+    if (!data || !data.ogTitle || !data.ogImage || !data.ogDescription || !data.dataUrl) return;
+
+    const uploadList = document.getElementById('uploadList');
+
+    // 미리보기 링크를 생성하여 리스트 최상단에 추가 (Bootstrap Card 사용)
+    const listItem = document.createElement('li');
+    listItem.classList.add('mb-3');
+    listItem.innerHTML = `
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="${data.ogImage}" class="img-fluid rounded-start" alt="Preview Image">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">${data.ogTitle}</h5>
+                        <p class="card-text">${data.ogDescription}</p>
+                        <a href="${data.dataUrl}" class="btn btn-primary" target="_blank">Go to link</a>
                     </div>
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
-        uploadList.insertBefore(listItem, uploadList.firstChild);
-    }
+    uploadList.insertBefore(listItem, uploadList.firstChild);
+}
 </script>
 
 <!-- Bootstrap JS (Optional) -->
