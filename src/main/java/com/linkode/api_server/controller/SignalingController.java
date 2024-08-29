@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.web.socket.CloseStatus;
@@ -49,16 +50,17 @@ public class SignalingController {
     }
 
     /** 이상합니다.. 세션을 어떤거 기반으로 추출해야할지 혼동... */
+
     @MessageMapping("/studyroom/{studyroomId}/callUser")
-    public void callUser(
-            @DestinationVariable String studyroomId,
-            SimpMessageHeaderAccessor headerAccessor,
-            @Payload String targetUserId) {
+    public void callUser(@DestinationVariable String studyroomId,
+                         SimpMessageHeaderAccessor headerAccessor,
+                         @Payload String targetUserId,
+                         Principal principal) { // Principal 객체 추가
 
-        // 호출하는 사용자의 ID 가져오기
-        Long callerId = (Long) headerAccessor.getSessionAttributes().get("memberId");
+        // Principal에서 callerId 추출
+        Long callerId = Long.valueOf(principal.getName());
 
-        // 특정 사용자의 세션을 가져와서 메시지를 보냅니다.
+        // 특정 사용자의 세션을 가져와 메시지 전송
         WebSocketSession targetSession = sessionService.getSession(targetUserId);
         if (targetSession != null && targetSession.isOpen()) {
             messagingTemplate.convertAndSendToUser(targetUserId, "/queue/private",
