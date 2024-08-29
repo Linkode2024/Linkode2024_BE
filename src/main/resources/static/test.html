@@ -110,7 +110,7 @@
         // 초기 리스트 로드
         loadInitialList(studyroomId, token);
 
-        const socket = new SockJS('http://localhost:8080/ws');  // WebSocket 서버 URL을 localhost로 설정
+        const socket = new SockJS('https://linkode.site/ws');  // WebSocket 서버 URL을 localhost로 설정
         stompClient = Stomp.over(socket);
 
         // 헤더에 JWT 토큰을 추가하여 서버에 연결

@@ -67,6 +67,7 @@ public class SignalingController {
 
         // Principal에서 부르는 사람 추출
         Long callerId = (Long) headerAccessor.getSessionAttributes().get("memberId");
+        log.info("Attempting to call user: " + targetUserId + " from user: " + callerId);
 
         // 특정 사용자의 세션을 가져와 메시지 전송
         WebSocketSession targetSession = sessionService.getSession(targetUserId);
