@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 적용
                 .csrf(CsrfConfigurer::disable)  // CSRF 비활성화
                 .authorizeRequests(auth -> auth
-                        .requestMatchers("/login", "/oauth2/redirect","/user/avatar","/linkode","/user/avatar/all","/ws/**").permitAll()  // 이 URL은 모두에게 허용
+                        .requestMatchers("/login", "/oauth2/redirect","/user/avatar","/linkode","/user/avatar/all","/ws/**","/webhook/studyRoomId/**").permitAll()  // 이 URL은 모두에게 허용
                         .anyRequest().authenticated()  // 그 외의 모든 요청은 인증 필요
                 )
                 .sessionManagement(session -> session
@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:63342","https://localhost:3000", "http:localhost:3000"));  // 허용할 도메인 설정
+        configuration.setAllowedOrigins(List.of("http://localhost:63342","https://localhost:3000", "http:localhost:3000","https://github.com"));  // 허용할 도메인 설정
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT"));  // 허용할 HTTP 메서드 설정
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));  // 허용할 헤더 설정
         configuration.setAllowCredentials(true);  // 자격 증명 허용 설정
