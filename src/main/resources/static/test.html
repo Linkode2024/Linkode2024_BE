@@ -140,6 +140,13 @@ document.getElementById('connectButton').addEventListener('click', function() {
             document.getElementById('callAlert').style.display = 'block';
             document.getElementById('messages').value += `Call received from user ${messageData.callerId} in studyroom ${messageData.studyroomId}\n`;
         });
+
+        // 이슈 관련 메시지 구독 추가
+        stompClient.subscribe(`/topic/issues/${studyroomId}`, (message) => {
+            const issueData = JSON.parse(message.body);
+            document.getElementById('messages').value += `Issue received: Title - ${issueData.title}, State - ${issueData.state}, URL - ${issueData.url}\n`;
+        });
+
     }, (error) => {
         console.error('Connection error: ' + error);
         document.getElementById('messages').value += 'Connection error: ' + error + '\n';
@@ -242,6 +249,7 @@ function addUploadToList(data) {
     uploadList.insertBefore(listItem, uploadList.firstChild);
 }
 </script>
+
 
 <!-- Bootstrap JS (Optional) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
