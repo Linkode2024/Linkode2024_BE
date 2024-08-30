@@ -31,6 +31,7 @@ public class GithubIssueService {
 
     public GithubIssueResponse saveGithubIssue(Long studyroomId, String payload) {
 
+
         JSONObject jsonObject = new JSONObject(payload);
 
         // 1. PR 제목 (message)
@@ -59,6 +60,7 @@ public class GithubIssueService {
                 .url(prUrl)
                 .state("opened")
                 .studyroom(studyroom)
+                .state("opened") // 상태를 하드코딩하거나 필요한 상태로 대체
                 .build();
 
         // 6. 저장 후 반환
