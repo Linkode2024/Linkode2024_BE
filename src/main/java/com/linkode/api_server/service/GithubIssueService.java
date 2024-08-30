@@ -2,7 +2,9 @@ package com.linkode.api_server.service;
 
 import com.linkode.api_server.common.exception.GithubIssueException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
+import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.domain.GithubIssue;
+import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueListResponse;
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueResponse;
@@ -27,7 +29,8 @@ public class GithubIssueService {
     private final StudyroomRepository studyroomRepository;
     private final MemberstudyroomRepository memberstudyroomRepository;
 
-    public GithubIssueResponse saveGithubIssue(String payload) {
+    public GithubIssueResponse saveGithubIssue(Long studyroomId, String payload) {
+
 
         JSONObject jsonObject = new JSONObject(payload);
 
@@ -45,11 +48,16 @@ public class GithubIssueService {
         // 4. 사용자에게 전달할 메시지 구성
         String message = "작성자: " + authorName + " (" + authorUsername + ")";
 
+        Studyroom studyroom = studyroomRepository.findById(studyroomId)
+                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
+
         // 5. GithubIssue 객체 생성
         GithubIssue issue = GithubIssue.builder()
                 .title(prTitle)
                 .body(message)  // 메시지를 body에 넣음
                 .url(prUrl)
+                .state("opened")
+                .studyroom(studyroom)
                 .state("opened") // 상태를 하드코딩하거나 필요한 상태로 대체
                 .build();
 
