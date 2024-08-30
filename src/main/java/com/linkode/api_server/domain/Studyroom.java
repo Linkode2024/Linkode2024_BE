@@ -44,8 +44,8 @@ public class Studyroom extends BaseTime {
     @OneToMany(mappedBy = "studyroom")
     private List<Data> dataList= new ArrayList<>();
 
-    @OneToMany
-    @JoinColumn(name = "studyroom_id")
+    @JsonIgnore
+    @OneToMany(mappedBy = "studyroom")
     private List<GithubIssue> githubIssues = new ArrayList<>();
 
     public Studyroom(String studyroomName, String studyroomProfile, BaseStatus status) {

@@ -23,7 +23,7 @@ public class WebhookController {
             @RequestBody String payload,
             @RequestHeader("X-GitHub-Event") String event
     ) {
-        GithubIssueResponse githubIssueDTO= githubIssueService.saveGithubIssue(payload);
+        GithubIssueResponse githubIssueDTO= githubIssueService.saveGithubIssue(studyRoomId,payload);
         messagingTemplate.convertAndSend("/topic/issues/" + studyRoomId, githubIssueDTO);
 
     }
