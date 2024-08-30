@@ -57,8 +57,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     NOT_FOUND_DATA(9002,HttpStatus.BAD_REQUEST.value(), "조건에 맞는자료실을 불러올 수 없습니다."),
     INVALID_EXTENSION(9003,HttpStatus.BAD_REQUEST.value(), "파일 확장자를 확인해주세요."),
     INVALID_URL(9004,HttpStatus.BAD_REQUEST.value(), "URL 형식을 확인해주세요."),
-    INVALID_TYPE(9005,HttpStatus.BAD_REQUEST.value(), "데이터 타입을 확인해주세요");
+    INVALID_TYPE(9005,HttpStatus.BAD_REQUEST.value(), "데이터 타입을 확인해주세요"),
 
+    /**
+     * Issue 관련 : 10000대
+     * */
+    ISSUE_PARSING_ERROR(10000,HttpStatus.BAD_REQUEST.value(), "이슈를 파싱하는데 문제가 생겼습니다.");
 
     private final int code;
     private final int status;
