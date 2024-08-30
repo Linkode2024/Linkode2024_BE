@@ -19,12 +19,12 @@ public class WebhookController {
 
     @PostMapping("/webhook/studyroomId/{studyroomId}")
     public void handleGithubWebhook(
-            @PathVariable Long studyRoomId,  // 스터디룸 ID를 URL 경로에서 추출
+            @PathVariable Long studyroomId,  // 스터디룸 ID를 URL 경로에서 추출
             @RequestBody String payload,
             @RequestHeader("X-GitHub-Event") String event
     ) {
-        GithubIssueResponse githubIssueDTO= githubIssueService.saveGithubIssue(studyRoomId,payload);
-        messagingTemplate.convertAndSend("/topic/issues/" + studyRoomId, githubIssueDTO);
+        GithubIssueResponse githubIssueDTO= githubIssueService.saveGithubIssue(studyroomId,payload);
+        messagingTemplate.convertAndSend("/topic/issues/" + studyroomId, githubIssueDTO);
 
     }
 
