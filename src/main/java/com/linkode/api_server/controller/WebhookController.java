@@ -1,13 +1,11 @@
 package com.linkode.api_server.controller;
 
-import com.linkode.api_server.dto.gitHubIssue.GithubIssueDTO;
-import com.linkode.api_server.repository.GithubIssueRepository;
+import com.linkode.api_server.dto.gitHubIssue.GithubIssueResponse;
 import com.linkode.api_server.service.GithubIssueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.json.JSONObject;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ public class WebhookController {
             @RequestBody String payload,
             @RequestHeader("X-GitHub-Event") String event
     ) {
-        GithubIssueDTO githubIssueDTO= githubIssueService.saveGithubIssue(payload);
+        GithubIssueResponse githubIssueDTO= githubIssueService.saveGithubIssue(payload);
         messagingTemplate.convertAndSend("/topic/issues/" + studyRoomId, githubIssueDTO);
 
     }
