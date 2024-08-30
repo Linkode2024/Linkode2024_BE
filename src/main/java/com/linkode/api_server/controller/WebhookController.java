@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 public class WebhookController {
 
     private final GithubIssueService githubIssueService;
-    private final String BASE_WEBHOOK_URL = "https://www.linkode.site";
+    private final String BASE_WEBHOOK_URL = "https://www.linkode.site/webhook/studyroomId/";
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/webhook/studyRoomId/{studyRoomId}")
+    @PostMapping("/webhook/studyroomId/{studyroomId}")
     public void handleGithubWebhook(
             @PathVariable Long studyRoomId,  // 스터디룸 ID를 URL 경로에서 추출
             @RequestBody String payload,
@@ -28,9 +28,9 @@ public class WebhookController {
 
     }
 
-    @GetMapping("/webhookUrl/studyRoomId/{studyRoomId}")
-    public String getWebhookUrl(@PathVariable Long studyRoomId) {
+    @GetMapping("/webhookUrl")
+    public String getWebhookUrl(@RequestParam Long studyroomId) {
         // 스터디룸 ID에 맞는 웹훅 URL 생성
-        return BASE_WEBHOOK_URL + studyRoomId;
+        return BASE_WEBHOOK_URL + studyroomId;
     }
 }
