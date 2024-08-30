@@ -25,14 +25,14 @@ public class Data extends BaseTime {
     @Column(name = "data_id", nullable = false)
     private Long dataId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 2048)
     private String dataName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private DataType dataType;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 2048)
     private String dataUrl;
 
     @Enumerated(EnumType.STRING)
