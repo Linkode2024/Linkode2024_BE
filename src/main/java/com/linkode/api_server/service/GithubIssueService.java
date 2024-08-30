@@ -43,9 +43,7 @@ public class GithubIssueService {
         String prUrl = jsonObject.getJSONObject("head_commit").getString("url");
 
         // 4. 사용자에게 전달할 메시지 구성
-        String message = "PR 제목: " + prTitle + "\n"
-                + "작성자: " + authorName + " (" + authorUsername + ")\n"
-                + "PR 확인: " + prUrl;
+        String message = "작성자: " + authorName + " (" + authorUsername + ")";
 
         // 5. GithubIssue 객체 생성
         GithubIssue issue = GithubIssue.builder()
