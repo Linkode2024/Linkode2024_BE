@@ -1,6 +1,7 @@
 package com.linkode.api_server.controller;
 
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueResponse;
+import com.linkode.api_server.dto.gitHubIssue.WebhookURLResponse;
 import com.linkode.api_server.service.GithubIssueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,8 @@ public class WebhookController {
     }
 
     @GetMapping("/webhookUrl")
-    public String getWebhookUrl(@RequestParam Long studyroomId) {
+    public WebhookURLResponse getWebhookUrl(@RequestParam Long studyroomId) {
         // 스터디룸 ID에 맞는 웹훅 URL 생성
-        return BASE_WEBHOOK_URL + studyroomId;
+        return WebhookURLResponse .builder().webhookURL(BASE_WEBHOOK_URL + studyroomId).build();
     }
 }
