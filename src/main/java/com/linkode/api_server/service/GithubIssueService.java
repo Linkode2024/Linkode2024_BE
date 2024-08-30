@@ -27,27 +27,38 @@ public class GithubIssueService {
     private final StudyroomRepository studyroomRepository;
     private final MemberstudyroomRepository memberstudyroomRepository;
 
-    public GithubIssueResponse saveGithubIssue(String payload){
+    public GithubIssueResponse saveGithubIssue(String payload) {
 
         JSONObject jsonObject = new JSONObject(payload);
-        String action = jsonObject.getString("action");
 
-        // 이슈 생성 또는 수정 이벤트 처리
-        if ("opened".equals(action) || "edited".equals(action)) {
-            JSONObject issueObject = jsonObject.getJSONObject("issue");
+        // 1. PR 제목 (message)
+        String prTitle = jsonObject.getJSONObject("head_commit").getString("message");
 
-            GithubIssue issue = GithubIssue.builder()
-                    .title(issueObject.getString("title"))
-                    .body(issueObject.getString("body"))
-                    .url(issueObject.getString("html_url"))
-                    .state(issueObject.getString("state"))
-                    .build();
-            return GithubIssueResponse.from(githubIssueRepository.save(issue));
-        }else {
-            throw new GithubIssueException(ISSUE_PARSING_ERROR);
-        }
+        // 2. 작성자 정보
+        JSONObject authorObject = jsonObject.getJSONObject("head_commit").getJSONObject("author");
+        String authorName = authorObject.getString("name");
+        String authorUsername = authorObject.getString("username");
 
+        // 3. PR URL
+        String prUrl = jsonObject.getJSONObject("head_commit").getString("url");
+
+        // 4. 사용자에게 전달할 메시지 구성
+        String message = "PR 제목: " + prTitle + "\n"
+                + "작성자: " + authorName + " (" + authorUsername + ")\n"
+                + "PR 확인: " + prUrl;
+
+        // 5. GithubIssue 객체 생성
+        GithubIssue issue = GithubIssue.builder()
+                .title(prTitle)
+                .body(message)  // 메시지를 body에 넣음
+                .url(prUrl)
+                .state("opened") // 상태를 하드코딩하거나 필요한 상태로 대체
+                .build();
+
+        // 6. 저장 후 반환
+        return GithubIssueResponse.from(githubIssueRepository.save(issue));
     }
+
 
     public GithubIssueListResponse getGithubIssueList(Long studyroomId, Long memberId){
         log.info("[GithubIssueService.getGithubIssueList]");
