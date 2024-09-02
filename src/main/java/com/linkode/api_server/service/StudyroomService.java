@@ -51,7 +51,7 @@ public class StudyroomService {
     public void deleteStudyroom(long studyroomId, long memberId) {
 
         MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
-                .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
+                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
 
         if (memberRole.equals(MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
