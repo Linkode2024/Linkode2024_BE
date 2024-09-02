@@ -50,10 +50,8 @@ public class StudyroomService {
     @Transactional
     public void deleteStudyroom(long studyroomId, long memberId) {
 
-        MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
-                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
-
-        if (memberRole.equals(MemberRole.CAPTAIN)) {
+        if (memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
+                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM)).equals(MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
                 log.info("Success delete studyRoom in Service layer");
                 memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
