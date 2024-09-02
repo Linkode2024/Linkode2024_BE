@@ -28,12 +28,11 @@ public class StudyroomController {
      * 스터디룸 삭제
      */
     @PatchMapping("/removal")
-    public BaseResponse<BaseExceptionResponseStatus> deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId) {
-
+    public void deleteStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId) {
         long memberId = jwtProvider.extractIdFromHeader(authorization);
-        BaseExceptionResponseStatus responseStatus = studyroomService.deleteStudyroom(studyroomId, memberId);
+        studyroomService.deleteStudyroom(studyroomId, memberId);
         log.info("Run Delete Studyroom API ");
-        return new BaseResponse<>(responseStatus,null);
+
     }
 
     /**

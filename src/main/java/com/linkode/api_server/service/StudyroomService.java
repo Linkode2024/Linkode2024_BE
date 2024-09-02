@@ -5,10 +5,12 @@ import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.*;
+import com.linkode.api_server.repository.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
 import com.linkode.api_server.util.FileValidater;
@@ -39,37 +41,32 @@ public class StudyroomService {
     private final InviteService inviteService;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
+    private final DataRepository dataRepository;
 
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
     private String DEFAULT_PROFILE;
 
     @Transactional
-    public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
+    public void deleteStudyroom(long studyroomId, long memberId) {
 
-        if(!studyroomRepository.findById(studyroomId).isPresent()){
-            log.info("StudyRoom Id is Invalid");
-            return BaseExceptionResponseStatus.FAILURE;
-        }
+        MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(studyroomId, memberId)
+                .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
 
-        Optional<MemberRole> optionalMemberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(studyroomId, memberId);
-        if (optionalMemberRole.isEmpty()) {
-            log.info("Member Role not found for memberId: " + memberId + " and studyroomId: " + studyroomId);
-            return BaseExceptionResponseStatus.FAILURE;
-        }
-        MemberRole memberRole = optionalMemberRole.orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
-
-        if (memberRole .equals(MemberRole.CAPTAIN)) {
-            if(studyroomRepository.deleteStudyroom(studyroomId)==1 && memberstudyroomRepository.deleteMemberStudyroom(studyroomId)>0){
+        if (memberRole.equals(MemberRole.CAPTAIN)) {
+            if(studyroomRepository.deleteStudyroom(studyroomId)==1){
                 log.info("Success delete studyRoom in Service layer");
-                return BaseExceptionResponseStatus.SUCCESS;
+                memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
+                log.info("Success delete MemberStudyRoom in Service layer");
+                dataRepository.updateDataStatus(studyroomId,BaseStatus.DELETE);
+                log.info("Success delete Data in Service layer");
             }else {
                 log.info("Failure delete studyRoom");
-                return BaseExceptionResponseStatus.FAILURE;
+                throw new StudyroomException(FAILURE);
             }
         } else {
             log.info("Crew Member can't delete studyRoom");
-            return BaseExceptionResponseStatus.FAILURE;
+            throw new StudyroomException(FAILURE);
         }
 
     }
