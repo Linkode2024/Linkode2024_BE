@@ -50,7 +50,7 @@ public class StudyroomService {
     @Transactional
     public void deleteStudyroom(long studyroomId, long memberId) {
 
-        MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(studyroomId, memberId)
+        MemberRole memberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
                 .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
 
         if (memberRole.equals(MemberRole.CAPTAIN)) {
