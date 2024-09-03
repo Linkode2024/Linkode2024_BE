@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class GithubIssueService {
     private final StudyroomRepository studyroomRepository;
     private final MemberstudyroomRepository memberstudyroomRepository;
 
+    @Transactional
     public GithubIssueResponse saveGithubIssue(Long studyroomId, String payload) {
 
 
@@ -60,6 +62,7 @@ public class GithubIssueService {
                 .url(prUrl)
                 .state("opened")
                 .studyroom(studyroom)
+                .status(BaseStatus.ACTIVE)
                 .state("opened") // 상태를 하드코딩하거나 필요한 상태로 대체
                 .build();
 
