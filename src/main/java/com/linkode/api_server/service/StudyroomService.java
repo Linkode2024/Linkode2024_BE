@@ -5,14 +5,13 @@ import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
+import com.linkode.api_server.domain.GithubIssue;
 import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.*;
-import com.linkode.api_server.repository.DataRepository;
-import com.linkode.api_server.repository.MemberstudyroomRepository;
-import com.linkode.api_server.repository.StudyroomRepository;
+import com.linkode.api_server.repository.*;
 import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import java.util.Optional;
 import com.linkode.api_server.domain.Member;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
-import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +40,7 @@ public class StudyroomService {
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
     private final DataRepository dataRepository;
+    private final GithubIssueRepository githubIssueRepository;
 
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
@@ -52,11 +51,9 @@ public class StudyroomService {
         log.info("[StudyroomService.deleteStudyroom]");
         if (validateMemberRole(studyroomId,memberId,MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
-                log.info("Success delete studyRoom in Service layer");
                 memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
-                log.info("Success delete MemberStudyRoom in Service layer");
                 dataRepository.updateDataStatus(studyroomId,BaseStatus.DELETE);
-                log.info("Success delete Data in Service layer");
+                githubIssueRepository.updateIssueStatus(studyroomId,BaseStatus.DELETE);
             }else {
                 log.info("Failure delete studyRoom");
                 throw new StudyroomException(FAILURE);
