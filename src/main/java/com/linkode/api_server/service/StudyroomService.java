@@ -50,19 +50,19 @@ public class StudyroomService {
     public void deleteStudyroom(long studyroomId, long memberId) {
         log.info("[StudyroomService.deleteStudyroom]");
         if (validateMemberRole(studyroomId,memberId,MemberRole.CAPTAIN)) {
-            if(studyroomRepository.deleteStudyroom(studyroomId)==1){
+            try {
                 memberstudyroomRepository.deleteMemberStudyroom(studyroomId, BaseStatus.DELETE);
                 dataRepository.updateDataStatus(studyroomId,BaseStatus.DELETE);
                 githubIssueRepository.updateIssueStatus(studyroomId,BaseStatus.DELETE);
-            }else {
-                log.info("Failure delete studyRoom");
-                throw new StudyroomException(FAILURE);
+                studyroomRepository.updateStudyroomStatus(studyroomId, BaseStatus.DELETE);
+            }catch (Exception e){
+                log.error("Failure during delete studyroom -> {}",e.getMessage(), e);
+                throw new StudyroomException(FAILED_DELETE_STUDYROOM);
             }
         } else {
-            log.info("Failure find studyRoom of captain");
+            log.error("Failure find studyRoom of captain");
             throw new StudyroomException(NOT_FOUND_MEMBERROLE);
         }
-
     }
 
     /** 스터디룸 ROLE 검증 메서드 */
