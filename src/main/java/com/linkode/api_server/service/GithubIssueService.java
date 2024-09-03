@@ -24,6 +24,7 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GithubIssueService {
 
     private final GithubIssueRepository githubIssueRepository;
