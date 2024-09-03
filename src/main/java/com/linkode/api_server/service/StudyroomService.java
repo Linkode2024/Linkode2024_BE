@@ -49,9 +49,8 @@ public class StudyroomService {
 
     @Transactional
     public void deleteStudyroom(long studyroomId, long memberId) {
-
-        if (memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
-                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM)).equals(MemberRole.CAPTAIN)) {
+        log.info("[StudyroomService.deleteStudyroom]");
+        if (validateMemberRole(studyroomId,memberId,MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
                 log.info("Success delete studyRoom in Service layer");
                 memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
@@ -63,10 +62,18 @@ public class StudyroomService {
                 throw new StudyroomException(FAILURE);
             }
         } else {
-            log.info("Crew Member can't delete studyRoom");
-            throw new StudyroomException(FAILURE);
+            log.info("Failure find studyRoom of captain");
+            throw new StudyroomException(NOT_FOUND_MEMBERROLE);
         }
 
+    }
+
+    /** 스터디룸 ROLE 검증 메서드 */
+    public Boolean validateMemberRole(long studyroomId, long memberId,MemberRole role){
+        log.info("[StudyroomService.validateMemberRole]");
+        return memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
+                .stream()
+                .anyMatch(m->m.equals(role));
     }
 
     /** 스터디룸 생성

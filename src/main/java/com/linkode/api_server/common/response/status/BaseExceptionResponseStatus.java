@@ -19,7 +19,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      * 멤버 관련 code : 4000 대
      */
     ALREADY_EXIST_MEMBER(4000, HttpStatus.OK.value(), "이미 존재하는 회원입니다."),
-    NOT_FOUND_MEMBERROLE(4001, HttpStatus.OK.value(), "해당 스터디룸의 역할을 찾을 수 없습니다." ),
+    NOT_FOUND_MEMBERROLE(4001, HttpStatus.OK.value(), "삭제권한이 있는 스터디룸을 찾을 수 없습니다." ),
     NOT_FOUND_MEMBER(4002, HttpStatus.OK.value(), "회원을 찾을 수 없습니다."),
     /**
      * 스터디룸 관련 code : 5000 대
