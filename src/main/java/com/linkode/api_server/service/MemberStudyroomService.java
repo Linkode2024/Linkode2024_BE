@@ -108,29 +108,13 @@ public class MemberStudyroomService {
      *
      * */
     @Transactional
-    public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
+    public void leaveStudyroom(long studyroomId, long memberId){
         log.info("[MemberStudyroomService.leaveStudyroom]");
-        try {
             MemberStudyroom memberStudyroom = memberstudyroomRepository
                     .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
                     .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
-            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new
-                    LeaveStudyroomExeption(CANNOT_LEAVE_STUDYROOM);
+            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new MemberStudyroomException(CANNOT_LEAVE_STUDYROOM);
             memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE);
-            memberstudyroomRepository.save(memberStudyroom);
-            return BaseExceptionResponseStatus.SUCCESS;
-        }
-        catch (LeaveStudyroomExeption e) {
-            log.error("MemberStudyroomException! -> ", e);
-            return CANNOT_LEAVE_STUDYROOM;
-        }
-        catch (MemberStudyroomException e) {
-            log.error("MemberStudyroomException! -> ", e);
-            return NOT_FOUND_MEMBER_STUDYROOM;
-        }
-        catch (Exception e){
-            return FAILURE;
-        }
     }
 
     /**
