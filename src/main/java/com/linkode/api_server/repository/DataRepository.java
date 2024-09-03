@@ -22,6 +22,7 @@ public interface DataRepository extends JpaRepository<Data, Long> {
             "ORDER BY d.dataId DESC")
     Optional<List<DataListResponse.Data>> getDataListByType(Long studyroomId, DataType type , BaseStatus status);
 
+
     @Modifying
     @Query("UPDATE Data d SET d.status = :status WHERE d.studyroom.studyroomId = :studyroomId")
     void updateDataStatus(Long studyroomId, BaseStatus status);
