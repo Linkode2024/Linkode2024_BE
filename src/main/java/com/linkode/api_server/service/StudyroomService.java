@@ -51,7 +51,7 @@ public class StudyroomService {
         log.info("[StudyroomService.deleteStudyroom]");
         if (validateMemberRole(studyroomId,memberId,MemberRole.CAPTAIN)) {
             if(studyroomRepository.deleteStudyroom(studyroomId)==1){
-                memberstudyroomRepository.deleteMemberStudyroom(studyroomId);
+                memberstudyroomRepository.deleteMemberStudyroom(studyroomId, BaseStatus.DELETE);
                 dataRepository.updateDataStatus(studyroomId,BaseStatus.DELETE);
                 githubIssueRepository.updateIssueStatus(studyroomId,BaseStatus.DELETE);
             }else {
