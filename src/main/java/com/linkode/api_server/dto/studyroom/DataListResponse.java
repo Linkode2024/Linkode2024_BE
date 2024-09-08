@@ -23,6 +23,7 @@ public class DataListResponse {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Data{
         private long dataId;
         private String dataName;
