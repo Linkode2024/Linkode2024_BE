@@ -33,8 +33,8 @@ public class DataRepositoryDSL implements DataRepositoryCustom {
                             data.ogTitle,
                             data.ogDescription,
                             data.ogImage,
-                            data.ogUrl,
-                            data.ogType
+                            data.ogType,
+                            data.ogUrl
                     ))
                     .from(data)
                     .where(builder)
