@@ -8,9 +8,10 @@ import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueListResponse;
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueResponse;
-import com.linkode.api_server.repository.GithubIssueRepository;
+import com.linkode.api_server.repository.githubIssue.GithubIssueDSL;
+import com.linkode.api_server.repository.githubIssue.GithubIssueRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
-import com.linkode.api_server.repository.studyroom.StudyroomRepository;
+import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -28,6 +29,7 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 public class GithubIssueService {
 
     private final GithubIssueRepository githubIssueRepository;
+    private final GithubIssueDSL githubIssueDSL;
     private final StudyroomRepository studyroomRepository;
     private final MemberstudyroomRepository memberstudyroomRepository;
 
@@ -72,13 +74,12 @@ public class GithubIssueService {
     }
 
 
-    public GithubIssueListResponse getGithubIssueList(Long studyroomId, Long memberId){
+    public GithubIssueListResponse getGithubIssueList(Long studyroomId, Long memberId, Long lastGithubIssueId, int limit){
         log.info("[GithubIssueService.getGithubIssueList]");
         if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
             throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
         }
-        List<GithubIssueListResponse.GithubIssues> issues = studyroomRepository.getIssueListByStudyroom(studyroomId, BaseStatus.ACTIVE)
-                .orElseThrow(()->new GithubIssueException(NOT_FOUND_ISSUE));
+        List<GithubIssueListResponse.GithubIssues> issues = githubIssueDSL.getIssueListByStudyroom(studyroomId, BaseStatus.ACTIVE,lastGithubIssueId,limit);
         return GithubIssueListResponse.builder().IssueList(issues).build();
     }
 
