@@ -84,12 +84,12 @@ public class DataService {
         }
     }
 
-    public DataListResponse getDataList(long memberId , long studyroomId, DataType type){
+    public DataListResponse getDataList(long memberId , long studyroomId, DataType type, Long lastDataId, int limit){
         log.info("[DataService.getDataList]");
         if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
             throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
         }
-        List<DataListResponse.Data> dataList = dataRepositoryDSL.getDataListByType(studyroomId, type, BaseStatus.ACTIVE);
+        List<DataListResponse.Data> dataList = dataRepositoryDSL.getDataListByType(studyroomId, type, BaseStatus.ACTIVE, lastDataId, limit);
 
         return new DataListResponse(dataList);
     }

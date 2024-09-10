@@ -7,5 +7,5 @@ import com.linkode.api_server.dto.studyroom.DataListResponse;
 import java.util.List;
 
 public interface DataRepositoryCustom {
-    List<DataListResponse.Data> getDataListByType(Long studyroomId, DataType type, BaseStatus status);
+    List<DataListResponse.Data> getDataListByType(Long studyroomId, DataType type, BaseStatus status, Long lastDataId, int limit);
 }

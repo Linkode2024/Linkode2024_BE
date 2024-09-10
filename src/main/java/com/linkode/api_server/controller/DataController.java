@@ -38,10 +38,12 @@ public class DataController {
      */
     @GetMapping("/list")
     public BaseResponse<DataListResponse> getDataList(@RequestHeader("Authorization") String authorization,
-                                                      @RequestParam long studyroomId, @RequestParam DataType type) {
+                                                      @RequestParam long studyroomId, @RequestParam DataType type,
+                                                      @RequestParam(required = false) Long lastDataId,
+                                                      @RequestParam int limit) {
         log.info("[StudyroomController.getDataList]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        DataListResponse response = dataService.getDataList(memberId,studyroomId,type);
+        DataListResponse response = dataService.getDataList(memberId, studyroomId, type, lastDataId, limit);
         return new BaseResponse<>(response);
     }
 }
