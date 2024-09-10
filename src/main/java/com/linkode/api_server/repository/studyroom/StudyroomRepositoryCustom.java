@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudyroomRepositoryCustom {
-    List<GithubIssueListResponse.GithubIssues> getIssueListByStudyroom(Long studyroomId, BaseStatus status, Long lastDataId, int limit);
+    List<GithubIssueListResponse.GithubIssues> getIssueListByStudyroom(Long studyroomId, BaseStatus status, Long  lastStudyroomId, int limit);
 
 }
