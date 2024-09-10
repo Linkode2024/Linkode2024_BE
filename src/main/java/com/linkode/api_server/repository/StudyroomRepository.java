@@ -1,4 +1,4 @@
-package com.linkode.api_server.repository.studyroom;
+package com.linkode.api_server.repository;
 
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
