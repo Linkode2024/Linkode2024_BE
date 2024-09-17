@@ -1,16 +1,19 @@
 package com.linkode.api_server.dto.member;
 
+import com.linkode.api_server.domain.Member;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class LoginResponse {
     /**
      * 깃허브 소셜로그인
      */
-    private boolean memberStatus;
+    private Long memberId;
     private String githubId;
     private String accessToken;
     private String refreshToken;
@@ -18,17 +21,38 @@ public class LoginResponse {
     private List<Studyroom> studyroomList;
 
     @Getter
-    @AllArgsConstructor
-    public static class Profile{
+    @Builder
+    public static class Profile {
         private String nickname;
         private Long avatarId;
         private Long colorId;
+
+        // 정적 팩토리 메서드
+        public static Profile from(Member member) {
+            return Profile.builder()
+                    .nickname(member.getNickname())
+                    .avatarId(member.getAvatar().getAvatarId())
+                    .colorId(member.getColor().getColorId())
+                    .build();
+        }
     }
 
     @Getter
     @AllArgsConstructor
-    public static class Studyroom{
+    public static class Studyroom {
         private Long studyroomId;
         private String studyroomProfile;
+    }
+
+    // 정적 팩토리 메서드
+    public static LoginResponse of(Member member, String accessToken, String refreshToken, List<Studyroom> studyroomList) {
+        return LoginResponse.builder()
+                .memberId(member.getMemberId())
+                .githubId(member.getGithubId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .profile(Profile.from(member))
+                .studyroomList(studyroomList)
+                .build();
     }
 }
