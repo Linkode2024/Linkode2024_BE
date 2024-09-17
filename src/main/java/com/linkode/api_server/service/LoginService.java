@@ -1,6 +1,5 @@
 package com.linkode.api_server.service;
 
-import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Member;
@@ -23,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER_STUDYROOM;
 
 @Slf4j

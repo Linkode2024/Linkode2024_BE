@@ -19,9 +19,12 @@ public class GithubIssueController {
     private final JwtProvider jwtProvider;
 
     @GetMapping("")
-    public BaseResponse<GithubIssueListResponse> getIssueList(@RequestHeader("Authorization") String authorization,@RequestParam long studyroomId){
+    public BaseResponse<GithubIssueListResponse> getIssueList(@RequestHeader("Authorization") String authorization,
+                                                              @RequestParam long studyroomId,
+                                                              @RequestParam(required = false) Long lastGithubIssueId,
+                                                              @RequestParam int limit){
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        GithubIssueListResponse response = githubIssueService.getGithubIssueList(studyroomId,memberId);
+        GithubIssueListResponse response = githubIssueService.getGithubIssueList(studyroomId,memberId,lastGithubIssueId,limit);
         return new BaseResponse<>(response);
     }
 
