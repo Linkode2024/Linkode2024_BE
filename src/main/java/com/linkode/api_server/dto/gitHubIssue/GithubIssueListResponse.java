@@ -1,9 +1,7 @@
 package com.linkode.api_server.dto.gitHubIssue;
 
 import com.linkode.api_server.dto.studyroom.DataListResponse;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
@@ -15,8 +13,10 @@ public class GithubIssueListResponse {
 
     @Builder
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class GithubIssues{
-        private Long gitHubIssueId;
+        private Long githubIssueId;
         private String title;
         private String body;
         private String url;

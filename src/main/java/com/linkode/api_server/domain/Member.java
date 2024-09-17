@@ -35,7 +35,6 @@ public class Member extends BaseTime {
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
-
     @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<MemberStudyroom> memberStudyroomList = new ArrayList<>();

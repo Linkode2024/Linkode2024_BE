@@ -56,8 +56,8 @@ public class MemberService {
             Member member = new Member(githubId, nickname, avatar, color, BaseStatus.ACTIVE);
             memberRepository.save(member);
 
-            String jwtAccessToken = jwtProvider.createAccessToken(githubId);
-            String jwtRefreshToken = jwtProvider.createRefreshToken(githubId);
+            String jwtAccessToken = jwtProvider.createAccessToken(member);
+            String jwtRefreshToken = jwtProvider.createRefreshToken(member);
             // 레디스 저장
             tokenService.storeToken(jwtRefreshToken, githubId);
             return new CreateAvatarResponse(jwtAccessToken,jwtRefreshToken);
