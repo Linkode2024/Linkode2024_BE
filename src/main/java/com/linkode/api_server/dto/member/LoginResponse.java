@@ -1,6 +1,7 @@
 package com.linkode.api_server.dto.member;
 
 import com.linkode.api_server.domain.Member;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ public class LoginResponse {
     /**
      * 깃허브 소셜로그인
      */
+    private boolean memberStatus;
     private Long memberId;
     private String githubId;
     private String accessToken;
@@ -45,13 +47,14 @@ public class LoginResponse {
     }
 
     // 정적 팩토리 메서드
-    public static LoginResponse of(Member member, String accessToken, String refreshToken, List<Studyroom> studyroomList) {
+    public static LoginResponse of(boolean memberStatus, @Nullable Member member, String githubId,String accessToken, String refreshToken, List<Studyroom> studyroomList) {
         return LoginResponse.builder()
-                .memberId(member.getMemberId())
-                .githubId(member.getGithubId())
+                .memberStatus(memberStatus)
+                .memberId(member != null ? member.getMemberId() : null)
+                .githubId(githubId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .profile(Profile.from(member))
+                .profile(member != null ? Profile.from(member) : null)
                 .studyroomList(studyroomList)
                 .build();
     }

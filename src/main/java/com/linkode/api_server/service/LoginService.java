@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
@@ -47,37 +48,45 @@ public class LoginService {
     public LoginResponse githubLogin(String code){
         log.info("[LoginService.githubLogin]");
         String githubId = getUserInfo(getAccessToken(code)); //깃허브 서버와 통신해서 유저 정보 받아오기
-        Member member = null;
         String jwtAccessToken = null;
         String jwtRefreshToken = null;
         List<LoginResponse.Studyroom> studyroom = null;
+        boolean memberStatus = false;
 
-        member = memberRepository.findByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)
-                .orElseThrow(()-> new MemberException(NOT_FOUND_MEMBER));
-        log.info("[깃허브 아이디로 member 찾기]");
+        try {
+            Member member = memberRepository.findByGithubIdAndStatus(githubId, BaseStatus.ACTIVE)
+                    .orElseThrow(()-> new MemberException(NOT_FOUND_MEMBER));
+            log.info("[깃허브 아이디로 member 찾기]");
 
-        if(member!=null){
-            jwtAccessToken = jwtProvider.createAccessToken(member);
-            log.info("[엑세스토큰 발급~]");
-            jwtRefreshToken = jwtProvider.createRefreshToken(member);
-            log.info("[리프레시토큰 발급~]");
-            // 레디스 저장
-            tokenService.storeToken(jwtRefreshToken, githubId);
-            LoginResponse.Profile.from(member);
-            studyroom = memberstudyroomRepository.findByMemberIdAndStatus(member.getMemberId(), BaseStatus.ACTIVE)
-                    .orElseThrow(()->new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM))
-                    .stream()
-                    .map(ms -> new LoginResponse.Studyroom(ms.getStudyroom().getStudyroomId(), ms.getStudyroom().getStudyroomProfile()))
-                    .collect(Collectors.toList());
-            log.info("[studyroom stream 으로 찾아서 반환하기]");
+            if(member!=null){
+                memberStatus = true;
+                jwtAccessToken = jwtProvider.createAccessToken(member);
+                log.info("[엑세스토큰 발급~]");
+                jwtRefreshToken = jwtProvider.createRefreshToken(member);
+                log.info("[리프레시토큰 발급~]");
+                // 레디스 저장
+                tokenService.storeToken(jwtRefreshToken, githubId);
+                LoginResponse.Profile.from(member);
+                studyroom = memberstudyroomRepository.findByMemberIdAndStatus(member.getMemberId(), BaseStatus.ACTIVE)
+                        .orElseThrow(()->new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM))
+                        .stream()
+                        .map(ms -> new LoginResponse.Studyroom(ms.getStudyroom().getStudyroomId(), ms.getStudyroom().getStudyroomProfile()))
+                        .collect(Collectors.toList());
+                log.info("[studyroom stream 으로 찾아서 반환하기]");
+
+            }
+            return LoginResponse.of(
+                    memberStatus,
+                    member,
+                    githubId,
+                    jwtAccessToken,
+                    jwtRefreshToken,
+                    studyroom
+            );
+        }catch (MemberException e){
+            return LoginResponse.of(memberStatus, null, githubId, null,null,null);
         }
-        // Member가 없을 경우 Profile 및 Studyroom은 null 또는 빈 값 처리
-        return LoginResponse.of(
-                member,
-                jwtAccessToken,
-                jwtRefreshToken,
-                studyroom
-        );
+
     }
 
     /**
