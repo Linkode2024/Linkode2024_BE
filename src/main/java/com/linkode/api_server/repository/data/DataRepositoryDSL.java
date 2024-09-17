@@ -34,7 +34,15 @@ public class DataRepositoryDSL implements DataRepositoryCustom {
                 data.dataUrl
         );
         if (type.equals(DataType.LINK)) {
-            projections = Projections.fields(DataListResponse.Data.class, data);
+            projections = Projections.fields(DataListResponse.Data.class,
+                    data.dataId,
+                    data.dataName,
+                    data.dataUrl,
+                    data.ogTitle,
+                    data.ogDescription,
+                    data.ogImage,
+                    data.ogUrl,
+                    data.ogType);
         }
         return queryFactory.select(projections)
                 .from(data)
