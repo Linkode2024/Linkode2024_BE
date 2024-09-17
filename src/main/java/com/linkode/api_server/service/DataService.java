@@ -14,8 +14,9 @@ import com.linkode.api_server.dto.data.OpenGraphData;
 import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
-import com.linkode.api_server.repository.DataRepository;
+import com.linkode.api_server.repository.data.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.data.DataRepositoryDSL;
 import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class DataService {
 
     private final MemberstudyroomRepository memberstudyroomRepository;
     private final DataRepository dataRepository;
+    private final DataRepositoryDSL dataRepositoryDSL;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
     private final SimpMessagingTemplate messagingTemplate;
@@ -82,13 +84,13 @@ public class DataService {
         }
     }
 
-    public DataListResponse getDataList(long memberId , long studyroomId, DataType type){
+    public DataListResponse getDataList(long memberId , long studyroomId, DataType type, Long lastDataId, int limit){
         log.info("[DataService.getDataList]");
         if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
             throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
         }
-        List<DataListResponse.Data> dataList= dataRepository.getDataListByType(studyroomId,type, BaseStatus.ACTIVE)
-                .orElseThrow(()->new DataException(NOT_FOUND_DATA));
+        List<DataListResponse.Data> dataList = dataRepositoryDSL.getDataListByType(studyroomId, type, BaseStatus.ACTIVE, lastDataId, limit);
+
         return new DataListResponse(dataList);
     }
 

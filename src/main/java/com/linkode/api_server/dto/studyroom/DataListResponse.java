@@ -15,14 +15,9 @@ public class DataListResponse {
         this.DataList=DataList;
     }
 
-    public static DataListResponse of (DataListResponse response){
-        return DataListResponse.builder()
-                .DataList(response.getDataList())
-                .build();
-    }
-
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Data{
         private long dataId;
         private String dataName;
