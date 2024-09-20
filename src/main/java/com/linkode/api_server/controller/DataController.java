@@ -6,6 +6,7 @@ import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.service.DataService;
+import com.linkode.api_server.util.BroadCaster;
 import com.linkode.api_server.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class DataController {
     private final DataService dataService;
     private final JwtProvider jwtProvider;
+    private final BroadCaster broadCaster;
     /**
      * 자료 업로드
      */
@@ -30,7 +32,7 @@ public class DataController {
         log.info("[StudyroomController.uploadData]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
         UploadDataResponse response = dataService.uploadData(request, memberId);
-        dataService.broadCastUploadDataResponse(request.getStudyroomId(),memberId,response);
+        broadCaster.broadCastUploadDataResponse(request.getStudyroomId(),memberId,response);
         return new BaseResponse<>(response);
     }
     /**

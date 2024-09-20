@@ -51,10 +51,6 @@ public class DataService {
     private final DataRepositoryDSL dataRepositoryDSL;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
-    private final RestTemplate restTemplate;
-
-    @Value("${SOCKET_SERVER_URL}")
-    private String SOCKET_SERVER_URL ;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
@@ -131,31 +127,6 @@ public class DataService {
             throw new DataException(INVALID_URL);
         } else if(!fileValidater.validateFile(dataName,dataType)){
             throw new DataException(INVALID_EXTENSION);
-        }
-    }
-
-    /** 업로드 응답을 메세지로 브로드캐스트 */
-    public void broadCastUploadDataResponse(long studyroomId, long memberId, UploadDataResponse response) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("studyroomId", studyroomId);
-        body.put("memberId", memberId);
-        body.put("event", "fileUploaded");
-        body.put("data", response);
-
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(SOCKET_SERVER_URL, request, String.class);
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                log.info("Broadcast sent successfully");
-            } else {
-                log.error("Failed to send broadcast. Status code: " + responseEntity.getStatusCodeValue());
-            }
-        } catch (RestClientException e) {
-            log.error("Error sending broadcast: " + e.getMessage());
         }
     }
 
