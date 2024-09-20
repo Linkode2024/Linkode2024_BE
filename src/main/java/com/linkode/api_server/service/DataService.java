@@ -1,7 +1,6 @@
 package com.linkode.api_server.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.linkode.api_server.common.exception.DataException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.domain.Member;
@@ -21,15 +20,23 @@ import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -44,8 +51,10 @@ public class DataService {
     private final DataRepositoryDSL dataRepositoryDSL;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final RestTemplate restTemplate;
 
+    @Value("${SOCKET_SERVER_URL}")
+    private String SOCKET_SERVER_URL ;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
@@ -125,24 +134,29 @@ public class DataService {
         }
     }
 
-    public String extractJsonResponse(UploadDataResponse response){
-        log.info("[DataService.extractJsonResponse]");
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            log.info("JAVA -> JSON extract");
-            return "DATA_UPLOAD: " + objectMapper.writeValueAsString(response);
-        } catch (JsonProcessingException e) {
-            log.error("Error JSON extract : ", e);
-            return "{ error }";
-        }
-    }
-
-
     /** 업로드 응답을 메세지로 브로드캐스트 */
     public void broadCastUploadDataResponse(long studyroomId, long memberId, UploadDataResponse response) {
-        String destination = "/topic/studyroom/" + studyroomId + "/upload";  // 목적지(topic) 설정
-        messagingTemplate.convertAndSend(destination, extractJsonResponse(response));  // 메시지 전송
-        log.info("BroadcastMessage of UploadData Success!");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("studyroomId", studyroomId);
+        body.put("memberId", memberId);
+        body.put("event", "fileUploaded");
+        body.put("data", response);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> responseEntity = restTemplate.postForEntity(SOCKET_SERVER_URL, request, String.class);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                log.info("Broadcast sent successfully");
+            } else {
+                log.error("Failed to send broadcast. Status code: " + responseEntity.getStatusCodeValue());
+            }
+        } catch (RestClientException e) {
+            log.error("Error sending broadcast: " + e.getMessage());
+        }
     }
 
     /** 이름과 타입으로 확장자 검사 */

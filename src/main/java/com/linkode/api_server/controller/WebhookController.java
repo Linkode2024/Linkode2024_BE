@@ -4,8 +4,6 @@ import com.linkode.api_server.dto.gitHubIssue.GithubIssueResponse;
 import com.linkode.api_server.dto.gitHubIssue.WebhookURLResponse;
 import com.linkode.api_server.service.GithubIssueService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +13,6 @@ public class WebhookController {
     private final GithubIssueService githubIssueService;
     private final String BASE_WEBHOOK_URL = "https://www.linkode.site/webhook/studyroomId/";
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/webhook/studyroomId/{studyroomId}")
     public void handleGithubWebhook(
@@ -25,7 +21,7 @@ public class WebhookController {
             @RequestHeader("X-GitHub-Event") String event
     ) {
         GithubIssueResponse githubIssueDTO= githubIssueService.saveGithubIssue(studyroomId,payload);
-        messagingTemplate.convertAndSend("/topic/issues/" + studyroomId, githubIssueDTO);
+        githubIssueService.broadcastGithubIssue(studyroomId,githubIssueDTO);
 
     }
 
