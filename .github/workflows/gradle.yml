@@ -29,6 +29,7 @@ jobs:
       AWS_REGION: ap-northeast-2
       DEFAULT_PROFILE: ${{ secrets.DEFAULT_PROFILE }}
       AWS_CLOUDFRONT_DOMAIN: ${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
+      SOCKET_SERVER_URL: ${{secrets.SOCKET_SERVER_URL}}
 
     steps:
       - name: Checkout repository
@@ -79,6 +80,7 @@ jobs:
           --build-arg AWS_REGION=ap-northeast-2 \
           --build-arg DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
           --build-arg AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
+          --build-arg SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
           -t linkode/linkode:latest .
           docker images
           docker push linkode/linkode:latest
@@ -111,6 +113,7 @@ jobs:
             -e AWS_REGION=ap-northeast-2 \
             -e DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
             -e AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
+            -e SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
             -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
             
             sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
