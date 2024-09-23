@@ -1,6 +1,5 @@
 package com.linkode.api_server.service;
 
-import com.linkode.api_server.common.exception.GithubIssueException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.exception.StudyroomException;
 import com.linkode.api_server.domain.GithubIssue;
@@ -15,10 +14,12 @@ import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
