@@ -71,23 +71,19 @@ public class MemberStudyroomService {
      * */
     public DetailStudyroomResponse getStudyroomDetail(long studyroomId, long memberId) {
         log.info("[MemberStudyroomService.getStudyroomDetail]");
-        List<Object[]> results = memberstudyroomRepository.getStudyroomDetail(studyroomId, memberId, BaseStatus.ACTIVE);
+        MemberStudyroom memberStudyroom = memberstudyroomRepository.getStudyroomDetail(studyroomId,memberId,BaseStatus.ACTIVE)
+                .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
-        if (results.isEmpty()) {
-            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
-        }
-        Object[] firstRow = results.get(0);
-        MemberRole role = (MemberRole) firstRow[0];
-        String studyroomName = (String) firstRow[1];
-        String studyroomProfile = (String) firstRow[2];
+        MemberRole role = memberStudyroom.getRole();
+        String studyroomName = memberStudyroom.getStudyroom().getStudyroomName();
+        String studyroomProfile = memberStudyroom.getStudyroom().getStudyroomProfile();
 
-
-        List<DetailStudyroomResponse.Member> members = results.stream()
-                .map(row -> DetailStudyroomResponse.Member.builder()
-                        .memberId((Long) row[3])
-                        .nickname((String) row[4])
-                        .avatarId((Long) row[5])
-                        .colorId((Long) row[6])
+        List<DetailStudyroomResponse.Member> members = memberStudyroom.getStudyroom().getMemberStudyroomList().stream()
+                .map(member -> DetailStudyroomResponse.Member.builder()
+                        .memberId(member.getMember().getMemberId())
+                        .nickname(member.getMember().getNickname())
+                        .avatarId(member.getMember().getAvatar().getAvatarId())
+                        .colorId(member.getMember().getColor().getColorId())
                         .build())
                 .collect(Collectors.toList());
 
@@ -108,29 +104,13 @@ public class MemberStudyroomService {
      *
      * */
     @Transactional
-    public BaseExceptionResponseStatus leaveStudyroom(long studyroomId, long memberId){
+    public void leaveStudyroom(long studyroomId, long memberId){
         log.info("[MemberStudyroomService.leaveStudyroom]");
-        try {
             MemberStudyroom memberStudyroom = memberstudyroomRepository
                     .findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)
                     .orElseThrow(()-> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
-            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new
-                    LeaveStudyroomExeption(CANNOT_LEAVE_STUDYROOM);
+            if(memberStudyroom.getRole()==MemberRole.CAPTAIN) throw new MemberStudyroomException(CANNOT_LEAVE_STUDYROOM);
             memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE);
-            memberstudyroomRepository.save(memberStudyroom);
-            return BaseExceptionResponseStatus.SUCCESS;
-        }
-        catch (LeaveStudyroomExeption e) {
-            log.error("MemberStudyroomException! -> ", e);
-            return CANNOT_LEAVE_STUDYROOM;
-        }
-        catch (MemberStudyroomException e) {
-            log.error("MemberStudyroomException! -> ", e);
-            return NOT_FOUND_MEMBER_STUDYROOM;
-        }
-        catch (Exception e){
-            return FAILURE;
-        }
     }
 
     /**

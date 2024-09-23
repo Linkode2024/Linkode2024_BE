@@ -43,10 +43,10 @@ public class StudyroomController {
     public BaseResponse<MemberStudyroomListResponse> leaveStudyroom(@RequestHeader("Authorization") String authorization, @RequestParam long studyroomId){
         log.info("[StudyroomController.leaveStudyroom]");
         long memberId = jwtProvider.extractIdFromHeader(authorization);
-        BaseExceptionResponseStatus responseStatus = memberStudyroomService.leaveStudyroom(studyroomId, memberId);
+        memberStudyroomService.leaveStudyroom(studyroomId, memberId);
         MemberStudyroomListResponse latestStudyroomList = memberStudyroomService.getMemberStudyroomList(memberId);
         log.info("Run leaveStudyroom API ");
-        return new BaseResponse<>(responseStatus, latestStudyroomList);
+        return new BaseResponse<>(SUCCESS, latestStudyroomList);
     }
 
     @PostMapping("/generation")
