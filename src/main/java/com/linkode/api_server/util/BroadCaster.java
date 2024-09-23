@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +26,10 @@ public class BroadCaster {
 
     @Value("${SOCKET_SERVER_URL}")
     private String SOCKET_SERVER_URL ;
-    private final RestTemplate restTemplate;
 
+    /** 업로드 응답을 메세지로 브로드캐스트 */
     public void broadCastUploadDataResponse(long studyroomId, long memberId, UploadDataResponse response) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        WebClient webClient = WebClient.builder().baseUrl(SOCKET_SERVER_URL).build();
 
         Map<String, Object> body = new HashMap<>();
         body.put("studyroomId", studyroomId);
@@ -35,41 +37,36 @@ public class BroadCaster {
         body.put("event", "fileUploaded");
         body.put("data", response);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        try {
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(SOCKET_SERVER_URL, request, String.class);
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                log.info("Broadcast sent successfully");
-            } else {
-                log.error("Failed to send broadcast. Status code: " + responseEntity.getStatusCodeValue());
-            }
-        } catch (RestClientException e) {
-            log.error("Error sending broadcast: " + e.getMessage());
-        }
+        webClient.post()
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .subscribe(
+                        null,
+                        e -> log.error("Error sending broadcast : {}", e.getMessage()),
+                        () -> log.info("Broadcast sent successfully: studyroomId = {}", studyroomId)
+                );
     }
+
     /** 업로드 응답을 메세지로 브로드캐스트 */
     public void broadcastGithubIssue(long studyroomId, GithubIssueResponse issue) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        WebClient webClient = WebClient.builder().baseUrl(SOCKET_SERVER_URL).build();
 
         Map<String, Object> body = new HashMap<>();
         body.put("studyroomId", studyroomId);
         body.put("event", "issueUploaded");
         body.put("data", issue);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(SOCKET_SERVER_URL, request, String.class);
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                log.info("Broadcast sent successfully");
-            } else {
-                log.error("Failed to send broadcast. Status code: " + responseEntity.getStatusCodeValue());
-            }
-        } catch (RestClientException e) {
-            log.error("Error sending broadcast: " + e.getMessage());
-        }
+        webClient.post()
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .subscribe(
+                        null,
+                        error -> log.error("브로드캐스트 전송 중 오류 발생: {}", error.getMessage()),
+                        () -> log.info("브로드캐스트 성공적으로 전송됨: studyroomId={}", studyroomId)
+                );
     }
 }
 
