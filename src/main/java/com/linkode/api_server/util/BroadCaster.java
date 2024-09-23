@@ -5,16 +5,8 @@ import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.HashMap;
 import java.util.Map;
