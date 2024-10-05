@@ -18,6 +18,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(indexes = {@Index(name="idx_github_id_status", columnList = "github_id, status")})
 public class Member extends BaseTime {
 
     @Id
