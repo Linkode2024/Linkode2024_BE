@@ -58,6 +58,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
     INVALID_EXTENSION(9003,HttpStatus.BAD_REQUEST.value(), "파일 확장자를 확인해주세요."),
     INVALID_URL(9004,HttpStatus.BAD_REQUEST.value(), "URL 형식을 확인해주세요."),
     INVALID_TYPE(9005,HttpStatus.BAD_REQUEST.value(), "데이터 타입을 확인해주세요"),
+    CONFLICT_UPLOAD(9006,HttpStatus.CONFLICT.value(), "중복된 업로드 요청입니다."),
 
     /**
      * Issue 관련 : 10000대

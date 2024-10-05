@@ -27,11 +27,12 @@ public class DataController {
     @PostMapping("/upload")
     public BaseResponse<UploadDataResponse> uploadData(
             @RequestHeader("Authorization") String authorization,
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
             @ModelAttribute UploadDataRequest request) {
 
         log.info("[StudyroomController.uploadData]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        UploadDataResponse response = dataService.uploadData(request, memberId);
+        UploadDataResponse response = dataService.uploadData(request, memberId,idempotencyKey);
         broadCaster.broadCastUploadDataResponse(request.getStudyroomId(),memberId,response);
         return new BaseResponse<>(response);
     }

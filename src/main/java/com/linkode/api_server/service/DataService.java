@@ -21,6 +21,7 @@ import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -51,6 +53,7 @@ public class DataService {
     private final DataRepositoryDSL dataRepositoryDSL;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
+    private final RedisTemplate<String, Object> redisTemplate;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
@@ -72,9 +75,15 @@ public class DataService {
         return dataRepository.save(data);
     }
 
+    /** 멱등키는 클라이언트가 업로드시 세션에 1-2초간 가지고있음 */
     @Transactional
-    public UploadDataResponse uploadData(UploadDataRequest request, long memberId) {
+    public UploadDataResponse uploadData(UploadDataRequest request, long memberId, String idempotencyKey) {
         log.info("[DataService.uploadData]");
+
+        if (redisTemplate.hasKey(idempotencyKey)) {
+            throw new DataException(CONFLICT_UPLOAD);
+        }
+
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
         try {
@@ -83,6 +92,9 @@ public class DataService {
             DataType dataType = request.getDataType();
             String dataUrl=dataInfo[1];
             Data savedData = saveData(dataName, dataType, dataUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
+
+            redisTemplate.opsForValue().set(idempotencyKey, savedData.getDataId(), 15,TimeUnit.SECONDS);
+
             return UploadDataResponse.from(savedData);
         } catch (NullPointerException e) {
             throw new DataException(NONE_FILE);
