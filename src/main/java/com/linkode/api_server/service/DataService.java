@@ -17,28 +17,19 @@ import com.linkode.api_server.repository.data.DataRepository;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.data.DataRepositoryDSL;
 import com.linkode.api_server.util.FileValidater;
+import com.linkode.api_server.util.IdempotencyKeyProvider;
+import com.linkode.api_server.util.OpenGraphDataExtracter;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -53,13 +44,14 @@ public class DataService {
     private final DataRepositoryDSL dataRepositoryDSL;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final IdempotencyKeyProvider idempotencyKeyProvider;
+    private final OpenGraphDataExtracter openGraphDataExtracter;
     private static final String S3_FOLDER = "data/"; // 스터디룸 파일과 구분하기위한 폴더 지정
 
     @Transactional
     public Data saveData(String dataName, DataType dataType, String dataUrl, Member member, Studyroom studyroom) {
         log.info("[DataService.saveData]");
-        OpenGraphData openGraphData = (dataType == DataType.LINK) ? extractOpenGraphData(dataUrl) : new OpenGraphData(null, null, null, null);
+        OpenGraphData openGraphData = (dataType == DataType.LINK) ? openGraphDataExtracter.extractOpenGraphData(dataUrl) : new OpenGraphData(null, null, null, null);
         Data data = Data.builder()
                 .dataName(dataName)
                 .dataType(dataType)
@@ -75,14 +67,11 @@ public class DataService {
         return dataRepository.save(data);
     }
 
-    /** 멱등키는 클라이언트가 업로드시 세션에 1-2초간 가지고있음 */
     @Transactional
     public UploadDataResponse uploadData(UploadDataRequest request, long memberId, String idempotencyKey) {
         log.info("[DataService.uploadData]");
 
-        if (redisTemplate.hasKey(idempotencyKey)) {
-            throw new DataException(CONFLICT_UPLOAD);
-        }
+        idempotencyKeyProvider.idempotencyKeyValidater(idempotencyKey);
 
         MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
                 .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
@@ -93,13 +82,15 @@ public class DataService {
             String dataUrl=dataInfo[1];
             Data savedData = saveData(dataName, dataType, dataUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
 
-            redisTemplate.opsForValue().set(idempotencyKey, savedData.getDataId(), 15,TimeUnit.SECONDS);
+            idempotencyKeyProvider.idempotencyKeySetter(idempotencyKey,savedData.getDataId());
 
             return UploadDataResponse.from(savedData);
         } catch (NullPointerException e) {
             throw new DataException(NONE_FILE);
         }
     }
+
+
 
     public DataListResponse getDataList(long memberId , long studyroomId, DataType type, Long lastDataId, int limit){
         log.info("[DataService.getDataList]");
@@ -146,30 +137,6 @@ public class DataService {
     private void validateType(UploadDataRequest request){
         log.info("[DataService.validateType]");
         if(request.getLink()!=null){ throw new DataException(INVALID_TYPE);}
-    }
-
-    /** OpenGraph 데이터 추출 */
-    private OpenGraphData extractOpenGraphData(String url) {
-        log.info("[DataService.extractOpenGraphData]");
-        try {
-            Document doc = Jsoup.connect(url).get();
-            String ogTitle = getMetaContent(doc, "og:title");
-            String ogDescription = getMetaContent(doc, "og:description");
-            String ogImage = getMetaContent(doc, "og:image");
-            String ogType = getMetaContent(doc, "og:type");
-
-            return new OpenGraphData(ogTitle, ogDescription, ogImage, ogType);
-        } catch (IOException e) {
-            log.error("Error fetching OpenGraph tags", e);
-            return new OpenGraphData(null, null, null, null);
-        }
-    }
-
-    /** meta[property]에 대한 content 값을 추출 */
-    private String getMetaContent(Document doc, String property) {
-        log.info("[DataService.getMetaContent]");
-        Element element = doc.select("meta[property=" + property + "]").first();
-        return (element != null) ? element.attr("content") : null;
     }
 
 }
