@@ -1,11 +1,6 @@
 package com.linkode.api_server.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
-import com.linkode.api_server.common.exception.LeaveStudyroomExeption;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
-import com.linkode.api_server.common.response.BaseResponse;
-import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
-import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
@@ -29,6 +24,7 @@ import static com.linkode.api_server.common.response.status.BaseExceptionRespons
 public class MemberStudyroomService {
 
     private final MemberstudyroomRepository memberstudyroomRepository;
+    private final DataService dataService;
 
     /**
      * 회원 탈퇴
@@ -62,8 +58,8 @@ public class MemberStudyroomService {
                 .filter(memberStudyroom -> memberStudyroom.getRole() != MemberRole.CAPTAIN)
                 .forEach(memberStudyroom -> memberStudyroom.updateMemberStudyroomStatus(BaseStatus.DELETE));
 
-        memberstudyroomRepository.saveAll(memberStudyroomList);
-        memberstudyroomRepository.saveAll(crewList);
+        // 삭제하려는 스터디룸 id (캡틴인 방에 한해서) 를 가지고 있는 모든 데이터 삭제
+        dataService.deleteData(captainStudyroomIds);
     }
 
     /**
