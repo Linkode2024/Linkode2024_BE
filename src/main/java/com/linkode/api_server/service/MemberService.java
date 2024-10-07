@@ -74,11 +74,7 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         memberStudyroomService.deleteMember(memberId); // member_studyroom 테이블에서 상태 delete 작업 수행
         member.updateMemberStatus(BaseStatus.DELETE); // member 테이블에서 상태 delete 작업 수행
-        memberRepository.save(member);
         tokenService.invalidateToken(member.getGithubId());
-        /**
-         * TODO : 자료실 delete 작업 -> 아직 자료실이 없어서 구현 불가 추후에 작업
-         */
     }
 
     @Transactional
