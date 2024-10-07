@@ -105,22 +105,24 @@ public class DataService {
     /** 이름과 URL 추출 */
     private String[] extractDataNameAndUrl(UploadDataRequest request){
         log.info("[DataService.extractDataNameAndUrl]");
+        String dataName;
+        String dataUrl;
+
         DataType dataType = request.getDataType();
         if(dataType.equals(DataType.LINK) && request.getLink() != null){
-            String dataName = request.getLink();
+            dataName = request.getLink();
             validateData(dataName,dataType);
-            String dataUrl = request.getLink();
-            return new String[]{dataName,dataUrl};
+            dataUrl = dataName;
         }else if (dataType.equals(DataType.FILE)||dataType.equals(DataType.IMG)) {
             validateType(request);
-            String dataName = request.getFile().getOriginalFilename();
+            dataName = request.getFile().getOriginalFilename();
             validateData(dataName,dataType);
-            String dataUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
-            return new String[]{dataName,dataUrl};
+            dataUrl = s3Uploader.uploadFileToS3(request.getFile(), S3_FOLDER);
         }
         else {
             throw new DataException(NONE_FILE);
         }
+        return new String[]{dataName,dataUrl};
     }
 
     /** 이름과 타입으로 확장자 검사 */
