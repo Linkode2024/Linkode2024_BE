@@ -117,7 +117,8 @@ public class StudyroomService {
     @Transactional
     public JoinStudyroomByCodeResponse joinStudyroomByCode(JoinStudyroomByCodeRequest request, long memberId){
         log.info("[StudyroomService.joinStudyroomByCode]");
-                long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode());
+                Long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode())
+                        .orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
                 Studyroom studyroom = studyroomRepository
                         .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
                 if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
