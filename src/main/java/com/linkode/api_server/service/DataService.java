@@ -107,7 +107,6 @@ public class DataService {
         log.info("[DataService.extractDataNameAndUrl]");
         String dataName;
         String dataUrl;
-
         DataType dataType = request.getDataType();
         if(dataType.equals(DataType.LINK) && request.getLink() != null){
             dataName = request.getLink();
