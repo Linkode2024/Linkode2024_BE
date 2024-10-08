@@ -204,9 +204,4 @@ public class StudyroomService {
         String inviteCode = inviteService.generateInviteCode(studyroomId);
         return new PostInviteCodeResponse(inviteCode);
     }
-
-    public void validateStudyroom(Long studyroomId){
-
-    }
-
 }
