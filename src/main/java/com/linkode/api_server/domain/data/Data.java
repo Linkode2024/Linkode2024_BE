@@ -80,4 +80,8 @@ public class Data extends BaseTime {
         this.member = member;
         this.studyroom = studyroom;
     }
+
+    public void updateDataStatus(BaseStatus status){
+        this.status = status;
+    }
 }
