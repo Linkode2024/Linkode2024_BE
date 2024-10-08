@@ -10,5 +10,5 @@ import org.springframework.data.jpa.repository.Query;
 public interface GithubIssueRepository extends JpaRepository<GithubIssue, Long> {
     @Modifying
     @Query("UPDATE GithubIssue gi SET gi.status = :status WHERE gi.studyroom.studyroomId = :studyroomId")
-    void updateIssueStatus(Long studyroomId, BaseStatus status);
+    void updateStudyroomIssueStatus(Long studyroomId, BaseStatus status);
 }

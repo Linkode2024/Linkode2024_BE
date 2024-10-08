@@ -56,7 +56,7 @@ public class StudyroomService {
             try {
                 memberstudyroomRepository.deleteMemberStudyroom(studyroomId,BaseStatus.DELETE);
                 dataRepository.updateStudyroomDataStatus(studyroomId,BaseStatus.DELETE);
-                githubIssueRepository.updateIssueStatus(studyroomId,BaseStatus.DELETE);
+                githubIssueRepository.updateStudyroomIssueStatus(studyroomId,BaseStatus.DELETE);
                 studyroomRepository.updateStudyroomStatus(studyroomId, BaseStatus.DELETE);
             }catch (Exception e){
                 log.error("Failure during delete studyroom -> {}",e.getMessage(), e);
