@@ -104,8 +104,10 @@ public class StudyroomService {
     /** 방장으로 가입 */
     @Transactional
     public void joinStudyroomAsCaptain(long studyroomId, long memberId){
+        Studyroom studyroom = studyroomRepository.findById(studyroomId)
+                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
         JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
-                        .studyroomId(studyroomId)
+                        .studyroom(studyroom)
                         .memberId(memberId)
                         .memberRole(MemberRole.CAPTAIN)
                         .build();
@@ -125,11 +127,10 @@ public class StudyroomService {
             throw new MemberException(JOINED_STUDYROOM);
         }
         JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
-                .studyroomId(studyroomId)
+                .studyroom(studyroom)
                 .memberId(memberId)
                 .memberRole(MemberRole.CREW)
                 .build();
-
         joinStudyroom(joinStudyroomRequest);
         return JoinStudyroomByCodeResponse.from(studyroom);
     }
@@ -141,15 +142,12 @@ public class StudyroomService {
         log.info("[StudyroomService.joinStudyroom]");
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
-        Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
-                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
-
         MemberStudyroom memberStudyroom = new MemberStudyroom(
                 null,
                 BaseStatus.ACTIVE,
                 request.getMemberRole(),
                 member,
-                studyroom);
+                request.getStudyroom());
         memberstudyroomRepository.save(memberStudyroom);
         log.info("Success save memberStudyroom");
     }
@@ -206,4 +204,9 @@ public class StudyroomService {
         String inviteCode = inviteService.generateInviteCode(studyroomId);
         return new PostInviteCodeResponse(inviteCode);
     }
+
+    public void validateStudyroom(Long studyroomId){
+
+    }
+
 }
