@@ -117,19 +117,20 @@ public class StudyroomService {
     @Transactional
     public JoinStudyroomByCodeResponse joinStudyroomByCode(JoinStudyroomByCodeRequest request, long memberId){
         log.info("[StudyroomService.joinStudyroomByCode]");
-                long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode());
-                Studyroom studyroom = studyroomRepository
-                        .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
-                if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
-                    throw new MemberException(JOINED_STUDYROOM);
-                }
+        Long studyroomId = inviteService.findRoomIdByInviteCode(request.getInviteCode())
+                .orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
+        Studyroom studyroom = studyroomRepository
+                .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
+        if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
+            throw new MemberException(JOINED_STUDYROOM);
+        }
         JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
                 .studyroomId(studyroomId)
                 .memberId(memberId)
                 .memberRole(MemberRole.CREW)
                 .build();
 
-               joinStudyroom(joinStudyroomRequest);
+        joinStudyroom(joinStudyroomRequest);
         return JoinStudyroomByCodeResponse.from(studyroom);
     }
 

@@ -84,12 +84,8 @@ public class StudyroomController {
     public BaseResponse<JoinStudyroomByCodeResponse> joinStudyroom(@RequestHeader("Authorization") String authorization, @RequestBody JoinStudyroomByCodeRequest request){
         log.info("[StudyroomController.joinStudyroom]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        try {
-            JoinStudyroomByCodeResponse response = studyroomService.joinStudyroomByCode(request,memberId);
-            return new BaseResponse<>(response);
-        }catch (NullPointerException e){
-            return new BaseResponse<>(INVALID_INVITE_CODE,null);
-        }
+        JoinStudyroomByCodeResponse response = studyroomService.joinStudyroomByCode(request,memberId);
+        return new BaseResponse<>(response);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.linkode.api_server.service;
 
+import com.linkode.api_server.common.exception.StudyroomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,11 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.INVALID_INVITE_CODE;
 
 @Slf4j
 @Service
@@ -57,14 +61,9 @@ public class InviteService {
     /**
      * 초대 코드로 스터디룸 아이디 찾기
      */
-    public Long findRoomIdByInviteCode(String code) {
+    public Optional<Long> findRoomIdByInviteCode(String code) {
         String keyPattern = "invite:*";
         Set<String> keys = redisTemplate.keys(keyPattern);
-
-        if (keys == null || keys.isEmpty()) {
-            return null;
-        }
-
         for (String key : keys) {
             String value = redisTemplate.opsForValue().get(key);
             if (value != null) {
@@ -72,12 +71,11 @@ public class InviteService {
                 String storedCode = values[0];
                 if (storedCode.equals(code)) {
                     // key 형식이 "invite:{roomId}"이므로, roomId를 추출하여 반환
-                    return Long.parseLong(key.split(":")[1]);
+                    return Optional.of(Long.parseLong(key.split(":")[1]));
                 }
             }
         }
-
-        return null;
+        throw new StudyroomException(INVALID_INVITE_CODE);
     }
 
     /**
