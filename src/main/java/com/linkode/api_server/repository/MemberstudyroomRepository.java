@@ -18,12 +18,12 @@ import java.util.Set;
 @Repository
 public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom, Long> {
 
-    @Query("SELECT ms.role FROM MemberStudyroom ms WHERE ms.studyroom.studyroomId = :studyroomId AND ms.member.memberId = :memberId")
-    Optional<MemberRole> findRoleByMemberIdAndStudyroomId(long studyroomId, long memberId);
+    @Query("SELECT ms.role FROM MemberStudyroom ms WHERE ms.studyroom.studyroomId = :studyroomId AND ms.member.memberId = :memberId AND ms.status = :status")
+    Optional<MemberRole> findRoleByMemberIdAndStudyroomIdAndRole(long studyroomId, long memberId, BaseStatus status);
 
     @Modifying
-    @Query("UPDATE MemberStudyroom ms SET ms.status = 'DELETE' WHERE ms.studyroom.studyroomId = :studyroomId")
-    int deleteMemberStudyroom(long studyroomId);
+    @Query("UPDATE MemberStudyroom ms SET ms.status = :status WHERE ms.studyroom.studyroomId = :studyroomId")
+    void deleteMemberStudyroom(long studyroomId, BaseStatus status);
 
     Optional<MemberStudyroom> findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(Long memberId, Long studyroomId, BaseStatus status);
     Optional<List<MemberStudyroom>> findByMember_MemberIdAndStatus(Long memberId, BaseStatus status);

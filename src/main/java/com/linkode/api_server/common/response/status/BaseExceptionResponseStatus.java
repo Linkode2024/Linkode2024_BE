@@ -26,6 +26,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus{
      */
     INVALID_ROLE(5000,HttpStatus.OK.value(), "해당 스터디룸에 접근할 권한이 없습니다."),
     NOT_FOUND_STUDYROOM(5001,HttpStatus.OK.value(), "스터디룸을 찾을 수 없습니다."),
+    FAILED_DELETE_STUDYROOM(5007,HttpStatus.BAD_REQUEST.value(),"스터디룸과 관련 데이터 샂게중 오류가 발생하였습니다."),
+
     /**
      * 멤버_스터디룸 관련 code : 6000 대
      */
