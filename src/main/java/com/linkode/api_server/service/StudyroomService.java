@@ -130,7 +130,7 @@ public class StudyroomService {
                 .memberRole(MemberRole.CREW)
                 .build();
 
-               joinStudyroom(joinStudyroomRequest);
+        joinStudyroom(joinStudyroomRequest);
         return JoinStudyroomByCodeResponse.from(studyroom);
     }
 
