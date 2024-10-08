@@ -11,6 +11,8 @@ import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.repository.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
+import com.linkode.api_server.repository.data.DataRepository;
+import com.linkode.api_server.repository.githubIssue.GithubIssueRepository;
 import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
+import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.FAILED_DELETE_STUDYROOM;
 
 @Service
 @Slf4j
@@ -39,39 +42,38 @@ public class StudyroomService {
     private final InviteService inviteService;
     private final S3Uploader s3Uploader;
     private final FileValidater fileValidater;
+    private final DataRepository dataRepository;
+    private final GithubIssueRepository githubIssueRepository;
 
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
     private String DEFAULT_PROFILE;
 
     @Transactional
-    public BaseExceptionResponseStatus deleteStudyroom(long studyroomId, long memberId) {
-
-        if(!studyroomRepository.findById(studyroomId).isPresent()){
-            log.info("StudyRoom Id is Invalid");
-            return BaseExceptionResponseStatus.FAILURE;
-        }
-
-        Optional<MemberRole> optionalMemberRole = memberstudyroomRepository.findRoleByMemberIdAndStudyroomId(studyroomId, memberId);
-        if (optionalMemberRole.isEmpty()) {
-            log.info("Member Role not found for memberId: " + memberId + " and studyroomId: " + studyroomId);
-            return BaseExceptionResponseStatus.FAILURE;
-        }
-        MemberRole memberRole = optionalMemberRole.orElseThrow(() -> new IllegalArgumentException("Error because of Invalid Member Id or Invalid StudyRoom Id"));
-
-        if (memberRole .equals(MemberRole.CAPTAIN)) {
-            if(studyroomRepository.deleteStudyroom(studyroomId)==1 && memberstudyroomRepository.deleteMemberStudyroom(studyroomId)>0){
-                log.info("Success delete studyRoom in Service layer");
-                return BaseExceptionResponseStatus.SUCCESS;
-            }else {
-                log.info("Failure delete studyRoom");
-                return BaseExceptionResponseStatus.FAILURE;
+    public void deleteStudyroom(long studyroomId, long memberId) {
+        log.info("[StudyroomService.deleteStudyroom]");
+        if (validateMemberRole(studyroomId,memberId,MemberRole.CAPTAIN)) {
+            try {
+                memberstudyroomRepository.deleteMemberStudyroom(studyroomId,BaseStatus.DELETE);
+                dataRepository.updateStudyroomDataStatus(studyroomId,BaseStatus.DELETE);
+                githubIssueRepository.updateIssueStatus(studyroomId,BaseStatus.DELETE);
+                studyroomRepository.updateStudyroomStatus(studyroomId, BaseStatus.DELETE);
+            }catch (Exception e){
+                log.error("Failure during delete studyroom -> {}",e.getMessage(), e);
+                throw new StudyroomException(FAILED_DELETE_STUDYROOM);
             }
         } else {
-            log.info("Crew Member can't delete studyRoom");
-            return BaseExceptionResponseStatus.FAILURE;
+            log.error("Failure find studyRoom of captain");
+            throw new StudyroomException(NOT_FOUND_MEMBERROLE);
         }
+    }
 
+    /** 스터디룸 ROLE 검증 메서드 */
+    public Boolean validateMemberRole(long studyroomId, long memberId,MemberRole role){
+        log.info("[StudyroomService.validateMemberRole]");
+        return memberstudyroomRepository.findRoleByMemberIdAndStudyroomIdAndRole(studyroomId, memberId,BaseStatus.ACTIVE)
+                .stream()
+                .anyMatch(m->m.equals(role));
     }
 
     /** 스터디룸 생성
