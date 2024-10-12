@@ -6,7 +6,7 @@ import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.DetailStudyroomResponse;
 import com.linkode.api_server.dto.studyroom.MemberStudyroomListResponse;
-import com.linkode.api_server.repository.Memberstudyroom.MemberstudyroomRepository;
+import com.linkode.api_server.repository.memberstudyroom.MemberstudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

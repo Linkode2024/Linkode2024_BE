@@ -4,7 +4,7 @@ import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Member;
-import com.linkode.api_server.repository.Memberstudyroom.MemberstudyroomRepository;
+import com.linkode.api_server.repository.memberstudyroom.MemberstudyroomRepository;
 import com.linkode.api_server.util.JwtProvider;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.LoginResponse;
