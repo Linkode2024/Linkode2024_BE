@@ -20,4 +20,8 @@ public interface DataRepository extends JpaRepository<Data, Long>{
     @Modifying
     @Query("UPDATE Data d SET d.status = :status WHERE d IN :dataLists")
     void updateDataStatus(@Param("dataLists") List<Data> dataLists, @Param("status") BaseStatus status);
+
+    @Modifying
+    @Query("UPDATE Data d SET d.status = :status WHERE d.studyroom.studyroomId = :studyroomId")
+    void updateStudyroomDataStatus(Long studyroomId, BaseStatus status);
 }
