@@ -151,15 +151,4 @@ public class DataService {
         Element element = doc.select("meta[property=" + property + "]").first();
         return (element != null) ? element.attr("content") : null;
     }
-
-    /**
-     * 탈퇴하는 회원의 스터디룸 중 CAPTAIN 인 스터디룸의 Data 만 지우기
-     */
-    @Transactional
-    public void deleteData(Set<Long> captainStudyroomIds){
-        log.info("[DataService.deleteData]");
-        List<Data> dataLists = dataRepository.findByStudyroom_StudyroomIdInAndStatus(captainStudyroomIds, BaseStatus.ACTIVE)
-                .orElseThrow(()->new DataException(NOT_FOUND_DATA)); // 조건에 맞는 자료실을 불러올 수 없습니다.
-        dataRepository.updateDataStatus(dataLists, BaseStatus.DELETE);
-    }
 }

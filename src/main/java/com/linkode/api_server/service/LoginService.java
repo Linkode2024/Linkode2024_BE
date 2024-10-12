@@ -150,12 +150,4 @@ public class LoginService {
         return jsonObject.getString("login");
     }
 
-    private boolean checkMember(String githubId){
-        log.info("[LoginService.githubLogin.checkMember]");
-        boolean memberStatus = memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE);
-        return memberStatus;
-    }
-
-
-
 }
