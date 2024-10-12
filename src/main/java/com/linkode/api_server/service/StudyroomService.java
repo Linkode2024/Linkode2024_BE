@@ -9,7 +9,7 @@ import com.linkode.api_server.domain.data.DataType;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import com.linkode.api_server.dto.studyroom.*;
-import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.memberstudyroom.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
 import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
