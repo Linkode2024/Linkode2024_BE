@@ -14,7 +14,7 @@ import com.linkode.api_server.dto.studyroom.DataListResponse;
 import com.linkode.api_server.dto.studyroom.UploadDataRequest;
 import com.linkode.api_server.dto.studyroom.UploadDataResponse;
 import com.linkode.api_server.repository.data.DataRepository;
-import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.Memberstudyroom.MemberstudyroomRepository;
 import com.linkode.api_server.repository.data.DataRepositoryDSL;
 import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;

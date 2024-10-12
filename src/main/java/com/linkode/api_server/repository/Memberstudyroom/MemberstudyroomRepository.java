@@ -1,4 +1,4 @@
-package com.linkode.api_server.repository;
+package com.linkode.api_server.repository.Memberstudyroom;
 
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
