@@ -4,7 +4,7 @@ import com.linkode.api_server.common.exception.MemberException;
 import com.linkode.api_server.common.exception.MemberStudyroomException;
 import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.domain.Member;
-import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.memberstudyroom.MemberstudyroomRepository;
 import com.linkode.api_server.util.JwtProvider;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.member.LoginResponse;
@@ -21,7 +21,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
@@ -150,13 +149,5 @@ public class LoginService {
         JSONObject jsonObject = new JSONObject(response.getBody());
         return jsonObject.getString("login");
     }
-
-    private boolean checkMember(String githubId){
-        log.info("[LoginService.githubLogin.checkMember]");
-        boolean memberStatus = memberRepository.existsByGithubIdAndStatus(githubId, BaseStatus.ACTIVE);
-        return memberStatus;
-    }
-
-
 
 }

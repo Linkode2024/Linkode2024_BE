@@ -9,7 +9,7 @@ import com.linkode.api_server.dto.gitHubIssue.GithubIssueListResponse;
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueResponse;
 import com.linkode.api_server.repository.githubIssue.GithubIssueDSL;
 import com.linkode.api_server.repository.githubIssue.GithubIssueRepository;
-import com.linkode.api_server.repository.MemberstudyroomRepository;
+import com.linkode.api_server.repository.memberstudyroom.MemberstudyroomRepository;
 import com.linkode.api_server.repository.StudyroomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
