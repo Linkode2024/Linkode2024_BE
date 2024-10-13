@@ -93,6 +93,20 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
           script: |
+            export DB_PROD_HOST=${{ secrets.DB_PROD_HOST }}
+            export DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }}
+            export DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }}
+            export SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }}
+            export SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }}
+            export SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
+            export AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}
+            export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            export DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }}
+            export AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
+            export SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }}
+            
             if ! sudo docker info | grep -q "Swarm: active"; then
                 sudo docker swarm init
             fi
