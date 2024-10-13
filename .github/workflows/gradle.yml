@@ -65,9 +65,25 @@ jobs:
 
       - name: Docker Hub build & push
         run: |
-          sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
-          sudo docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest .
-          sudo docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
+          docker build \
+            --build-arg PROFILE=${{ secrets.PROFILE }} \
+            --build-arg DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
+            --build-arg DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
+            --build-arg DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
+            --build-arg SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
+            --build-arg SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
+            --build-arg SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
+            --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --build-arg AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
+            --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            --build-arg AWS_REGION=ap-northeast-2 \
+            --build-arg DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
+            --build-arg AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
+            --build-arg SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
 
       - name: Deploy to Docker Swarm
         uses: appleboy/ssh-action@master
@@ -80,28 +96,6 @@ jobs:
             if ! sudo docker info | grep -q "Swarm: active"; then
                 sudo docker swarm init
             fi
-
-            cat << EOF > .env
-            DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
-            DOCKER_HUB_REPO_NAME=${{ secrets.DOCKER_HUB_REPO_NAME }}
-            PROFILE=${{ secrets.PROFILE }}
-            DB_PROD_HOST=${{ secrets.DB_PROD_HOST }}
-            DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }}
-            DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }}
-            SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }}
-            SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }}
-            SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }}
-            AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
-            SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }}
-            APP_PORT=8080
-            REDIS_PORT=6379
-            APP_REPLICAS=2
-            EOF
 
             if [ -d "Linkode2024_BE" ]; then
               cd Linkode2024_BE
