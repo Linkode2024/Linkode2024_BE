@@ -144,8 +144,5 @@ jobs:
               linkode-service
             fi
 
-            # 서비스의 로그를 출력
-            sudo docker service logs -f linkode-service
-
             # 사용하지 않는 도커 이미지를 정리
             sudo docker image prune -f
