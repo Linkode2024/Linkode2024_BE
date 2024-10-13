@@ -1,4 +1,4 @@
-name: Java CI/CD with Gradle
+name: Java CI/CD with Gradle and Docker Swarm
 
 on:
   push:
@@ -7,46 +7,13 @@ on:
     branches: [ "develop" ]
     types: [ closed ]
 
-permissions:
-  contents: read
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_REPO_NAME: ${{ secrets.DOCKER_HUB_REPO_NAME }}
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-    env:
-      PROFILE: prod
-      DB_PROD_HOST: ${{ secrets.DB_PROD_HOST }}
-      DB_PROD_USERNAME: ${{ secrets.DB_PROD_USERNAME }}
-      DB_PROD_PASSWD: ${{ secrets.DB_PROD_PASSWD }}
-      SOCIAL_CLIENT_ID: ${{ secrets.SOCIAL_CLIENT_ID }}
-      SOCIAL_CLIENT_PASSWD: ${{ secrets.SOCIAL_CLIENT_PASSWD }}
-      SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      WAS_HOST: ${{ secrets.WAS_HOST }}
-      AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ap-northeast-2
-      DEFAULT_PROFILE: ${{ secrets.DEFAULT_PROFILE }}
-      AWS_CLOUDFRONT_DOMAIN: ${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
-      SOCKET_SERVER_URL: ${{secrets.SOCKET_SERVER_URL}}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build with Gradle
-        run: ./gradlew --warning-mode all build -i
-
-  docker-build:
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -60,62 +27,162 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle (without Test)
-        run: ./gradlew clean build -x test --stacktrace
+      - name: Build with Gradle
+        run: ./gradlew build
 
-      - name: Docker Hub build & push
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: build/libs/*.jar
+
+  docker-build-and-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: build/libs
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_HUB_REPO_NAME }}:latest
+          build-args: |
+            PROFILE=${{ secrets.PROFILE }}
+            DB_PROD_HOST=${{ secrets.DB_PROD_HOST }}
+            DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }}
+            DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }}
+            SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }}
+            SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }}
+            SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=ap-northeast-2
+            DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }}
+            AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
+            SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }}
+
+  deploy-to-swarm:
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create deployment script
         run: |
-          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
-          docker build --build-arg PROFILE=${{ secrets.PROFILE }} \
-          --build-arg DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
-          --build-arg DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
-          --build-arg DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
-          --build-arg SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
-          --build-arg SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
-          --build-arg SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
-          --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
-          --build-arg AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
-          --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-          --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-          --build-arg AWS_REGION=ap-northeast-2 \
-          --build-arg DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
-          --build-arg AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
-          --build-arg SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
-          -t linkode/linkode:latest .
-          docker images
-          docker push linkode/linkode:latest
+          cat << EOF > deploy.sh
+          #!/bin/bash
+          
+          # 환경 변수를 .env 파일로 저장
+          cat << EOT > .env
+          PROFILE=${PROFILE:-prod}
+          DB_PROD_HOST=${DB_PROD_HOST}
+          DB_PROD_USERNAME=${DB_PROD_USERNAME}
+          DB_PROD_PASSWD=${DB_PROD_PASSWD}
+          SOCIAL_CLIENT_ID=${SOCIAL_CLIENT_ID}
+          SOCIAL_CLIENT_PASSWD=${SOCIAL_CLIENT_PASSWD}
+          SOCIAL_CLIENT_SECRET=${SOCIAL_CLIENT_SECRET}
+          JWT_SECRET=${JWT_SECRET}
+          AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+          AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          AWS_REGION=${AWS_REGION:-ap-northeast-2}
+          DEFAULT_PROFILE=${DEFAULT_PROFILE}
+          AWS_CLOUDFRONT_DOMAIN=${AWS_CLOUDFRONT_DOMAIN}
+          SOCKET_SERVER_URL=${SOCKET_SERVER_URL}
+          DOCKER_HUB_USERNAME=${DOCKER_HUB_USERNAME:-linkode}
+          DOCKER_HUB_REPO_NAME=${DOCKER_HUB_REPO_NAME:-linkode}
+          EOT
+          
+          # Docker Swarm 초기화 (아직 초기화되지 않은 경우)
+          if ! docker info | grep -q "Swarm: active"; then
+              docker swarm init
+          fi
+          
+          # Docker Stack 배포
+          docker stack deploy -c docker-compose.yml --with-registry-auth linkode-stack
+          
+          # 서비스 로그 확인
+          docker service logs linkode-stack_app
+          EOF
+          
+          chmod +x deploy.sh
 
-      - name: deploy
+      - name: Deploy to Docker Swarm
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
           host: ${{ secrets.WAS_HOST }}
+          username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
           script: |
-            CONTAINER_ID=$(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
-            if [ ! -z "$CONTAINER_ID" ]; then
-              sudo docker stop $CONTAINER_ID
-              sudo docker rm $CONTAINER_ID
-            fi
-            sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
-            sudo docker run -d -e PROFILE=${{ secrets.PROFILE }} \
-            -e DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
-            -e DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
-            -e DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
-            -e SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
-            -e SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
-            -e SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
-            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            -e AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
-            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            -e AWS_REGION=ap-northeast-2 \
-            -e DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
-            -e AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
-            -e SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
-            -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
+            mkdir -p ~/linkode-deploy
+            cd ~/linkode-deploy
             
-            sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
+            # 기존 파일 삭제
+            rm -f docker-compose.yml deploy.sh .env
+            
+            # 새 파일 생성
+            cat << EOF > docker-compose.yml
+            version: '3.8'
+            
+            services:
+              app:
+                image: ${DOCKER_HUB_USERNAME:-linkode}/${DOCKER_HUB_REPO_NAME:-linkode}:latest
+                env_file: .env
+                ports:
+                  - "${APP_PORT:-8080}:8080"
+                  - "${REDIS_PORT:-6379}:6379"
+                deploy:
+                  replicas: 2
+                  update_config:
+                    parallelism: 1
+                    delay: 10s
+                  restart_policy:
+                    condition: on-failure
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+            EOF
+            
+            # deploy.sh 파일 생성 (위에서 만든 스크립트 내용을 여기에 붙여넣기)
+            
+            # 배포 스크립트 실행
+            ./deploy.sh
 
-            sudo docker image prune -f
+      - name: Verify deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.WAS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.WAS_PORT }}
+          script: |
+            cd ~/linkode-deploy
+            docker stack services linkode-stack
+            docker service logs linkode-stack_app --tail 100
