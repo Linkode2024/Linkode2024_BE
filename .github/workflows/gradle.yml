@@ -77,12 +77,10 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
           script: |
-            # Docker Swarm 초기화 (처음 실행시에만 필요)
-            if ! docker info | grep -q "Swarm: active"; then
-              sudo docker swarm init
+            if ! sudo docker info | grep -q "Swarm: active"; then
+                sudo docker swarm init
             fi
 
-            # 환경 변수 파일 생성
             cat << EOF > .env
             DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
             DOCKER_HUB_REPO_NAME=${{ secrets.DOCKER_HUB_REPO_NAME }}
@@ -105,7 +103,6 @@ jobs:
             APP_REPLICAS=2
             EOF
 
-            # 프로젝트 클론 또는 업데이트
             if [ -d "Linkode2024_BE" ]; then
               cd Linkode2024_BE
               git pull origin develop
@@ -114,8 +111,6 @@ jobs:
               cd Linkode2024_BE
             fi
 
-            # 스택 배포 또는 업데이트
             sudo docker stack deploy -c docker-compose.yml linkode-stack
 
-            # 서비스 로그 확인
             sudo docker service logs linkode-stack_app
