@@ -104,7 +104,6 @@ jobs:
               git clone -b develop https://github.com/Linkode2024/Linkode2024_BE.git
               cd Linkode2024_BE
             fi
-
-            sudo docker stack deploy -c docker-compose.yml linkode-stack
-
+            sudo docker stack deploy -c <(docker-compose config) linkode-stack
+            
             sudo docker service logs linkode-stack_app
