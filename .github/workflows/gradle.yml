@@ -85,64 +85,37 @@ jobs:
           docker images
           docker push linkode/linkode:latest
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: docker-build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: SSH로 서버에 연결하여 Docker Swarm 배포
+      - name: deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.WAS_HOST }}
           username: ubuntu
+          host: ${{ secrets.WAS_HOST }}
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.WAS_PORT }}
           script: |
-            # 기존 서비스가 존재하는지 확인 후 없으면 생성, 있으면 업데이트
-            if ! sudo docker service ls | grep -q "linkode-service"; then
-              echo "서비스가 존재하지 않으므로 새로 생성합니다."
-              sudo docker service create \
-              --name linkode-service \
-              --env PROFILE=${{ secrets.PROFILE }} \
-              --env DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
-              --env DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
-              --env DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
-              --env SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
-              --env SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
-              --env SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
-              --env JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              --env AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
-              --env AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-              --env AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-              --env AWS_REGION=ap-northeast-2 \
-              --env DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
-              --env AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
-              --env SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
-              --publish 8080:8080 \
-              ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
-            else
-              echo "서비스가 이미 존재합니다. 업데이트를 진행합니다."
-              sudo docker service update --force \
-              --image ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest \
-              --env-add PROFILE=${{ secrets.PROFILE }} \
-              --env-add DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
-              --env-add DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
-              --env-add DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
-              --env-add SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
-              --env-add SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
-              --env-add SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
-              --env-add JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              --env-add AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
-              --env-add AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-              --env-add AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-              --env-add AWS_REGION=ap-northeast-2 \
-              --env-add DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
-              --env-add AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
-              --env-add SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
-              linkode-service
+            CONTAINER_ID=$(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
+            if [ ! -z "$CONTAINER_ID" ]; then
+              sudo docker stop $CONTAINER_ID
+              sudo docker rm $CONTAINER_ID
             fi
+            sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
+            sudo docker run -d -e PROFILE=${{ secrets.PROFILE }} \
+            -e DB_PROD_HOST=${{ secrets.DB_PROD_HOST }} \
+            -e DB_PROD_USERNAME=${{ secrets.DB_PROD_USERNAME }} \
+            -e DB_PROD_PASSWD=${{ secrets.DB_PROD_PASSWD }} \
+            -e SOCIAL_CLIENT_ID=${{ secrets.SOCIAL_CLIENT_ID }} \
+            -e SOCIAL_CLIENT_PASSWD=${{ secrets.SOCIAL_CLIENT_PASSWD }} \
+            -e SOCIAL_CLIENT_SECRET=${{ secrets.SOCIAL_CLIENT_SECRET }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
+            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            -e AWS_REGION=ap-northeast-2 \
+            -e DEFAULT_PROFILE=${{ secrets.DEFAULT_PROFILE }} \
+            -e AWS_CLOUDFRONT_DOMAIN=${{ secrets.AWS_CLOUDFRONT_DOMAIN }} \
+            -e SOCKET_SERVER_URL=${{ secrets.SOCKET_SERVER_URL }} \
+            -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}
+            
+            sudo docker logs $(sudo docker ps -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }})
 
-            # 사용하지 않는 도커 이미지를 정리
             sudo docker image prune -f
