@@ -30,7 +30,7 @@ jobs:
       AWS_REGION: ap-northeast-2
       DEFAULT_PROFILE: ${{ secrets.DEFAULT_PROFILE }}
       AWS_CLOUDFRONT_DOMAIN: ${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
-      SOCKET_SERVER_URL: ${{secrets.SOCKET_SERVER_URL}}
+      SOCKET_SERVER_URL: ${{ secrets.SOCKET_SERVER_URL }}
 
     steps:
       - name: Checkout repository
@@ -46,7 +46,7 @@ jobs:
         run: ./gradlew --warning-mode all build -i
 
   docker-build-and-push:
-    needs: build-and-test
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -72,7 +72,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_HUB_REPO_NAME }}:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
           build-args: |
             PROFILE=${{ secrets.PROFILE }}
             DB_PROD_HOST=${{ secrets.DB_PROD_HOST }}
@@ -102,7 +102,7 @@ jobs:
           cat << EOF > deploy.sh
           #!/bin/bash
           
-          # 환경 변수를 .env 파일로 저장
+          # Save environment variables to .env file
           cat << EOT > .env
           PROFILE=${PROFILE:-prod}
           DB_PROD_HOST=${DB_PROD_HOST}
@@ -123,15 +123,15 @@ jobs:
           DOCKER_HUB_REPO_NAME=${DOCKER_HUB_REPO_NAME:-linkode}
           EOT
           
-          # Docker Swarm 초기화 (아직 초기화되지 않은 경우)
+          # Initialize Docker Swarm if not active
           if ! docker info | grep -q "Swarm: active"; then
               docker swarm init
           fi
           
-          # Docker Stack 배포
+          # Deploy Docker stack
           docker stack deploy -c docker-compose.yml --with-registry-auth linkode-stack
           
-          # 서비스 로그 확인
+          # Check service logs
           docker service logs linkode-stack_app
           EOF
           
@@ -148,10 +148,10 @@ jobs:
             mkdir -p ~/linkode-deploy
             cd ~/linkode-deploy
             
-            # 기존 파일 삭제
+            # Remove old files
             rm -f docker-compose.yml deploy.sh .env
             
-            # 새 파일 생성
+            # Create new files
             cat << EOF > docker-compose.yml
             version: '3.8'
             
@@ -176,9 +176,7 @@ jobs:
                   retries: 3
             EOF
             
-            # deploy.sh 파일 생성 (위에서 만든 스크립트 내용을 여기에 붙여넣기)
-            
-            # 배포 스크립트 실행
+            # Run deployment script
             ./deploy.sh
 
       - name: Verify deployment
