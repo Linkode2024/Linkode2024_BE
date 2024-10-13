@@ -13,6 +13,24 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PROFILE: prod
+      DB_PROD_HOST: ${{ secrets.DB_PROD_HOST }}
+      DB_PROD_USERNAME: ${{ secrets.DB_PROD_USERNAME }}
+      DB_PROD_PASSWD: ${{ secrets.DB_PROD_PASSWD }}
+      SOCIAL_CLIENT_ID: ${{ secrets.SOCIAL_CLIENT_ID }}
+      SOCIAL_CLIENT_PASSWD: ${{ secrets.SOCIAL_CLIENT_PASSWD }}
+      SOCIAL_CLIENT_SECRET: ${{ secrets.SOCIAL_CLIENT_SECRET }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      WAS_HOST: ${{ secrets.WAS_HOST }}
+      AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-northeast-2
+      DEFAULT_PROFILE: ${{ secrets.DEFAULT_PROFILE }}
+      AWS_CLOUDFRONT_DOMAIN: ${{ secrets.AWS_CLOUDFRONT_DOMAIN }}
+      SOCKET_SERVER_URL: ${{secrets.SOCKET_SERVER_URL}}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
