@@ -65,9 +65,9 @@ jobs:
 
       - name: Docker Hub build & push
         run: |
-          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
+          sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PWD }}
+          sudo docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest .
+          sudo docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
 
       - name: Deploy to Docker Swarm
         uses: appleboy/ssh-action@master
@@ -79,7 +79,7 @@ jobs:
           script: |
             # Docker Swarm 초기화 (처음 실행시에만 필요)
             if ! docker info | grep -q "Swarm: active"; then
-              docker swarm init
+              sudo docker swarm init
             fi
 
             # 환경 변수 파일 생성
@@ -115,7 +115,7 @@ jobs:
             fi
 
             # 스택 배포 또는 업데이트
-            docker stack deploy -c docker-compose.yml linkode-stack
+            sudo docker stack deploy -c docker-compose.yml linkode-stack
 
             # 서비스 로그 확인
-            docker service logs linkode-stack_app
+            sudo docker service logs linkode-stack_app
