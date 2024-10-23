@@ -49,6 +49,7 @@ public class MemberStudyroomService {
         String studyroomProfile = memberStudyroom.getStudyroom().getStudyroomProfile();
 
         List<DetailStudyroomResponse.Member> members = memberStudyroom.getStudyroom().getMemberStudyroomList().stream()
+                .filter(ms->ms.getStatus().equals(BaseStatus.ACTIVE))
                 .map(member -> DetailStudyroomResponse.Member.builder()
                         .memberId(member.getMember().getMemberId())
                         .nickname(member.getMember().getNickname())
