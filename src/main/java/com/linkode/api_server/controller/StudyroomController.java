@@ -34,7 +34,6 @@ public class StudyroomController {
         return new BaseResponse<>(SUCCESS,null);
     }
 
-
     /**
      * 스터디룸 탈퇴
      */
@@ -60,11 +59,10 @@ public class StudyroomController {
      * 스터디룸 수정
      */
     @PatchMapping("")
-    public BaseResponse<Void> modifyStudyroom(@RequestHeader("Authorization") String authorization, @ModelAttribute PatchStudyroomRequest patchStudyroomRequest) {
+    public BaseResponse<CreateStudyroomResponse> modifyStudyroom(@RequestHeader("Authorization") String authorization, @ModelAttribute PatchStudyroomRequest patchStudyroomRequest) {
         log.info("[StudyroomController.modifyStudyroom]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        studyroomService.modifyStudyroom(memberId, patchStudyroomRequest);
-        return new BaseResponse<>(null);
+        return new BaseResponse<>(studyroomService.modifyStudyroom(memberId, patchStudyroomRequest));
     }
 
     /**
