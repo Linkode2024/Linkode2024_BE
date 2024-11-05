@@ -158,36 +158,31 @@ public class StudyroomService {
      * 스터디룸 수정
      */
     @Transactional
-    public CreateStudyroomResponse modifyStudyroom(Long memberId, PatchStudyroomRequest patchStudyroomRequest){
+    public void modifyStudyroom(Long memberId, PatchStudyroomRequest patchStudyroomRequest) {
         log.info("[StudyroomService.modifyStudyroom]");
         Long studyroomId = patchStudyroomRequest.getStudyroomId();
-        MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId, studyroomId,BaseStatus.ACTIVE)
-                .orElseThrow(()->new StudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+        MemberStudyroom memberStudyroom = memberstudyroomRepository.findByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId, studyroomId, BaseStatus.ACTIVE)
+                .orElseThrow(() -> new StudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
 
-        if(memberStudyroom.getRole().equals(MemberRole.CAPTAIN)){
+        if (memberStudyroom.getRole().equals(MemberRole.CAPTAIN)) {
             log.info("[StudyroomService.modifyStudyroom -- MEMBERROLE : CAPTAIN]");
             Studyroom studyroom = studyroomRepository.findById(studyroomId)
-                    .orElseThrow(()-> new StudyroomException(NOT_FOUND_STUDYROOM));
+                    .orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
 
             String studyroomName = studyroom.getStudyroomName();
             String studyroomImg = studyroom.getStudyroomProfile();
 
-            if(patchStudyroomRequest.getStudyroomName() != null){
+            if (patchStudyroomRequest.getStudyroomName() != null) {
                 studyroomName = patchStudyroomRequest.getStudyroomName();
             }
 
-            if(patchStudyroomRequest.getStudyroomImg() != null){
+            if (patchStudyroomRequest.getStudyroomImg() != null) {
                 studyroomImg = getProfileUrl(patchStudyroomRequest.getStudyroomImg());
             }
 
-            studyroom.updateStudyroomInfo(studyroomName,studyroomImg);
+            studyroom.updateStudyroomInfo(studyroomName, studyroomImg);
             studyroomRepository.save(studyroom);
-            return CreateStudyroomResponse.builder()
-                    .studyroomId(studyroomId)
-                    .studyroomName(studyroomName)
-                    .studyroomProfile(studyroomImg)
-                    .build();
-        }else{
+        } else {
             throw new StudyroomException(INVALID_ROLE);
         }
     }

@@ -1,7 +1,6 @@
 package com.linkode.api_server.controller;
 
 import com.linkode.api_server.common.response.BaseResponse;
-import com.linkode.api_server.common.response.status.BaseExceptionResponseStatus;
 import com.linkode.api_server.dto.studyroom.*;
 import com.linkode.api_server.service.MemberStudyroomService;
 import com.linkode.api_server.service.StudyroomService;
@@ -61,10 +60,11 @@ public class StudyroomController {
      * 스터디룸 수정
      */
     @PatchMapping("")
-    public BaseResponse<CreateStudyroomResponse> modifyStudyroom(@RequestHeader("Authorization") String authorization, @ModelAttribute PatchStudyroomRequest patchStudyroomRequest) {
+    public BaseResponse<Void> modifyStudyroom(@RequestHeader("Authorization") String authorization, @ModelAttribute PatchStudyroomRequest patchStudyroomRequest) {
         log.info("[StudyroomController.modifyStudyroom]");
         Long memberId = jwtProvider.extractIdFromHeader(authorization);
-        return new BaseResponse<>(studyroomService.modifyStudyroom(memberId, patchStudyroomRequest));
+        studyroomService.modifyStudyroom(memberId, patchStudyroomRequest);
+        return new BaseResponse<>(null);
     }
 
     /**
