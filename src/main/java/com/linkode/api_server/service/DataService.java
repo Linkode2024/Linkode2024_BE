@@ -175,4 +175,17 @@ public class DataService {
             throw new DataException(NONE_FILE);
         }
     }
+
+    /**
+     * 유해앱 사진 조회
+     */
+    public DataListResponse getHarmfulAppList(long memberId , long studyroomId, Long lastDataId, int limit){
+        log.info("[DataService.getDataList]");
+        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
+        List<DataListResponse.Data> hamrfulAppImgList = dataRepositoryDSL.getDataListByType(studyroomId, DataType.IMG, BaseStatus.ACTIVE, lastDataId, limit);
+
+        return new DataListResponse(hamrfulAppImgList);
+    }
 }

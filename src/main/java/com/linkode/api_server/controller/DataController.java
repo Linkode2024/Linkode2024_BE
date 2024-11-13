@@ -67,10 +67,14 @@ public class DataController {
     /**
      * 유해앱 사진 조회
      */
-//    @GetMapping("/harmful-app")
-//    public BaseResponse<> getHarmfulApp(@RequestHeader("Authorization") String authorization, @RequestParam Long studyroomId){
-//        log.info("[StudyroomController.getHarmfulApp]");
-//
-//    }
-
+    @GetMapping("/harmful-app")
+    public BaseResponse<DataListResponse> getHarmfulAppList(
+            @RequestHeader("Authorization") String authorization, @RequestParam Long studyroomId,
+            @RequestParam(required = false) Long lastImgId,
+            @RequestParam int limit){
+        log.info("[StudyroomController.getHarmfulAppList]");
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        DataListResponse response = dataService.getHarmfulAppList(memberId, studyroomId, lastImgId, limit);
+        return new BaseResponse<>(response);
+    }
 }
