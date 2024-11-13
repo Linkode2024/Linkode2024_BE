@@ -48,4 +48,29 @@ public class DataController {
         DataListResponse response = dataService.getDataList(memberId, studyroomId, type, lastDataId, limit);
         return new BaseResponse<>(response);
     }
+
+    /**
+     * 유해앱 사진 업로드
+     */
+    @PostMapping("/upload/harmful-app")
+    public BaseResponse<UploadDataResponse> uploadHarmfulApp(
+            @RequestHeader("Authorization") String authorization,
+            @ModelAttribute UploadDataRequest request) {
+        log.info("[StudyroomController.uploadHarmfulApp]");
+
+        Long memberId = jwtProvider.extractIdFromHeader(authorization);
+        UploadDataResponse response = dataService.uploadHarmfulApp(memberId,request);
+        broadCaster.broadCastUploadDataResponse(request.getStudyroomId(),memberId, response);
+        return new BaseResponse<>(response);
+    }
+
+    /**
+     * 유해앱 사진 조회
+     */
+//    @GetMapping("/harmful-app")
+//    public BaseResponse<> getHarmfulApp(@RequestHeader("Authorization") String authorization, @RequestParam Long studyroomId){
+//        log.info("[StudyroomController.getHarmfulApp]");
+//
+//    }
+
 }

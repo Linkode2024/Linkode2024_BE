@@ -2,6 +2,7 @@ package com.linkode.api_server.domain;
 
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
+import com.linkode.api_server.domain.data.DataType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,11 +25,17 @@ public class HarmfulApp extends BaseTime {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
+    private DataType dataType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private BaseStatus status;
 
-    /** 캐릭터와의 연관관계의 주인 */
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "studyroom_id")
     private Studyroom studyroom;
-
 }
