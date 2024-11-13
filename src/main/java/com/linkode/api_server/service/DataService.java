@@ -100,7 +100,7 @@ public class DataService {
             validateData(dataName,dataType);
             String dataUrl = request.getLink();
             return new String[]{dataName,dataUrl};
-        }else if (dataType.equals(DataType.FILE)||dataType.equals(DataType.IMG)) {
+        }else if (dataType.equals(DataType.FILE)||dataType.equals(DataType.IMG)||dataType.equals(DataType.HARMFULAPP)) {
             validateType(request);
             String dataName = request.getFile().getOriginalFilename();
             validateData(dataName,dataType);
@@ -163,7 +163,7 @@ public class DataService {
 
         try {
             DataType dataType = request.getDataType();
-            if(!dataType.equals(DataType.IMG)){
+            if(!dataType.equals(DataType.HARMFULAPP)){
                 throw new DataException(INVALID_TYPE);
             }
             String[] ImgInfo = extractDataNameAndUrl(request);
@@ -184,7 +184,7 @@ public class DataService {
         if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
             throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
         }
-        List<DataListResponse.Data> hamrfulAppImgList = dataRepositoryDSL.getDataListByType(studyroomId, DataType.IMG, BaseStatus.ACTIVE, lastDataId, limit);
+        List<DataListResponse.Data> hamrfulAppImgList = dataRepositoryDSL.getDataListByType(studyroomId, DataType.HARMFULAPP, BaseStatus.ACTIVE, lastDataId, limit);
 
         return new DataListResponse(hamrfulAppImgList);
     }

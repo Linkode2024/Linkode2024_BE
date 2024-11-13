@@ -4,5 +4,6 @@ public enum DataType {
 
     IMG,
     LINK,
-    FILE
+    FILE,
+    HARMFULAPP
 }
