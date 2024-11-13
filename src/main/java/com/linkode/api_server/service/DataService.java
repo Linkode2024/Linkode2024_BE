@@ -151,4 +151,41 @@ public class DataService {
         Element element = doc.select("meta[property=" + property + "]").first();
         return (element != null) ? element.attr("content") : null;
     }
+
+    /**
+     * 유해앱 업로드
+     */
+    @Transactional
+    public UploadDataResponse uploadHarmfulApp(long memberId, UploadDataRequest request) {
+        log.info("[DataService.uploadHarmfulApp]");
+        MemberStudyroom memberstudyroom = memberstudyroomRepository.findByMemberIdAndStudyroomIdAndStatus(memberId, request.getStudyroomId(), BaseStatus.ACTIVE)
+                .orElseThrow(() -> new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM));
+
+        try {
+            DataType dataType = request.getDataType();
+            if(!dataType.equals(DataType.IMG)){
+                throw new DataException(INVALID_TYPE);
+            }
+            String[] ImgInfo = extractDataNameAndUrl(request);
+            String ImgName = ImgInfo[0];
+            String ImgUrl = ImgInfo[1];
+            Data savedData = saveData(ImgName, dataType, ImgUrl, memberstudyroom.getMember(), memberstudyroom.getStudyroom());
+            return UploadDataResponse.from(savedData);
+        } catch (NullPointerException e) {
+            throw new DataException(NONE_FILE);
+        }
+    }
+
+    /**
+     * 유해앱 사진 조회
+     */
+    public DataListResponse getHarmfulAppList(long memberId , long studyroomId, Long lastDataId, int limit){
+        log.info("[DataService.getDataList]");
+        if(!memberstudyroomRepository.existsByMember_MemberIdAndStudyroom_StudyroomIdAndStatus(memberId,studyroomId,BaseStatus.ACTIVE)){
+            throw new MemberStudyroomException(NOT_FOUND_MEMBER_STUDYROOM);
+        }
+        List<DataListResponse.Data> hamrfulAppImgList = dataRepositoryDSL.getDataListByType(studyroomId, DataType.IMG, BaseStatus.ACTIVE, lastDataId, limit);
+
+        return new DataListResponse(hamrfulAppImgList);
+    }
 }

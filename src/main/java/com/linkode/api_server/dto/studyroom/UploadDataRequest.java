@@ -4,7 +4,6 @@ import com.linkode.api_server.domain.data.DataType;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
