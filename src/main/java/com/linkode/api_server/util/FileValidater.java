@@ -48,7 +48,7 @@ public class FileValidater {
 
     public boolean validateFile(String filename, DataType dataType){
         switch (dataType) {
-            case IMG:
+            case IMG, HARMFULAPP:
                 if(filename.equals("")) throw new DataException(NONE_FILE);
                 return IMAGE_EXTENSIONS.contains(getFileExtension(filename).toLowerCase());
             case FILE:
