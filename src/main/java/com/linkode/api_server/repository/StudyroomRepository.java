@@ -18,7 +18,10 @@ public interface StudyroomRepository extends JpaRepository<Studyroom, Long> {
     @Query("UPDATE Studyroom sr SET sr.status = :status WHERE studyroomId = :studyroomId")
     void updateStudyroomStatus(Long studyroomId, BaseStatus status);
 
-    @Query("SELECT sr From Studyroom sr WHERE sr.studyroomId = :studyroomId AND sr.status = 'ACTIVE'")
+    @Query("SELECT sr From Studyroom sr " +
+            "JOIN FETCH sr.memberStudyroomList msl " +
+            "WHERE sr.studyroomId = :studyroomId " +
+            "AND sr.status = 'ACTIVE'")
     Optional<Studyroom> findById(long studyroomId);
 
     @Query("SELECT new com.linkode.api_server.dto.gitHubIssue.GithubIssueListResponse$GithubIssues(gi.githubIssueId, gi.title, gi.body, gi.url, gi.state) " +
