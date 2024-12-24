@@ -16,6 +16,7 @@ import com.linkode.api_server.util.FileValidater;
 import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.mapping.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.linkode.api_server.domain.Member;
@@ -24,6 +25,9 @@ import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.repository.MemberRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.*;
 import static com.linkode.api_server.common.response.status.BaseExceptionResponseStatus.FAILED_DELETE_STUDYROOM;
@@ -143,6 +147,14 @@ public class StudyroomService {
                 .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
         Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
                 .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
+
+        long activeCount = studyroom.getMemberStudyroomList().stream()
+                .filter(memberStudyroom -> memberStudyroom.getStatus().equals(BaseStatus.ACTIVE))
+                .count();
+
+        if(activeCount>5){
+            throw new StudyroomException(OVER_MEMBER_STUDYROOM);
+        }
 
         MemberStudyroom memberStudyroom = new MemberStudyroom(
                 null,
