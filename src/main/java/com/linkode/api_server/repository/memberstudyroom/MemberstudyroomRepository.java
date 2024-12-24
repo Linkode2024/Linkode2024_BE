@@ -51,4 +51,5 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     @Query("SELECT ms FROM MemberStudyroom ms JOIN FETCH ms.studyroom WHERE ms.member.memberId = :memberId AND ms.status = :status AND ms.studyroom.studyroomId = :studyroomId")
     Optional<MemberStudyroom> findByMemberIdAndStudyroomIdStatus(Long memberId, Long studyroomId, BaseStatus status);
 
+    List<MemberStudyroom> findByStudyroom_StudyroomIdAndStatus(Long studyroomId, BaseStatus status);
 }
