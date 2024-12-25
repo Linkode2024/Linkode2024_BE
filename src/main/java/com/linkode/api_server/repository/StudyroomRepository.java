@@ -3,7 +3,9 @@ package com.linkode.api_server.repository;
 import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.dto.gitHubIssue.GithubIssueListResponse;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -22,6 +24,7 @@ public interface StudyroomRepository extends JpaRepository<Studyroom, Long> {
             "JOIN FETCH sr.memberStudyroomList msl " +
             "WHERE sr.studyroomId = :studyroomId " +
             "AND sr.status = 'ACTIVE'")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Studyroom> findById(long studyroomId);
 
     @Query("SELECT new com.linkode.api_server.dto.gitHubIssue.GithubIssueListResponse$GithubIssues(gi.githubIssueId, gi.title, gi.body, gi.url, gi.state) " +

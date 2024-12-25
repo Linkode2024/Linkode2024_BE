@@ -145,25 +145,27 @@ public class StudyroomService {
         log.info("[StudyroomService.joinStudyroom]");
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
-        Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
-                .orElseThrow(()->new StudyroomException(NOT_FOUND_STUDYROOM));
+        synchronized(this) {
+            Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
+                    .orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
 
-        long activeCount = studyroom.getMemberStudyroomList().stream()
-                .filter(memberStudyroom -> memberStudyroom.getStatus().equals(BaseStatus.ACTIVE))
-                .count();
+            long activeCount = studyroom.getMemberStudyroomList().stream()
+                    .filter(memberStudyroom -> memberStudyroom.getStatus().equals(BaseStatus.ACTIVE))
+                    .count();
 
-        if(activeCount>5){
-            throw new StudyroomException(OVER_MEMBER_STUDYROOM);
+            if (activeCount > 5) {
+                throw new StudyroomException(OVER_MEMBER_STUDYROOM);
+            }
+
+            MemberStudyroom memberStudyroom = new MemberStudyroom(
+                    null,
+                    BaseStatus.ACTIVE,
+                    request.getMemberRole(),
+                    member,
+                    studyroom);
+            memberstudyroomRepository.save(memberStudyroom);
+            log.info("Success save memberStudyroom");
         }
-
-        MemberStudyroom memberStudyroom = new MemberStudyroom(
-                null,
-                BaseStatus.ACTIVE,
-                request.getMemberRole(),
-                member,
-                studyroom);
-        memberstudyroomRepository.save(memberStudyroom);
-        log.info("Success save memberStudyroom");
     }
 
     /**

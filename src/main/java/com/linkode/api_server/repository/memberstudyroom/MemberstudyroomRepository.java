@@ -1,5 +1,6 @@
 package com.linkode.api_server.repository.memberstudyroom;
 
+import com.linkode.api_server.domain.Studyroom;
 import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.memberstudyroom.MemberRole;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
@@ -52,4 +53,7 @@ public interface MemberstudyroomRepository extends JpaRepository<MemberStudyroom
     Optional<MemberStudyroom> findByMemberIdAndStudyroomIdStatus(Long memberId, Long studyroomId, BaseStatus status);
 
     List<MemberStudyroom> findByStudyroom_StudyroomIdAndStatus(Long studyroomId, BaseStatus status);
+
+    long countByStudyroomAndStatus(Studyroom studyroom, BaseStatus status);
+
 }
