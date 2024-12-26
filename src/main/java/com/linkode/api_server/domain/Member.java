@@ -7,6 +7,7 @@ import com.linkode.api_server.domain.base.BaseStatus;
 import com.linkode.api_server.domain.base.BaseTime;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +19,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(indexes = {@Index(name="idx_github_id_status", columnList = "github_id, status")})
 public class Member extends BaseTime {
 

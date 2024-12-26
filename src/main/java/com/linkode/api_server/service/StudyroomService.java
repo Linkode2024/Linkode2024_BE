@@ -105,15 +105,29 @@ public class StudyroomService {
         }
     }
 
+    /**가입 공통 로직*/
+    public MemberStudyroom joinStudyroom(long studyroomId, long memberId, MemberRole role) {
+        log.info("[StudyroomService.joinStudyroom]");
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        synchronized (this) {
+            Studyroom studyroom = studyroomRepository.findById(studyroomId)
+                    .orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
+            validateHeadCount(studyroom);
+            MemberStudyroom memberStudyroom = new MemberStudyroom(
+                    null,
+                    BaseStatus.ACTIVE,
+                    role,
+                    member,
+                    studyroom);
+            return memberstudyroomRepository.save(memberStudyroom);
+        }
+    }
+
     /** 방장으로 가입 */
     @Transactional
     public void joinStudyroomAsCaptain(long studyroomId, long memberId){
-        JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
-                        .studyroomId(studyroomId)
-                        .memberId(memberId)
-                        .memberRole(MemberRole.CAPTAIN)
-                        .build();
-        joinStudyroom(joinStudyroomRequest);
+        joinStudyroom(studyroomId, memberId, MemberRole.CAPTAIN);
         log.info("Success Join Studyroom as Captain");
     }
 
@@ -125,47 +139,11 @@ public class StudyroomService {
                 .orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
         Studyroom studyroom = studyroomRepository
                 .findById(studyroomId).orElseThrow(()->new StudyroomException(INVALID_INVITE_CODE));
-        if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
-            throw new MemberException(JOINED_STUDYROOM);
-        }
-        JoinStudyroomRequest joinStudyroomRequest = JoinStudyroomRequest.builder()
-                .studyroomId(studyroomId)
-                .memberId(memberId)
-                .memberRole(MemberRole.CREW)
-                .build();
 
-        joinStudyroom(joinStudyroomRequest);
+        validateAlreadyJoined(memberId, studyroomId);
+        joinStudyroom(studyroomId,memberId,MemberRole.CREW);
+
         return JoinStudyroomByCodeResponse.from(studyroom);
-    }
-
-
-    /** 초대 코드가 필요없는 가입 */
-    @Transactional
-    public void joinStudyroom(JoinStudyroomRequest request){
-        log.info("[StudyroomService.joinStudyroom]");
-        Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(()->new MemberException(NOT_FOUND_MEMBER));
-        synchronized(this) {
-            Studyroom studyroom = studyroomRepository.findById(request.getStudyroomId())
-                    .orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
-
-            long activeCount = studyroom.getMemberStudyroomList().stream()
-                    .filter(memberStudyroom -> memberStudyroom.getStatus().equals(BaseStatus.ACTIVE))
-                    .count();
-
-            if (activeCount > 5) {
-                throw new StudyroomException(OVER_MEMBER_STUDYROOM);
-            }
-
-            MemberStudyroom memberStudyroom = new MemberStudyroom(
-                    null,
-                    BaseStatus.ACTIVE,
-                    request.getMemberRole(),
-                    member,
-                    studyroom);
-            memberstudyroomRepository.save(memberStudyroom);
-            log.info("Success save memberStudyroom");
-        }
     }
 
     /**
@@ -216,4 +194,27 @@ public class StudyroomService {
         String inviteCode = inviteService.generateInviteCode(studyroomId);
         return new PostInviteCodeResponse(inviteCode);
     }
+
+    /**
+     * 스터디룸 기존 가입여부 검증
+     * */
+    private void validateAlreadyJoined(long memberId, long studyroomId){
+        if (memberstudyroomRepository.findByMemberIdAndStudyroomIdStatus(memberId,studyroomId,BaseStatus.ACTIVE).isPresent()){
+            throw new MemberException(JOINED_STUDYROOM);
+        }
+    }
+
+    /**
+     * 스터디룸 인원 파악
+     * */
+    private void validateHeadCount(Studyroom studyroom){
+        long activeCount = studyroom.getMemberStudyroomList().stream()
+                .filter(memberStudyroom -> memberStudyroom.getStatus().equals(BaseStatus.ACTIVE))
+                .count();
+
+        if (activeCount > 5) {
+            throw new StudyroomException(OVER_MEMBER_STUDYROOM);
+        }
+    }
+
 }

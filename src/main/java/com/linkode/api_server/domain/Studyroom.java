@@ -7,6 +7,7 @@ import com.linkode.api_server.domain.data.Data;
 import com.linkode.api_server.domain.memberstudyroom.MemberStudyroom;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Studyroom extends BaseTime {
 
 

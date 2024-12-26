@@ -6,6 +6,7 @@ import com.linkode.api_server.domain.base.BaseTime;
 import com.linkode.api_server.domain.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MemberStudyroom extends BaseTime {
 
     @Id
