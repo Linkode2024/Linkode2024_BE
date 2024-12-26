@@ -83,7 +83,7 @@ public class StudyroomServiceTest {
         for (int i = 0; i < 2; i++) {
             executorService.submit(() -> {
                 try {
-                    studyroomService.joinStudyroom(joinStudyroomRequest);
+                    studyroomService.joinStudyroom(joinStudyroomRequest.getStudyroomId(), joinStudyroomRequest.getMemberId(), joinStudyroomRequest.getMemberRole());
                 } catch (StudyroomException | DataIntegrityViolationException e) {
                     System.out.println("Exception occurred: " + e.getMessage());
                 } finally {
@@ -106,7 +106,7 @@ public class StudyroomServiceTest {
             memberstudyroomRepository.save(memberStudyroom);
         }
 
-        assertThrows(StudyroomException.class, () -> studyroomService.joinStudyroom(joinStudyroomRequest),
+        assertThrows(StudyroomException.class, () ->  studyroomService.joinStudyroom(joinStudyroomRequest.getStudyroomId(), joinStudyroomRequest.getMemberId(), joinStudyroomRequest.getMemberRole()),
                 "최대 가입 인원을 초과하면 예외가 발생해야 합니다.");
     }
 }
