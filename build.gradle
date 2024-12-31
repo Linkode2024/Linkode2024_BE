@@ -76,6 +76,8 @@ dependencies {
 
 	//WebClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	implementation 'org.redisson:redisson:3.17.7'
 }
 
 tasks.named('test') {

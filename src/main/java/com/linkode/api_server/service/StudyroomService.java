@@ -17,6 +17,9 @@ import com.linkode.api_server.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.mapping.List;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.linkode.api_server.domain.Member;
@@ -46,6 +49,10 @@ public class StudyroomService {
     private final FileValidater fileValidater;
     private final DataRepository dataRepository;
     private final GithubIssueRepository githubIssueRepository;
+
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     private static final String S3_FOLDER = "studyroom_profile/"; // 스터디룸 파일과 구분하기위한 폴더 지정
     @Value("${spring.s3.default-profile}")
@@ -105,12 +112,17 @@ public class StudyroomService {
         }
     }
 
-    /**가입 공통 로직*/
-    public MemberStudyroom joinStudyroom(long studyroomId, long memberId, MemberRole role) {
+
+    /**
+     * 가입 공통 로직
+     * */
+    public void joinStudyroom(long studyroomId, long memberId, MemberRole role) {
         log.info("[StudyroomService.joinStudyroom]");
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
-        synchronized (this) {
+        RLock lock = redissonClient.getLock("studyroomLock:" + studyroomId);
+        lock.lock();
+        try {
             Studyroom studyroom = studyroomRepository.findById(studyroomId)
                     .orElseThrow(() -> new StudyroomException(NOT_FOUND_STUDYROOM));
             validateHeadCount(studyroom);
@@ -120,7 +132,9 @@ public class StudyroomService {
                     role,
                     member,
                     studyroom);
-            return memberstudyroomRepository.save(memberStudyroom);
+            memberstudyroomRepository.save(memberStudyroom);
+        }finally {
+            lock.unlock();
         }
     }
 
@@ -145,6 +159,8 @@ public class StudyroomService {
 
         return JoinStudyroomByCodeResponse.from(studyroom);
     }
+
+
 
     /**
      * 스터디룸 수정
@@ -180,8 +196,9 @@ public class StudyroomService {
         }
     }
 
+
     /**
-     * 초대코드 생성
+     * 초대 코드 생성
      */
     @Transactional
     public PostInviteCodeResponse createStudyroomCode(Long memberId, Long studyroomId){
